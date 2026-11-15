@@ -275,6 +275,7 @@ dependencies = [
  "unicode-width",
  "vte",
  "windows-sys 0.59.0",
+ "zeroize",
 ]
 
 [[package]]
@@ -7987,6 +7988,7 @@ dependencies = [
  "dashmap",
  "dirs",
  "libgssapi",
+ "oxideterm-atomic-file",
  "oxideterm-audit",
  "oxideterm-backend-classification",
  "oxideterm-connection-monitor",
@@ -8150,6 +8152,7 @@ name = "oxideterm-tmux"
 version = "3.0.1"
 dependencies = [
  "memchr",
+ "zeroize",
 ]
 
 [[package]]

@@ -422,6 +422,7 @@ pub(in crate::workspace) struct SettingsWorkspaceEntity {
     pub(super) portable_action_task: Option<Task<()>>,
     pub(super) managed_key_dialog: Option<SettingsManagedKeyDialog>,
     pub(super) managed_key_status: Option<String>,
+    pub(super) known_hosts: super::known_hosts::KnownHostsState,
     pub(super) managed_key_file_path: String,
     pub(super) managed_key_file_name: String,
     pub(super) managed_key_file_passphrase: Zeroizing<String>,
@@ -604,6 +605,7 @@ impl SettingsWorkspaceEntity {
             portable_action_task: None,
             managed_key_dialog: None,
             managed_key_status: None,
+            known_hosts: Default::default(),
             managed_key_file_path: String::new(),
             managed_key_file_name: String::new(),
             managed_key_file_passphrase: Zeroizing::new(String::new()),
@@ -723,6 +725,9 @@ impl SettingsWorkspaceEntity {
         self.account_credential_draft = None;
         self.account_credential_error = None;
         self.route.active_tab = tab;
+        if tab == SettingsTab::Connections {
+            self.refresh_known_hosts(cx);
+        }
         cx.notify();
         true
     }
@@ -2377,6 +2382,7 @@ impl SettingsWorkspaceEntity {
             SettingsInput::ConnectionImportTargetGroup => {
                 Some(&self.connection_import_target_group)
             }
+            SettingsInput::KnownHostsSearch => Some(&self.known_hosts.query),
             _ => None,
         }
     }
@@ -2440,7 +2446,7 @@ impl SettingsWorkspaceEntity {
             | SettingsInput::LocalPrivilegeHostPatterns
             | SettingsInput::LocalPrivilegeSecondFactorPatterns
             | SettingsInput::LocalPrivilegeSecondFactorUserHint => true,
-            SettingsInput::ConnectionImportTargetGroup => true,
+            SettingsInput::ConnectionImportTargetGroup | SettingsInput::KnownHostsSearch => true,
             _ => false,
         };
         if !can_focus {
@@ -2613,6 +2619,7 @@ impl SettingsWorkspaceEntity {
             SettingsInput::ConnectionImportTargetGroup => {
                 Some(&mut self.connection_import_target_group)
             }
+            SettingsInput::KnownHostsSearch => Some(&mut self.known_hosts.query),
             _ => None,
         }
     }
