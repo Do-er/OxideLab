@@ -249,6 +249,7 @@ impl WorkspaceApp {
                 self.clear_workspace_tooltip(id, cx);
             }
             sftp::SftpWorkspaceEvent::PreviewSaveRequested {
+                expected_version,
                 path,
                 content,
                 encoding,
@@ -257,6 +258,7 @@ impl WorkspaceApp {
                 delivery,
             } => {
                 if !self.spawn_remote_sftp_preview_save(
+                    expected_version.clone(),
                     path.clone(),
                     content.clone(),
                     encoding.clone(),

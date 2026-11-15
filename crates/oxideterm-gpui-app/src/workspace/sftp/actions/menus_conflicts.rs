@@ -166,7 +166,13 @@ impl SftpWorkspaceEntity {
                     .find(|file| file.name == name)
                     .cloned()
                     .map(|source| SftpPendingTransfer {
-                        name,
+                        name: if direction == SftpTransferDirection::Download
+                            && self.pair_primary_remote_id.is_none()
+                        {
+                            oxideterm_sftp::local_download_name(&name)
+                        } else {
+                            name
+                        },
                         direction,
                         source,
                         protocol_override: None,
