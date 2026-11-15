@@ -158,6 +158,13 @@ impl WorkspaceApp {
                                                     composer.toggle_expanded(cx);
                                                 },
                                             );
+                                            this.edit_settings(
+                                                |settings| {
+                                                    settings.terminal.command_bar.composer_expanded =
+                                                        expanding;
+                                                },
+                                                cx,
+                                            );
                                             let document_id = this
                                                 .terminal_command_composer
                                                 .read(cx)

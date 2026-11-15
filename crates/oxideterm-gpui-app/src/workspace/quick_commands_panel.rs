@@ -70,7 +70,12 @@ impl WorkspaceApp {
             self.ime_marked_text = None;
             self.clear_ime_selection();
         }
-        cx.notify();
+        self.edit_settings(
+            |settings| {
+                settings.terminal.command_bar.quick_bar_enabled = open;
+            },
+            cx,
+        );
     }
 
     #[allow(dead_code)]

@@ -1192,6 +1192,21 @@ impl WorkspaceApp {
         if changed {
             self.ime_marked_text = None;
             self.clear_ime_selection();
+            if self.settings_store.settings().terminal.command_bar.enabled
+                && self
+                    .settings_store
+                    .settings()
+                    .terminal
+                    .command_bar
+                    .quick_bar_enabled
+            {
+                self.edit_settings(
+                    |settings| {
+                        settings.terminal.command_bar.quick_bar_enabled = false;
+                    },
+                    cx,
+                );
+            }
         }
         changed
     }

@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::collections::{HashMap, HashSet};
+use std::path::Path;
 use std::time::{Duration, Instant};
 
-use gpui::{AppContext, Context, Entity, Task, Timer, WeakEntity};
+use gpui::{App, AppContext, Context, Entity, Task, Timer, WeakEntity};
 use oxideterm_gpui_editor::{
     EditorContextMenuLabels, EditorPresentation, EditorSettings, TextEditorView,
 };
@@ -1231,6 +1232,193 @@ impl TerminalCommandComposerEntity {
             }
         }
     }
+
+    pub(super) fn save_draft_snapshot_to_path(&self, path: &Path, cx: &App) {
+        let tabs: Vec<TerminalCommandComposerTabDraft> = self
+            .documents
+            .iter()
+            .map(|document| {
+                let text = if self.layout == TerminalCommandComposerLayout::Expanded {
+                    document.editor.read(cx).buffer().text()
+                } else {
+                    document.compact_draft.to_string()
+                };
+                TerminalCommandComposerTabDraft {
+                    text,
+                    input_mode: document.input_mode.into(),
+                    pacing: document.pacing.into(),
+                    interval_ms: document.interval_ms,
+                    repeat_count: document.repeat_count,
+                }
+            })
+            .collect();
+        let active_index = self
+            .documents
+            .iter()
+            .position(|document| document.id == self.active_document_id)
+            .unwrap_or(0);
+        let is_default_empty = tabs.len() == 1
+            && tabs[0].text.is_empty()
+            && tabs[0].input_mode == PersistedComposerInputMode::Text
+            && tabs[0].pacing == PersistedComposerPacing::Line
+            && tabs[0].interval_ms == 1_000
+            && tabs[0].repeat_count == 1
+            && (self.panel_height - TERMINAL_COMPOSER_DEFAULT_HEIGHT).abs() < f32::EPSILON;
+        if is_default_empty {
+            let _ = std::fs::remove_file(path);
+            return;
+        }
+        let snapshot = TerminalCommandComposerDraftSnapshot {
+            panel_height: Some(self.panel_height),
+            active_index,
+            tabs,
+        };
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        if let Ok(json) = serde_json::to_string_pretty(&snapshot) {
+            let _ = std::fs::write(path, json);
+        }
+    }
+
+    pub(super) fn restore_draft_snapshot_from_path(&mut self, path: &Path, cx: &mut Context<Self>) {
+        let Ok(raw) = std::fs::read_to_string(path) else {
+            return;
+        };
+        let Ok(snapshot) = serde_json::from_str::<TerminalCommandComposerDraftSnapshot>(&raw)
+        else {
+            return;
+        };
+        if snapshot.tabs.is_empty() {
+            return;
+        }
+        if let Some(height) = snapshot.panel_height
+            && height.is_finite()
+        {
+            self.panel_height = height.max(TERMINAL_COMPOSER_MIN_HEIGHT);
+        }
+        let presentation = self.layout.editor_presentation();
+        let placeholder = if self.is_expanded() {
+            self.expanded_editor_placeholder.clone()
+        } else {
+            self.compact_editor_placeholder.clone()
+        };
+        let mut documents = Vec::with_capacity(snapshot.tabs.len());
+        for (index, tab) in snapshot.tabs.into_iter().enumerate() {
+            let id = TerminalCommandComposerId(index as u64 + 1);
+            let mut document = Self::new_document(
+                id,
+                self.editor_tokens,
+                &placeholder,
+                &self.editor_context_menu_labels,
+                presentation,
+                cx,
+            );
+            document.compact_draft = Zeroizing::new(tab.text.clone());
+            document.editor.update(cx, |editor, cx| {
+                editor.replace_text_external(tab.text, cx);
+            });
+            document.input_mode = tab.input_mode.into();
+            document.pacing = tab.pacing.into();
+            document.interval_ms = tab
+                .interval_ms
+                .clamp(TERMINAL_COMPOSER_MIN_INTERVAL_MS, TERMINAL_COMPOSER_MAX_INTERVAL_MS);
+            document.repeat_count = tab.repeat_count.clamp(1, TERMINAL_COMPOSER_MAX_REPEAT_COUNT);
+            documents.push(document);
+        }
+        let active_index = snapshot.active_index.min(documents.len() - 1);
+        self.active_document_id = documents[active_index].id;
+        self.next_document_id = documents.len() as u64 + 1;
+        self.documents = documents;
+        self.sync_editor_presentation(cx);
+        cx.notify();
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+enum PersistedComposerInputMode {
+    #[default]
+    Text,
+    Hex,
+}
+
+impl From<TerminalSendInputMode> for PersistedComposerInputMode {
+    fn from(mode: TerminalSendInputMode) -> Self {
+        match mode {
+            TerminalSendInputMode::Text => Self::Text,
+            TerminalSendInputMode::Hex => Self::Hex,
+        }
+    }
+}
+
+impl From<PersistedComposerInputMode> for TerminalSendInputMode {
+    fn from(mode: PersistedComposerInputMode) -> Self {
+        match mode {
+            PersistedComposerInputMode::Text => Self::Text,
+            PersistedComposerInputMode::Hex => Self::Hex,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+enum PersistedComposerPacing {
+    #[default]
+    Line,
+    Character,
+}
+
+impl From<TerminalSendPacing> for PersistedComposerPacing {
+    fn from(pacing: TerminalSendPacing) -> Self {
+        match pacing {
+            TerminalSendPacing::Line => Self::Line,
+            TerminalSendPacing::Character => Self::Character,
+        }
+    }
+}
+
+impl From<PersistedComposerPacing> for TerminalSendPacing {
+    fn from(pacing: PersistedComposerPacing) -> Self {
+        match pacing {
+            PersistedComposerPacing::Line => Self::Line,
+            PersistedComposerPacing::Character => Self::Character,
+        }
+    }
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TerminalCommandComposerTabDraft {
+    #[serde(default)]
+    text: String,
+    #[serde(default)]
+    input_mode: PersistedComposerInputMode,
+    #[serde(default)]
+    pacing: PersistedComposerPacing,
+    #[serde(default = "default_composer_tab_interval_ms")]
+    interval_ms: u64,
+    #[serde(default = "default_composer_tab_repeat_count")]
+    repeat_count: u32,
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TerminalCommandComposerDraftSnapshot {
+    #[serde(default)]
+    panel_height: Option<f32>,
+    #[serde(default)]
+    active_index: usize,
+    #[serde(default)]
+    tabs: Vec<TerminalCommandComposerTabDraft>,
+}
+
+fn default_composer_tab_interval_ms() -> u64 {
+    1_000
+}
+
+fn default_composer_tab_repeat_count() -> u32 {
+    1
 }
 
 fn resolve_run_targets(

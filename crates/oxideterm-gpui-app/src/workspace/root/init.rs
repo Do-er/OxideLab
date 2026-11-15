@@ -932,15 +932,40 @@ impl WorkspaceApp {
                 default_session_tree_path().with_file_name("standalone_sessions.json"),
                 &workspace.connection_store,
             );
+        let composer_drafts_path =
+            default_session_tree_path().with_file_name("command_composer_drafts.json");
+        workspace
+            .terminal_command_composer
+            .update(cx, |composer, cx| {
+                composer.restore_draft_snapshot_from_path(&composer_drafts_path, cx);
+            });
+        if settings.terminal.command_bar.enabled {
+            if settings.terminal.command_bar.composer_expanded {
+                workspace
+                    .terminal_command_composer
+                    .update(cx, |composer, cx| {
+                        composer.set_expanded(true, cx);
+                    });
+            }
+            if settings.terminal.command_bar.quick_bar_enabled {
+                workspace.terminal.update(cx, |terminal, _| {
+                    terminal.quick_commands.open = true;
+                });
+            }
+        }
         workspace.sync_terminal_command_composer_appearance(cx);
         workspace.sync_active_terminal_metadata_context(cx);
         workspace.sync_active_terminal_recording_elapsed_tick(cx);
         workspace.sync_active_privilege_prompt_inline_hint(cx);
         workspace.refresh_terminal_trigger_runtime(cx);
         workspace.schedule_automatic_native_update_check(cx);
-        cx.on_release(|workspace, cx| {
+        cx.on_release(move |workspace, cx| {
             workspace.mosh_plugin_sessions.set_available(false);
             workspace.flush_main_window_state(cx);
+            workspace
+                .terminal_command_composer
+                .read(cx)
+                .save_draft_snapshot_to_path(&composer_drafts_path, cx);
             workspace.shutdown_terminal_trigger_runtime();
             // Shutdown ordering is security-sensitive: late broker callbacks
             // fail before user-decision waiters and owner projections disappear.

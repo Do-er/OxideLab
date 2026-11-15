@@ -118,6 +118,8 @@ pub struct TerminalCommandBarSettings {
     pub smart_completion: bool,
     #[serde(default = "default_command_bar_compact_input_enabled")]
     pub compact_input_enabled: bool,
+    #[serde(default)]
+    pub composer_expanded: bool,
     pub quick_commands_enabled: bool,
     #[serde(default)]
     pub quick_bar_enabled: bool,
@@ -167,6 +169,7 @@ impl Default for TerminalCommandBarSettings {
             ssh_latency_interval_secs: default_ssh_latency_interval_secs(),
             smart_completion: true,
             compact_input_enabled: false,
+            composer_expanded: false,
             quick_commands_enabled: true,
             quick_bar_enabled: false,
             quick_bar_category: None,
@@ -784,6 +787,7 @@ mod tests {
         assert!(!disabled_latency.ssh_latency);
         assert!(!settings.command_bar.quick_bar_enabled);
         assert!(!settings.command_bar.compact_input_enabled);
+        assert!(!settings.command_bar.composer_expanded);
         assert_eq!(settings.command_bar.quick_bar_category, None);
         assert!(settings.autosuggest.enabled);
         let disabled: TerminalAutosuggestSettings =
