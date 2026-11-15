@@ -1465,8 +1465,7 @@ impl WorkspaceApp {
         let line_height = input.textarea_line_height();
         let mut command_editor = div()
             .w_full()
-            .h(px(44.0))
-            .overflow_hidden()
+            .min_h(px(44.0))
             .rounded(px(self.tokens.radii.md))
             .border_1()
             .border_color(if focused {
@@ -1541,6 +1540,8 @@ impl WorkspaceApp {
                 });
             },
         );
+
+        let control = self.settings_multiline_input_viewport(target, control.into_any_element());
 
         let mut presets = div().w_full().flex().flex_row().flex_wrap().gap(px(8.0));
         for command in RECOMMENDED_FOCUS_HANDOFF_COMMANDS {
@@ -1940,7 +1941,7 @@ impl WorkspaceApp {
                 });
             });
 
-        control.into_any_element()
+        self.settings_multiline_input_viewport(target, control.into_any_element())
     }
 
     pub(in crate::workspace) fn open_terminal_command_specs_editor(
@@ -1979,6 +1980,13 @@ impl WorkspaceApp {
         line_height: f32,
         cx: &App,
     ) -> Div {
+        // The IME maps physical lines, so visual wrapping must not add lines.
+        // The viewport scrolls this anchored content rather than the anchor itself.
+        textarea = textarea
+            .w_auto()
+            .min_w_full()
+            .flex_shrink_0()
+            .whitespace_nowrap();
         let selection = self.ime_selected_range_for_target(target, cx);
         let theme = self.tokens.ui;
         for (line_range, line_text) in settings_multiline_line_ranges(value) {
@@ -1987,7 +1995,11 @@ impl WorkspaceApp {
             // Browser textareas hit-test contiguous line boxes. Keep the
             // manually rendered GPUI lines at the same height used by IME
             // y-to-line mapping so pointer selection cannot drift vertically.
-            let mut line = div().h(px(line_height)).min_h(px(line_height));
+            let mut line = div()
+                .h(px(line_height))
+                .min_h(px(line_height))
+                .flex_shrink_0()
+                .whitespace_nowrap();
             if placeholder {
                 // Browser placeholder text is not part of the editable value;
                 // keep it muted and do not feed it through selection segments.
@@ -2010,6 +2022,38 @@ impl WorkspaceApp {
             textarea = textarea.child(line);
         }
         textarea
+    }
+
+    pub(in crate::workspace) fn settings_multiline_input_viewport(
+        &self,
+        target: WorkspaceImeTarget,
+        content: AnyElement,
+    ) -> AnyElement {
+        let scroll =
+            self.selectable_text_scroll_handle(format!("multiline-input-{}", target.anchor_id().0));
+        let document =
+            target == WorkspaceImeTarget::Settings(SettingsInput::TerminalCommandSpecsJson);
+        div()
+            .relative()
+            .w_full()
+            .min_w_0()
+            .child(
+                div()
+                    .id(("settings-multiline-viewport", target.anchor_id().0))
+                    .w_full()
+                    .min_w_0()
+                    .when(!document, |area| area.max_h(px(240.0)))
+                    .flex()
+                    .items_start()
+                    .overflow_scroll()
+                    .track_scroll(&scroll)
+                    .child(content),
+            )
+            .child(
+                oxideterm_gpui_ui::Scrollbar::new(&scroll)
+                    .axis(oxideterm_gpui_ui::ScrollbarAxis::Both),
+            )
+            .into_any_element()
     }
 
     pub(in crate::workspace) fn terminal_command_specs_button(

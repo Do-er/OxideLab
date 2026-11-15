@@ -1054,6 +1054,8 @@ mod tests {
                 size(px(11.0), px(11.0))
             );
         }
+    }
+
     #[test]
     fn filled_toolbar_buttons_hover_with_their_own_tint() {
         let tokens = oxideterm_theme::default_tokens();
