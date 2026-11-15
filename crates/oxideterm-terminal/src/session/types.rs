@@ -254,6 +254,9 @@ pub trait TerminalSessionBackend: Send {
     }
     fn set_focused(&mut self, focused: bool) -> Result<()>;
     fn resize_with_cell_size(&mut self, resize: TerminalResize) -> Result<()>;
+    fn request_resize(&mut self, resize: TerminalResize) -> Result<()> {
+        self.resize_with_cell_size(resize)
+    }
     fn scroll_lines(&mut self, delta: i32);
     fn scroll_lines_snapshot_incremental(
         &mut self,
@@ -275,6 +278,16 @@ pub trait TerminalSessionBackend: Send {
     fn set_selection(&self, selection: Option<crate::TerminalSelectionRange>);
     fn selection(&self) -> Option<crate::TerminalSelectionRange>;
     fn clear_buffer(&mut self);
+    fn history_capture(
+        &self,
+        _alternate: bool,
+        _screen: bool,
+        _previous: Option<&crate::TerminalHistoryStamp>,
+        _byte_limit: usize,
+        _cancelled: &dyn Fn() -> bool,
+    ) -> Result<crate::TerminalHistoryCapture, crate::TerminalHistoryError> {
+        Err(crate::TerminalHistoryError::Unsupported)
+    }
     fn buffer_text(&self) -> String {
         String::new()
     }
