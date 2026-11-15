@@ -203,6 +203,7 @@ mod cli_companion;
 mod connections_page;
 mod controls;
 mod entity;
+mod known_hosts;
 pub(in crate::workspace) use entity::{
     BackgroundGalleryOperationResult, CliCompanionOperation, CliCompanionSnapshot,
     ConnectionImportSnapshot, DataDirectoryConfirm, DataDirectoryOperationResult,
