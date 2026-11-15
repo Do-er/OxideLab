@@ -237,7 +237,7 @@ impl WorkspaceApp {
             return;
         };
         match pane.update(cx, |pane, cx| pane.resize_grid(cols, rows, cx)) {
-            Ok(()) => finish_serialized(
+            Ok((cols, rows)) => finish_serialized(
                 request,
                 json!({ "terminal_ref": terminal_ref, "cols": cols, "rows": rows }),
             ),
