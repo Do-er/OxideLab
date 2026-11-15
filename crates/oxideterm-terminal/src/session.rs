@@ -11,7 +11,7 @@ use alacritty_terminal::{
     grid::{Dimensions, Row, Scroll},
     index::{Column, Line, Point},
     sync::FairMutex,
-    term::{cell::Flags, Config, Term},
+    term::{Config, Term},
     vte::ansi::{self, Handler, Processor},
 };
 use anyhow::{Context, Result, bail};
@@ -190,7 +190,8 @@ fn kept_cursor_line<T: EventListener>(term: &Term<T>) -> Option<KeptCursorLine> 
 
 pub(crate) fn clear_terminal_buffer<T: EventListener>(term: &mut Term<T>) {
     // Clear host-owned emulator state without sending control bytes to the process or device.
-    // New output must start at the cleared origin after viewport and scrollback removal.
+    // New output must continue from the kept prompt, or from the cleared origin without one.
+    let kept = kept_cursor_line(term);
     Handler::clear_screen(term, ansi::ClearMode::All);
     Handler::clear_screen(term, ansi::ClearMode::Saved);
     let grid = term.grid_mut();
