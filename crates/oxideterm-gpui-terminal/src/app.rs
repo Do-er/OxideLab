@@ -532,8 +532,8 @@ pub struct TerminalPane {
     metrics: TerminalMetrics,
     metrics_dirty: bool,
     selection: Option<TerminalSelection>,
-    pending_paste: Option<Zeroizing<String>>,
-    pending_paste_prefix: Option<Zeroizing<Vec<u8>>>,
+    // The draft owns the pending paste text, so protected pastes never keep a
+    // second copy of clipboard contents in the pane.
     paste_editor: Option<paste::PasteEditor>,
     // The pane observes only its session's capability and never stores the sandbox path.
     kitty_file_transmission: Option<KittyFileTransmissionControl>,
@@ -1313,8 +1313,6 @@ impl TerminalPane {
             metrics,
             metrics_dirty: false,
             selection: None,
-            pending_paste: None,
-            pending_paste_prefix: None,
             paste_editor: None,
             kitty_file_transmission,
             kitty_file_transmission_confirm_open: false,
@@ -1931,7 +1929,7 @@ impl TerminalPane {
                 ))
             || self.marked_text.is_some()
             || self.tmux_prompt.is_some()
-            || self.pending_paste.is_some()
+            || self.paste_editor.is_some()
             || self.context_menu.is_some()
             || self.privilege_prompt_inline_hint.is_some()
             || !cursor_row_is_active_input
@@ -3625,6 +3623,11 @@ impl TerminalPane {
     }
 
     fn paste_from_clipboard_after(&mut self, prefix: &[u8], cx: &mut Context<Self>) {
+        // While the draft owns the pending text, a second paste must not reach the
+        // terminal behind the overlay.
+        if self.paste_editor.is_some() {
+            return;
+        }
         let Some(text) = cx.read_from_clipboard().and_then(|item| item.text()) else {
             return;
         };
@@ -3635,34 +3638,15 @@ impl TerminalPane {
             return;
         }
         if self.settings.paste_protection && paste_needs_confirmation(&text) {
-            self.pending_paste = Some(Zeroizing::new(text));
-            self.pending_paste_prefix =
-                (!prefix.is_empty()).then(|| Zeroizing::new(prefix.to_vec()));
-            cx.notify();
+            // Protected pastes open the draft directly: the editor is the review
+            // step, and its Paste button the only way to deliver the text.
+            self.open_paste_editor(Zeroizing::new(text), prefix, cx);
             return;
         }
         if !prefix.is_empty() {
             self.send_user_protocol_bytes(prefix, cx);
         }
         self.paste_text(&text, cx);
-    }
-
-    pub(crate) fn confirm_pending_paste(&mut self, cx: &mut Context<Self>) {
-        let Some(text) = self.pending_paste.take() else {
-            return;
-        };
-        if let Some(prefix) = self.pending_paste_prefix.take() {
-            self.send_user_protocol_bytes(&prefix, cx);
-        }
-        self.paste_text(&text, cx);
-        cx.notify();
-    }
-
-    pub(crate) fn cancel_pending_paste(&mut self, cx: &mut Context<Self>) {
-        self.pending_paste_prefix = None;
-        if self.pending_paste.take().is_some() {
-            cx.notify();
-        }
     }
 
     pub(crate) fn confirm_kitty_file_transmission(&mut self, cx: &mut Context<Self>) {
@@ -4217,8 +4201,6 @@ impl TerminalPane {
                 self.ssh_reconnect_state = SshReconnectState::Idle;
                 self.win32_pressed_keys.clear();
                 self.tmux_prompt = None;
-                self.pending_paste = None;
-                self.pending_paste_prefix = None;
                 self.paste_editor = None;
                 self.marked_text = None;
                 self.marked_text_caret_utf16 = None;
