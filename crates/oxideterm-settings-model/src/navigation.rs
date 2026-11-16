@@ -201,7 +201,8 @@ pub fn settings_tab_section_count(
         SettingsTab::Appearance => 5,
         // Reconnect controls share one card and therefore one virtual section.
         SettingsTab::Connections => 7,
-        SettingsTab::Privilege => 2,
+        // dev 的统一凭据页渲染三张卡：账户 / 特权 / TOTP 动态凭据（main 只有两张）。
+        SettingsTab::Privilege => 3,
         SettingsTab::Network => 4,
         SettingsTab::Sftp => 3,
         SettingsTab::Ide => 4,
