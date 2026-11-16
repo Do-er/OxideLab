@@ -89,6 +89,8 @@ members = [
   "crates/gpui-ce/gpui_macos",
   "crates/gpui-ce/gpui_wgpu",
   "crates/gpui-ce/gpui_windows",
+  "crates/gpui-ce/xim-ctext",
+  "crates/gpui-ce/zed-xim",
   "crates/russh-sftp",
 ]
 default-members = ["crates/oxideterm-gpui-app"]
@@ -102,6 +104,8 @@ gpui-pre-macos = { path = "crates/gpui-ce/gpui_macos" }
 gpui-pre-windows = { path = "crates/gpui-ce/gpui_windows" }
 gpui-pre-linux = { path = "crates/gpui-ce/gpui_linux" }
 gpui-pre-wgpu = { path = "crates/gpui-ce/gpui_wgpu" }
+xim-ctext = { path = "crates/gpui-ce/xim-ctext" }
+zed-xim = { path = "crates/gpui-ce/zed-xim" }
 # Keep the SSH protocol fork independent from application lint and test targets.
 russh = { git = "https://github.com/AnalyseDeCircuit/russh", rev = "630bc79d7d759d11354855a7dd5b3e663d14c3ab" }
 russh-sftp = { path = "crates/russh-sftp" }
@@ -162,8 +166,8 @@ futures = "0.3"
 futures-concurrency = "7.7.1"
 fs2 = "0.4"
 flate2 = { version = "1.1.9", default-features = false, features = ["rust_backend"] }
-gpui = { package = "gpui-pre", version = "=0.3.7" }
-gpui_platform = { package = "gpui-pre-platform", version = "=0.3.7", features = ["font-kit", "wayland", "x11"] }
+gpui = { package = "gpui-pre", version = "=0.3.12" }
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.12", features = ["font-kit", "wayland", "x11"] }
 hdrhistogram = "7"
 heapless = "0.9.2"
 heck = "0.5"
@@ -330,7 +334,7 @@ windows = { version = "0.61", features = [
 ] }
 windows-core = "0.61"
 web-time = "1.1.0"
-wgpu = "29.0.3"
+wgpu = "30.0.1"
 whoami = "1.6"
 zeroize = { version = "1.8", features = ["serde"] }
 zip = { version = "2.0", default-features = false, features = ["deflate", "time"] }

@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod layout_tests;
@@ -567,7 +567,7 @@ impl WorkspaceApp {
                                                         "new-connection-modal-form-scroll",
                                                     ),
                                                 )
-                                                .on_scroll_wheel(cx.listener(
+                                                .on_scroll(cx.listener(
                                                     |this, _event, _window, cx| {
                                                         // Tauri/Radix closes select content when the modal
                                                         // scroll body moves its trigger. Native caches the
@@ -1522,7 +1522,7 @@ impl WorkspaceApp {
                     .on_mouse_down(MouseButton::Left, |_event, _window, cx| {
                         cx.stop_propagation();
                     })
-                    .on_scroll_wheel(|_event, _window, cx| cx.stop_propagation()),
+                    .on_scroll(|_event, _window, cx| cx.stop_propagation()),
             )
         })
         .into_any_element()

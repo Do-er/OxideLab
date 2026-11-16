@@ -517,7 +517,7 @@ impl WorkspaceApp {
                                             .max_h(px(PRIVILEGE_SCOPE_LIST_MAX_HEIGHT - 8.0))
                                             .pr(px(8.0))
                                             .selectable_overflow_y_scroll(&scope_scroll)
-                                            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+                                            .on_scroll(|_, _, cx| cx.stop_propagation())
                                             .child(scope_list),
                                     )
                                     .child(selectable_vertical_scrollbar_layer(

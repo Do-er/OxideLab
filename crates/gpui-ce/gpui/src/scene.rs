@@ -208,6 +208,10 @@ impl Scene {
         opacity: f32,
     ) {
         let layer_order = self.layer_stack.last().copied();
+        let fully_visible = batch.bounds().is_some_and(|bounds| {
+            let bounds = bounds + origin;
+            bounds.intersect(&content_mask.bounds) == bounds
+        });
         let glyph_opacity = opacity.clamp(0.0, 1.0);
         for glyph in &batch.monochrome {
             let mut sprite = MonochromeSprite {
@@ -222,10 +226,15 @@ impl Scene {
                 tile: glyph.tile,
                 transformation: TransformationMatrix::unit(),
             };
-            let clipped_bounds = sprite.bounds.intersect(&sprite.content_mask.bounds);
-            if clipped_bounds.is_empty() {
-                continue;
-            }
+            let clipped_bounds = if fully_visible {
+                sprite.bounds
+            } else {
+                let clipped = sprite.bounds.intersect(&sprite.content_mask.bounds);
+                if clipped.is_empty() {
+                    continue;
+                }
+                clipped
+            };
             sprite.order =
                 layer_order.unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds));
             self.monochrome_sprites.push(sprite);
@@ -243,10 +252,15 @@ impl Scene {
                 tile: glyph.tile,
                 transformation: TransformationMatrix::unit(),
             };
-            let clipped_bounds = sprite.bounds.intersect(&sprite.content_mask.bounds);
-            if clipped_bounds.is_empty() {
-                continue;
-            }
+            let clipped_bounds = if fully_visible {
+                sprite.bounds
+            } else {
+                let clipped = sprite.bounds.intersect(&sprite.content_mask.bounds);
+                if clipped.is_empty() {
+                    continue;
+                }
+                clipped
+            };
             sprite.order =
                 layer_order.unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds));
             self.subpixel_sprites.push(sprite);
@@ -262,10 +276,15 @@ impl Scene {
                 corner_radii: Default::default(),
                 tile: glyph.tile,
             };
-            let clipped_bounds = sprite.bounds.intersect(&sprite.content_mask.bounds);
-            if clipped_bounds.is_empty() {
-                continue;
-            }
+            let clipped_bounds = if fully_visible {
+                sprite.bounds
+            } else {
+                let clipped = sprite.bounds.intersect(&sprite.content_mask.bounds);
+                if clipped.is_empty() {
+                    continue;
+                }
+                clipped
+            };
             sprite.order =
                 layer_order.unwrap_or_else(|| self.primitive_bounds.insert(clipped_bounds));
             self.polychrome_sprites.push(sprite);
@@ -306,11 +325,11 @@ impl Scene {
         self.paths.sort_by_key(|path| path.order);
         self.underlines.sort_by_key(|underline| underline.order);
         self.monochrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
+            .sort_by_key(|sprite| (sprite.order, sprite.tile.texture_id.index));
         self.subpixel_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
+            .sort_by_key(|sprite| (sprite.order, sprite.tile.texture_id.index));
         self.polychrome_sprites
-            .sort_by_key(|sprite| (sprite.order, sprite.tile.tile_id));
+            .sort_by_key(|sprite| (sprite.order, sprite.tile.texture_id.index));
         self.surfaces.sort_by_key(|surface| surface.order);
         self.backdrop_filters.sort_by_key(|filter| filter.order);
         // Markers normally get distinct, monotonically-increasing orders (children overlap
@@ -974,7 +993,7 @@ impl TransformationMatrix {
     }
 
     /// Move the origin by a given point
-    pub fn translate(mut self, point: Point<ScaledPixels>) -> Self {
+    pub fn translate(self, point: Point<ScaledPixels>) -> Self {
         self.compose(Self {
             rotation_scale: [[1.0, 0.0], [0.0, 1.0]],
             translation: [point.x.0, point.y.0],
@@ -1060,10 +1079,10 @@ impl Default for TransformationMatrix {
 pub struct MonochromeSprite {
     pub order: DrawOrder,
     pub pad: u32,
+    pub tile: AtlasTile,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub color: SceneHsla,
-    pub tile: AtlasTile,
     pub transformation: TransformationMatrix,
 }
 
@@ -1079,10 +1098,10 @@ impl From<MonochromeSprite> for Primitive {
 pub struct SubpixelSprite {
     pub order: DrawOrder,
     pub pad: u32, // align to 8 bytes
+    pub tile: AtlasTile,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub color: SceneHsla,
-    pub tile: AtlasTile,
     pub transformation: TransformationMatrix,
 }
 
@@ -1098,12 +1117,12 @@ impl From<SubpixelSprite> for Primitive {
 pub struct PolychromeSprite {
     pub order: DrawOrder,
     pub corner_shape: u32,
+    pub tile: AtlasTile,
     pub grayscale: PaddedBool32,
     pub opacity: f32,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
     pub corner_radii: Corners<ScaledPixels>,
-    pub tile: AtlasTile,
 }
 
 impl From<PolychromeSprite> for Primitive {
@@ -1118,8 +1137,8 @@ pub struct PaintSurface {
     pub order: DrawOrder,
     pub bounds: Bounds<ScaledPixels>,
     pub content_mask: ContentMask<ScaledPixels>,
-    #[cfg(target_os = "macos")]
-    pub image_buffer: core_video::pixel_buffer::CVPixelBuffer,
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    pub image_buffer: objc2_core_foundation::CFRetained<objc2_core_video::CVPixelBuffer>,
     pub opacity: f32,
     pub rotation: u32,
     pub sample_size: Size<crate::DevicePixels>,
@@ -1537,6 +1556,59 @@ mod tests {
             replayed.monochrome_sprites[0].order,
             scene.monochrome_sprites[0].order
         );
+    }
+
+    #[test]
+    fn cached_batch_bounds_recheck_translation_and_clipping() {
+        let glyph = prepared_monochrome_glyph(full_bounds());
+        let batch = Arc::new(PreparedGlyphBatch {
+            monochrome: vec![glyph],
+            subpixel: vec![glyph],
+            polychrome: vec![crate::window::PreparedPolychromeGlyph {
+                bounds: glyph.bounds,
+                tile: glyph.tile,
+            }],
+            ..Default::default()
+        });
+        for layer in [false, true] {
+            for x in [0.0, 50.0, 100.0, -50.0] {
+                let mut scene = Scene::default();
+                if layer {
+                    scene.push_layer(full_bounds());
+                }
+                let origin = point(sp(x), sp(0.0));
+                scene.insert_prepared_glyph_batch(batch.clone(), origin, mask(), 0.5);
+                let expected = if x == 100.0 {
+                    vec![]
+                } else {
+                    vec![full_bounds() + origin]
+                };
+                assert_eq!(
+                    scene
+                        .monochrome_sprites
+                        .iter()
+                        .map(|s| s.bounds)
+                        .collect::<Vec<_>>(),
+                    expected
+                );
+                assert_eq!(
+                    scene
+                        .subpixel_sprites
+                        .iter()
+                        .map(|s| s.bounds)
+                        .collect::<Vec<_>>(),
+                    expected
+                );
+                assert_eq!(
+                    scene
+                        .polychrome_sprites
+                        .iter()
+                        .map(|s| s.bounds)
+                        .collect::<Vec<_>>(),
+                    expected
+                );
+            }
+        }
     }
 
     #[test]

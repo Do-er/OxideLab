@@ -1250,7 +1250,7 @@ impl WorkspaceApp {
                 capsule.hover(|s| s.bg(rgba((theme.bg_hover << 8) | 0x80)))
             })
             .child(content)
-            .on_scroll_wheel(cx.listener(move |this, event: &gpui::ScrollWheelEvent, _window, cx| {
+            .on_scroll(cx.listener(move |this, event: &gpui::ScrollEvent, _window, cx| {
                 let vertical = f32::from(event.delta.pixel_delta(px(16.0)).y);
                 if vertical.abs() > 0.5 {
                     let base_step = match pacing {
@@ -1405,7 +1405,7 @@ impl WorkspaceApp {
                 capsule.hover(|s| s.bg(rgba((theme.bg_hover << 8) | 0x80)))
             })
             .child(content)
-            .on_scroll_wheel(cx.listener(move |this, event: &gpui::ScrollWheelEvent, _window, cx| {
+            .on_scroll(cx.listener(move |this, event: &gpui::ScrollEvent, _window, cx| {
                 let vertical = f32::from(event.delta.pixel_delta(px(16.0)).y);
                 if vertical.abs() > 0.5 {
                     let step = if event.modifiers.shift { 5 } else { 1 };

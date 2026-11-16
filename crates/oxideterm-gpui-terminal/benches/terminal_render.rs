@@ -663,20 +663,38 @@ fn benchmark_internal_text(cx: &mut BenchAppContext<'_, '_>, sample: &str) {
     });
     cx.settle();
     let mut index = 0;
+    let mut parse = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
+    let mut snapshot = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
+    let mut snapshot_state = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
+    let mut links = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
     let mut layout = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
     let mut paint = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
     let mut previous = false;
     cx.bench_renderer(terminal.clone(), |terminal, _window, cx| {
         if previous {
-            let (_, _, _, layout_us, paint_us) = terminal.benchmark_render_stage_micros();
+            let (_, backend_us, state_us, layout_us, paint_us) =
+                terminal.benchmark_render_stage_micros();
+            snapshot.push(Duration::from_micros(backend_us));
+            snapshot_state.push(Duration::from_micros(state_us));
+            links.push(Duration::from_micros(
+                terminal.benchmark_link_stage_micros(),
+            ));
             layout.push(Duration::from_micros(layout_us));
             paint.push(Duration::from_micros(paint_us));
         }
         previous = true;
-        terminal.feed_recording_output(&chunks[index], cx);
+        parse.push(
+            terminal
+                .feed_recording_output_profiled(&chunks[index], cx)
+                .parse_and_grid,
+        );
         index = (index + 1) % chunks.len();
     });
     assert_eq!(benchmark_grid_size(cx, &terminal), grid);
+    cx.record_stage_samples("parse and grid", parse);
+    cx.record_stage_samples("backend snapshot", snapshot);
+    cx.record_stage_samples("snapshot pane state", snapshot_state);
+    cx.record_stage_samples("links within line layout", links);
     cx.record_stage_samples("line layout", layout);
     cx.record_stage_samples("scene construction", paint);
 }
@@ -738,12 +756,31 @@ fn terminal_internal_unicode(criterion: &mut criterion::Criterion<gpui::BenchMea
     });
 }
 
+fn terminal_internal_semantic_warm(criterion: &mut criterion::Criterion<gpui::BenchMeasurement>) {
+    benchmark_native_text(criterion, "terminal_internal_semantic_warm", |cx| {
+        benchmark_semantic_history(cx, 200, true, true, None);
+    });
+}
+
 fn terminal_internal_warm(criterion: &mut criterion::Criterion<gpui::BenchMeasurement>) {
     benchmark_native_text(criterion, "terminal_internal_warm", |cx| {
-        let terminal = benchmark_terminal(cx, false);
+        let terminal = benchmark_terminal(cx, true);
         let grid = benchmark_grid_size(cx, &terminal);
-        cx.bench_renderer(terminal.clone(), |_terminal, _window, cx| cx.notify());
+        let mut layout = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
+        let mut scene = Vec::with_capacity(PROFILE_SAMPLE_CAPACITY);
+        let mut previous = false;
+        cx.bench_renderer(terminal.clone(), |terminal, _window, cx| {
+            if previous {
+                let (_, _, _, layout_us, scene_us) = terminal.benchmark_render_stage_micros();
+                layout.push(Duration::from_micros(layout_us));
+                scene.push(Duration::from_micros(scene_us));
+            }
+            previous = true;
+            cx.notify();
+        });
         assert_eq!(benchmark_grid_size(cx, &terminal), grid);
+        cx.record_stage_samples("warm line layout", layout);
+        cx.record_stage_samples("warm scene construction", scene);
     });
 }
 
@@ -968,6 +1005,7 @@ fn terminal_idle_no_frames(cx: &mut BenchAppContext<'_, '_>) {
 
 gpui::bench_group!(
     terminal_render,
+    terminal_internal_semantic_warm,
     terminal_incremental_input,
     terminal_incremental_selection,
     terminal_incremental_scroll,
@@ -1005,4 +1043,4 @@ gpui::bench_group!(
     terminal_playback_output_pipeline,
     terminal_idle_no_frames
 );
-gpui::bench_main!(terminal_render);
+gpui::bench_main!(allocator = none; terminal_render);

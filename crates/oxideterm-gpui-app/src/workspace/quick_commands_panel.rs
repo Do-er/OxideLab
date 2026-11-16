@@ -228,7 +228,7 @@ impl WorkspaceApp {
                 11.0,
                 rgba((theme.text_muted << 8) | 0xb3),
             ))
-            .on_scroll_wheel(cx.listener(|this, event: &gpui::ScrollWheelEvent, _window, cx| {
+            .on_scroll(cx.listener(|this, event: &gpui::ScrollEvent, _window, cx| {
                 let delta_y = match event.delta {
                     gpui::ScrollDelta::Lines(lines) => lines.y,
                     gpui::ScrollDelta::Pixels(pixels) => f32::from(pixels.y),
@@ -495,6 +495,7 @@ impl WorkspaceApp {
             .occlude()
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
             .on_mouse_down(MouseButton::Right, |_, _, cx| cx.stop_propagation())
+            .on_scroll(|_, _, cx| cx.stop_propagation())
             .child(edit_btn)
             .child(
                 div()
@@ -602,7 +603,7 @@ impl WorkspaceApp {
             .items_center()
             .overflow_x_scroll()
             .track_scroll(&scroll_handle)
-            .on_scroll_wheel(move |event, _window, cx| {
+            .on_scroll(move |event, _window, cx| {
                 if crate::workspace::breadcrumb_scroll::scroll_breadcrumb_by_wheel(
                     &scroll_for_wheel,
                     event,
