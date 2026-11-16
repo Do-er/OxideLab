@@ -2841,16 +2841,11 @@ impl WorkspaceApp {
             true,
         ));
         let plugin_types = self.plugin_connection_types(cx);
-        let has_plugin_types = !plugin_types.is_empty();
         let mut sidebar = div()
-            .w(px(NEW_CONNECTION_TYPE_SIDEBAR_WIDTH))
-            .h_full()
-            .flex_none()
+            .min_h_full()
             .flex()
             .flex_col()
             .gap(px(4.0))
-            .border_r_1()
-            .border_color(rgba((theme.border << 8) | 0x80))
             .pr(px(self.tokens.spacing.three));
 
         let mut advanced_group_started = false;
@@ -3098,11 +3093,30 @@ impl WorkspaceApp {
                     ),
             );
         }
-        if has_plugin_types {
-            sidebar.overflow_y_scrollbar().into_any_element()
-        } else {
-            sidebar.into_any_element()
-        }
+        // Built-in transport rows overflow in short windows too, so the list is
+        // always scrollable instead of only when plugin types are present.
+        div()
+            .w(px(NEW_CONNECTION_TYPE_SIDEBAR_WIDTH))
+            .min_h_0()
+            .flex_none()
+            .relative()
+            .border_r_1()
+            .border_color(rgba((theme.border << 8) | 0x80))
+            .child(
+                div()
+                    .id("new-connection-transport-scroll")
+                    .size_full()
+                    .selectable_overflow_y_scroll(
+                        &self.selectable_text_scroll_handle("new-connection-transport-scroll"),
+                    )
+                    .restrict_scroll_to_axis()
+                    .child(sidebar),
+            )
+            .child(crate::workspace::selectable_vertical_scrollbar_layer(
+                "new-connection-transport-scrollbar",
+                &self.selectable_text_scroll_handle("new-connection-transport-scroll"),
+            ))
+            .into_any_element()
     }
 
     pub(super) fn render_local_terminal_form_branch(
