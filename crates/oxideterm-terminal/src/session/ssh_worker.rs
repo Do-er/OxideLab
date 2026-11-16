@@ -1026,6 +1026,14 @@ impl TerminalSessionBackend for SshPtySession {
         self.shared.core.lock().scroll_to_display_offset(offset)
     }
 
+    fn display_offset(&self) -> usize {
+        self.shared.core.lock().display_offset()
+    }
+
+    fn set_viewport_pinned(&self, pinned: bool) {
+        self.shared.core.lock().set_viewport_pinned(pinned);
+    }
+
     fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch> {
         self.shared.core.lock().search_matches(query)
     }
@@ -1037,6 +1045,17 @@ impl TerminalSessionBackend for SshPtySession {
     fn set_selection(&self, selection: Option<crate::TerminalSelectionRange>) {
         self.enqueue_control(0, move |core| {
             core.set_selection(selection);
+            Ok(())
+        });
+    }
+
+    fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        self.enqueue_control(0, move |core| {
+            core.set_selection_from_display_offset(selection, snapshot_display_offset);
             Ok(())
         });
     }

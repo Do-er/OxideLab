@@ -787,10 +787,55 @@ impl Render for TerminalPane {
                     })
                 },
             )
+            .when(
+                self.snapshot.display_offset > 0
+                    && self.pending_paste.is_none()
+                    && !self.kitty_file_transmission_confirm_open,
+                |pane| pane.child(self.render_scroll_to_bottom_button(cx)),
+            )
     }
 }
 
 impl TerminalPane {
+    fn render_scroll_to_bottom_button(&self, cx: &mut Context<Self>) -> AnyElement {
+        let tokens = self.theme.tokens;
+        div()
+            .id("terminal-scroll-to-bottom-container")
+            .absolute()
+            .right(px(18.0))
+            .bottom(px(14.0))
+            .child(
+                icon_button(
+                    &tokens,
+                    gpui::svg()
+                        .path("lucide/arrow-down.svg")
+                        .size(px(14.0))
+                        .text_color(rgb(tokens.ui.text))
+                        .into_any_element(),
+                    IconButtonOptions::opaque_toolbar(28.0, ButtonRadius::Md),
+                )
+                .id("terminal-scroll-to-bottom")
+                .border_1()
+                .border_color(rgb(tokens.ui.border))
+                .bg(rgb(tokens.ui.bg_elevated))
+                .shadow_md()
+                .role(gpui::Role::Button)
+                .on_mouse_down(
+                    MouseButton::Left,
+                    cx.listener(|_this, _, window, cx| {
+                        window.prevent_default();
+                        cx.stop_propagation();
+                    }),
+                )
+                .on_click(cx.listener(|this, _, _window, cx| {
+                    this.set_selection(None);
+                    this.apply_scroll_action(TerminalScrollAction::Bottom, cx);
+                    cx.stop_propagation();
+                })),
+            )
+            .into_any_element()
+    }
+
     fn render_terminal_autosuggest_overlay(
         &self,
         candidates: Vec<crate::command_facts::TerminalAutosuggestCandidate>,
@@ -2074,10 +2119,16 @@ impl TerminalPane {
             return cached.snapshot.clone();
         }
         let snapshot_started = self.preferences.show_performance_overlay.then(Instant::now);
-        let snapshot = self
-            .terminal
-            .lock()
-            .snapshot_with_display_offset(display_offset, rows);
+        let relative_delta = display_offset as isize - self.snapshot.display_offset as isize;
+        let snapshot = {
+            let terminal = self.terminal.lock();
+            // Rebase the requested animation offset onto the live backend offset so
+            // background output between snapshot capture and overscan paint cannot
+            // momentarily render a different window of scrollback lines.
+            let target_offset =
+                (terminal.display_offset() as isize + relative_delta).max(0) as usize;
+            terminal.snapshot_with_display_offset(target_offset, rows)
+        };
         if let Some(snapshot_started) = snapshot_started {
             // Count only cache misses because cached overscan snapshots do not rebuild terminal
             // rows and therefore do not represent smooth-scroll snapshot work.

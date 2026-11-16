@@ -964,6 +964,18 @@ impl LocalPtySession {
         crate::selection::set_term_selection(&mut self.display_term().lock(), selection);
     }
 
+    pub fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        crate::selection::set_term_selection_from_display_offset(
+            &mut self.display_term().lock(),
+            selection,
+            snapshot_display_offset,
+        );
+    }
+
     pub fn selection(&self) -> Option<crate::TerminalSelectionRange> {
         crate::selection::term_selection(&self.display_term().lock())
     }
@@ -1094,10 +1106,10 @@ pub(crate) fn incremental_snapshot_from_term<T: EventListener>(
 ) -> TerminalSnapshot {
     let scrollback_lines = term.total_lines().saturating_sub(term.screen_lines());
     let display_offset = term.grid().display_offset().min(scrollback_lines);
-    let shape_compatible = previous.cols == size.cols
+    let base_compatible = previous.cols == size.cols
         && previous.rows == size.rows
-        && previous.display_offset == display_offset
         && previous.lines.len() == size.rows;
+    let shape_compatible = base_compatible && previous.display_offset == display_offset;
 
     let (dirty_rows, scroll_up) = match term.damage() {
         TermDamage::Full => (None, None),
@@ -1137,6 +1149,33 @@ pub(crate) fn incremental_snapshot_from_term<T: EventListener>(
             dirty_rows,
             previous,
         );
+    }
+
+    // When the viewport is pinned in scrollback and new lines push history forward by the
+    // exact same delta, the visible rows stay unchanged and can be reused without rebuilding.
+    if let (Some(scroll_up), Some(dirty_rows)) = (scroll_up, dirty_rows.as_deref())
+        && base_compatible
+        && display_offset > 0
+        && display_offset == previous.display_offset.saturating_add(scroll_up)
+        && scrollback_lines == previous.scrollback_lines.saturating_add(scroll_up)
+        && (previous.display_offset >= size.rows || dirty_rows.is_empty())
+    {
+        let mut snapshot = previous.clone();
+        snapshot.display_offset = display_offset;
+        snapshot.scrollback_lines = scrollback_lines;
+        for (row, line) in snapshot.lines.iter_mut().enumerate() {
+            line.absolute_line = row as i64 - display_offset as i64;
+        }
+        refresh_snapshot_metadata(
+            &mut snapshot,
+            term,
+            size,
+            graphics,
+            palette,
+            display_offset,
+            Vec::new(),
+        );
+        return snapshot;
     }
 
     let compatible = shape_compatible && previous.scrollback_lines == scrollback_lines;
@@ -1225,6 +1264,8 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
     // The parser can advance before the UI observes its wakeup. Capture damage
     // under the same terminal lock, before scrolling adds full-viewport damage.
     let previous_offset = term.grid().display_offset();
+    let scrollback_before = term.total_lines().saturating_sub(term.screen_lines());
+    let scrollback_growth = scrollback_before.saturating_sub(previous.scrollback_lines);
     let dirty_rows = match term.damage() {
         TermDamage::Partial(damage) => {
             let mut dirty_rows = vec![false; size.rows];
@@ -1234,6 +1275,12 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
                 }
             }
             Some(dirty_rows)
+        }
+        TermDamage::ScrollUp { lines, .. }
+            if lines == scrollback_growth && previous.display_offset >= size.rows =>
+        {
+            // History rows scrolled deeper without modifying any line that was already in view.
+            Some(vec![false; size.rows])
         }
         TermDamage::Full | TermDamage::ScrollUp { .. } => None,
     };
@@ -1245,10 +1292,11 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
     let display_offset = term.grid().display_offset().min(scrollback_lines);
     let compatible = previous.cols == size.cols
         && previous.rows == size.rows
-        && previous.display_offset == previous_offset
-        && previous.scrollback_lines == scrollback_lines
+        && previous_offset == previous.display_offset.saturating_add(scrollback_growth)
+        && scrollback_lines == scrollback_before
         && previous.lines.len() == size.rows;
-    let offset_distance = previous.display_offset.abs_diff(display_offset);
+    let visual_delta = display_offset as isize - previous_offset as isize;
+    let offset_distance = visual_delta.unsigned_abs();
     if !compatible || dirty_rows.is_none() || offset_distance >= size.rows {
         let snapshot = snapshot_from_term_with_display_offset(
             term,
@@ -1264,7 +1312,7 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
 
     let dirty_rows = dirty_rows.expect("partial damage permits row reuse");
     let previous_row_index = |row: usize| {
-        if display_offset >= previous.display_offset {
+        if visual_delta >= 0 {
             row.checked_sub(offset_distance)
         } else {
             row.checked_add(offset_distance)
@@ -1274,19 +1322,22 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
     let mut rebuilt_rows = Vec::new();
     let lines = (0..size.rows)
         .map(|row| {
-            previous_row_index(row)
+            if let Some(mut reused) = previous_row_index(row)
                 .filter(|previous_row| !dirty_rows[*previous_row])
                 .and_then(|previous_row| previous.lines.get(previous_row))
                 .cloned()
-                .unwrap_or_else(|| {
-                    rebuilt_rows.push(row);
-                    snapshot_row_from_term(term, size, palette, display_offset, row)
-                })
+            {
+                reused.absolute_line = row as i64 - display_offset as i64;
+                reused
+            } else {
+                rebuilt_rows.push(row);
+                snapshot_row_from_term(term, size, palette, display_offset, row)
+            }
         })
         .collect::<Vec<_>>();
 
     // Only overlapping rows without pending damage retain their shared cell buffers.
-    let mapped_cursor_row = if display_offset >= previous.display_offset {
+    let mapped_cursor_row = if visual_delta >= 0 {
         previous.cursor_row.checked_add(offset_distance)
     } else {
         previous.cursor_row.checked_sub(offset_distance)

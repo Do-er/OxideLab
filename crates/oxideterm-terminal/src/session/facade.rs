@@ -781,6 +781,14 @@ impl TerminalSession {
         self.backend.scroll_to_display_offset(offset);
     }
 
+    pub fn display_offset(&self) -> usize {
+        self.backend.display_offset()
+    }
+
+    pub fn set_viewport_pinned(&self, pinned: bool) {
+        self.backend.set_viewport_pinned(pinned);
+    }
+
     pub fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch> {
         self.backend.search_matches(query)
     }
@@ -791,6 +799,15 @@ impl TerminalSession {
 
     pub fn set_selection(&self, selection: Option<crate::TerminalSelectionRange>) {
         self.backend.set_selection(selection);
+    }
+
+    pub fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        self.backend
+            .set_selection_from_display_offset(selection, snapshot_display_offset);
     }
 
     pub fn selection(&self) -> Option<crate::TerminalSelectionRange> {

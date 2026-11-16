@@ -36,6 +36,27 @@ pub(crate) fn set_term_selection<T>(term: &mut Term<T>, range: Option<TerminalSe
     });
 }
 
+pub(crate) fn set_term_selection_from_display_offset<T>(
+    term: &mut Term<T>,
+    range: Option<TerminalSelectionRange>,
+    snapshot_display_offset: usize,
+) {
+    let range = range.map(|mut range| {
+        // Rebase UI snapshot coordinates onto the live grid offset so async
+        // worker queues or deferred frames cannot mix display_offset epochs.
+        let live_offset = term.grid().display_offset();
+        let shift = live_offset as i64 - snapshot_display_offset as i64;
+        if shift != 0 {
+            range.start_line = (i64::from(range.start_line) - shift)
+                .clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32;
+            range.end_line = (i64::from(range.end_line) - shift)
+                .clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32;
+        }
+        range
+    });
+    set_term_selection(term, range);
+}
+
 pub(crate) fn term_selection<T>(term: &Term<T>) -> Option<TerminalSelectionRange> {
     let range = term.selection.as_ref()?.to_range(term)?;
     Some(TerminalSelectionRange {

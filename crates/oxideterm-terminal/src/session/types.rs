@@ -271,11 +271,25 @@ pub trait TerminalSessionBackend: Send {
     fn scroll_to_top(&mut self);
     fn scroll_to_bottom(&mut self);
     fn scroll_to_display_offset(&mut self, offset: usize);
+    fn display_offset(&self) -> usize {
+        0
+    }
+    fn set_viewport_pinned(&self, pinned: bool) {
+        let _ = pinned;
+    }
     fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch>;
     fn search_source(&self) -> Option<crate::TerminalSearchSource> {
         None
     }
     fn set_selection(&self, selection: Option<crate::TerminalSelectionRange>);
+    fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        let _ = snapshot_display_offset;
+        self.set_selection(selection);
+    }
     fn selection(&self) -> Option<crate::TerminalSelectionRange>;
     fn clear_buffer(&mut self);
     fn buffer_text(&self) -> String {

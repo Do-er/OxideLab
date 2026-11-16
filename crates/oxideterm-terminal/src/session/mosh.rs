@@ -779,6 +779,14 @@ impl TerminalSessionBackend for MoshTerminalSession {
         }
     }
 
+    fn display_offset(&self) -> usize {
+        self.term.lock().grid().display_offset()
+    }
+
+    fn set_viewport_pinned(&self, pinned: bool) {
+        self.term.lock().viewport_pinned = pinned;
+    }
+
     fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch> {
         search_matches_from_term(&self.term.lock(), self.resize.cols, query)
     }

@@ -314,6 +314,9 @@ pub struct Term<T> {
 
     pub selection: Option<Selection>,
 
+    /// Explicit viewport pin (for example while terminal search is active).
+    pub viewport_pinned: bool,
+
     /// Currently active grid.
     ///
     /// Tracks the screen buffer currently in use. While the alternate screen buffer is active,
@@ -525,6 +528,7 @@ impl<T> Term<T> {
             title_stack: Default::default(),
             is_focused: Default::default(),
             selection: Default::default(),
+            viewport_pinned: false,
             title: Default::default(),
             mode: Default::default(),
         }
@@ -938,11 +942,20 @@ impl<T> Term<T> {
         lines = cmp::min(lines, (self.scroll_region.end - self.scroll_region.start).0 as usize);
 
         let region = origin..self.scroll_region.end;
+        let pin_bottom_viewport = (self.selection.is_some() || self.viewport_pinned)
+            && region.start == 0
+            && !self.mode.contains(TermMode::ALT_SCREEN)
+            && self.grid.display_offset() == 0;
 
         // Scroll selection.
         self.selection = self.selection.take().and_then(|s| s.rotate(self, &region, lines as i32));
 
         self.grid.scroll_up(&region, lines);
+        // Pin the viewport when a selection or search is active at the bottom of the
+        // primary screen so streaming output does not pull target lines out of view.
+        if pin_bottom_viewport && (self.selection.is_some() || self.viewport_pinned) {
+            self.grid.scroll_display(Scroll::Delta(lines as i32));
+        }
         self.record_graphics_change(graphics::GraphicsGridChange::Scroll { alternate: self.mode.contains(TermMode::ALT_SCREEN), start: origin.0, end: self.scroll_region.end.0, delta: -(lines as i32), topmost: self.grid.topmost_line().0, history: origin.0 == 0 && self.scroll_region.end.0 == self.screen_lines() as i32 && !self.mode.contains(TermMode::ALT_SCREEN) });
 
         // Scroll vi mode cursor.

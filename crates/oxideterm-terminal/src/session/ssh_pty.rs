@@ -844,6 +844,18 @@ impl TerminalSessionBackend for SshPtyCore {
         }
     }
 
+    fn display_offset(&self) -> usize {
+        self.parser_state
+            .display_term()
+            .lock()
+            .grid()
+            .display_offset()
+    }
+
+    fn set_viewport_pinned(&self, pinned: bool) {
+        self.parser_state.display_term().lock().viewport_pinned = pinned;
+    }
+
     fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch> {
         let term = self.parser_state.display_term();
         let term = term.lock();
@@ -861,6 +873,18 @@ impl TerminalSessionBackend for SshPtyCore {
         crate::selection::set_term_selection(
             &mut self.parser_state.display_term().lock(),
             selection,
+        );
+    }
+
+    fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        crate::selection::set_term_selection_from_display_offset(
+            &mut self.parser_state.display_term().lock(),
+            selection,
+            snapshot_display_offset,
         );
     }
 

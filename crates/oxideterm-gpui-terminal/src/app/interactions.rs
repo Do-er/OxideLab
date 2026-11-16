@@ -615,7 +615,7 @@ impl TerminalPane {
         let previous_offset = self.visible_scroll_offset();
         let snapshot_was_dirty = self.snapshot_dirty;
         let snapshot_started = self.preferences.show_performance_overlay.then(Instant::now);
-        let snapshot = {
+        let (snapshot, physical_offset_before) = {
             let folded_offset = self.folding_active().then(|| {
                 let offset = previous_offset
                     .saturating_add_signed(terminal_scroll_delta(scroll_delta.rows) as isize)
@@ -623,16 +623,15 @@ impl TerminalPane {
                 self.physical_scroll_offset(offset)
             });
             let mut terminal = self.terminal.lock();
+            let physical_offset_before = terminal.display_offset();
             let delta = terminal_scroll_delta(scroll_delta.rows);
-            if let Some(offset) = folded_offset {
+            let snapshot = if let Some(offset) = folded_offset {
                 terminal.scroll_to_display_offset(offset);
-                terminal.snapshot()
-            } else if self.snapshot_dirty {
-                terminal.scroll_lines(delta);
                 terminal.snapshot()
             } else {
                 terminal.scroll_lines_snapshot_incremental(delta, &self.snapshot)
-            }
+            };
+            (snapshot, physical_offset_before)
         };
         if let Some(snapshot_started) = snapshot_started {
             // This includes the synchronous viewport snapshot used by both precise touchpads and
@@ -646,7 +645,19 @@ impl TerminalPane {
                 self.render_stats.scroll_snapshot_count.saturating_add(1);
         }
         let next_offset = self.command_folding.offset(&snapshot);
-        if next_offset == previous_offset {
+        let applied_rows = if self.folding_active() {
+            if next_offset >= previous_offset {
+                (next_offset - previous_offset) as f32
+            } else {
+                -((previous_offset - next_offset) as f32)
+            }
+        } else {
+            // Measure against the live backend offset immediately before scrolling so
+            // background output that arrived since the previous frame does not inflate
+            // or invert the smooth-scroll animation delta.
+            (snapshot.display_offset as isize - physical_offset_before as isize) as f32
+        };
+        if applied_rows.abs() <= f32::EPSILON {
             if snapshot_was_dirty {
                 self.snapshot = self.stamp_snapshot(snapshot);
                 self.snapshot_dirty = false;
@@ -657,11 +668,6 @@ impl TerminalPane {
             }
             return;
         }
-        let applied_rows = if next_offset >= previous_offset {
-            (next_offset - previous_offset) as f32
-        } else {
-            -((previous_offset - next_offset) as f32)
-        };
         self.snapshot_dirty = false;
         self.snapshot = self.stamp_snapshot(snapshot);
         self.refresh_command_folding();
@@ -1381,6 +1387,7 @@ impl TerminalPane {
         let Some(point) = self.physical_grid_point(point) else {
             return;
         };
+        self.selection_started_at_bottom = self.snapshot.display_offset == 0;
         self.set_selection(Some(TerminalSelection {
             anchor: point,
             head: point,
@@ -1452,6 +1459,7 @@ impl TerminalPane {
     fn finish_selection(&mut self, position: gpui::Point<Pixels>, cx: &mut Context<Self>) {
         self.update_selection(position, cx);
         self.selecting = false;
+        self.selection_started_at_bottom = false;
         self.selection_autoscroll_position = None;
         self.copy_selection_after_select_if_configured(cx);
     }
@@ -1536,7 +1544,11 @@ impl TerminalPane {
         terminal_selection_autoscroll_delta_rows(position.y, top, bottom, self.metrics.line_height)
     }
 
-    fn apply_scroll_action(&mut self, action: TerminalScrollAction, cx: &mut Context<Self>) {
+    pub(super) fn apply_scroll_action(
+        &mut self,
+        action: TerminalScrollAction,
+        cx: &mut Context<Self>,
+    ) {
         self.pending_search_reveal = false;
         self.search_navigation_needs_viewport_anchor = true;
         let folded_offset = self.folding_active().then(|| {
@@ -2076,12 +2088,21 @@ impl TerminalPane {
                 self.send_protocol_bytes(&report, cx);
             }
         } else if self.selection_allowed(event.modifiers.shift) {
+            let started_at_bottom = self.selection_started_at_bottom;
             self.finish_selection(event.position, cx);
             if event.button == MouseButton::Left
                 && self.selection.is_some_and(|selection| selection.is_empty())
             {
                 if !self.move_cursor_to_free_type_click(event.position, event.modifiers, mode, cx) {
                     self.select_command_mark_at_position(event.position, mode, cx);
+                }
+                if started_at_bottom
+                    && self.selection.is_some_and(|selection| selection.is_empty())
+                {
+                    // A plain click at the bottom should not leave live output paused at an
+                    // incidental scrollback offset accumulated between mouse-down and mouse-up.
+                    self.set_selection(None);
+                    self.restore_live_output_after_user_input();
                 }
             }
             self.last_mouse_report_point = None;

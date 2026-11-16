@@ -583,6 +583,7 @@ pub struct TerminalPane {
     command_folding: command_folding::CommandFolding,
     command_reflow_pending: bool,
     selecting: bool,
+    selection_started_at_bottom: bool,
     free_type_drag: Option<FreeTypeDragState>,
     last_mouse_report_point: Option<TerminalPoint>,
     mouse_paste_button: Option<gpui::MouseButton>,
@@ -1359,6 +1360,7 @@ impl TerminalPane {
             command_folding: command_folding::CommandFolding::default(),
             command_reflow_pending: false,
             selecting: false,
+            selection_started_at_bottom: false,
             free_type_drag: None,
             last_mouse_report_point: None,
             mouse_paste_button: None,
@@ -1508,7 +1510,9 @@ impl TerminalPane {
                 is_block,
             }
         });
-        self.terminal.lock().set_selection(range);
+        self.terminal
+            .lock()
+            .set_selection_from_display_offset(range, self.snapshot.display_offset);
         self.selection = selection;
         self.selection_highlight_cache = None;
     }
@@ -2789,6 +2793,9 @@ impl TerminalPane {
             .map(|query| oxideterm_terminal::TerminalSearchQuery::new(query, options));
         self.search_invalid_regex = compiled.as_ref().is_some_and(Result::is_err);
         self.search_pattern = compiled.and_then(Result::ok).map(Arc::new);
+        self.terminal
+            .lock()
+            .set_viewport_pinned(self.search_pattern.is_some());
         self.search_query = query;
         self.search_cache = None;
         self.selected_search_match = selected_match.or(Some(0));

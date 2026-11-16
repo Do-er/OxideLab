@@ -189,6 +189,14 @@ impl TerminalSessionBackend for LocalPtySession {
         LocalPtySession::scroll_to_display_offset(self, offset);
     }
 
+    fn display_offset(&self) -> usize {
+        self.display_term().lock().grid().display_offset()
+    }
+
+    fn set_viewport_pinned(&self, pinned: bool) {
+        self.display_term().lock().viewport_pinned = pinned;
+    }
+
     fn search_matches(&self, query: &str) -> Vec<TerminalSearchMatch> {
         LocalPtySession::search_matches(self, query)
     }
@@ -199,6 +207,18 @@ impl TerminalSessionBackend for LocalPtySession {
 
     fn set_selection(&self, selection: Option<crate::TerminalSelectionRange>) {
         LocalPtySession::set_selection(self, selection);
+    }
+
+    fn set_selection_from_display_offset(
+        &self,
+        selection: Option<crate::TerminalSelectionRange>,
+        snapshot_display_offset: usize,
+    ) {
+        LocalPtySession::set_selection_from_display_offset(
+            self,
+            selection,
+            snapshot_display_offset,
+        );
     }
 
     fn selection(&self) -> Option<crate::TerminalSelectionRange> {
