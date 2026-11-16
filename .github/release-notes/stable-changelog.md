@@ -7,23 +7,129 @@ section as the detailed changelog attached to the corresponding GitHub Release.
 
 ### 中文
 
-OxideTerm 3.0.1 修复 Windows 安装版更换图标颜色后任务栏图标不更新的问题。Windows 11 会从与应用关联的快捷方式解析任务栏按钮的图标，而不读取运行中窗口的图标，导致图标变化只出现在托盘和 Alt+Tab 中。
+OxideTerm 3.0.1 是社区定制分支（Do-er 维护）在 3.0.0 之后的更新：同步上游主线逐项修复与 GPUI 0.3.12 框架升级，并加入本分支的自有改进，重点覆盖 SSH 老设备兼容与主机密钥管理、终端滚动与清屏、编辑器中文输入法、SFTP 保存保护。
 
-#### 🖥️ 任务栏图标
+#### 🔄 上游更新
 
-- 安装版更换图标颜色时，同步改写开始菜单、桌面和任务栏固定快捷方式的图标指向所选颜色，并重建任务栏按钮使更改立即生效。
-- 每次启动会把快捷方式图标与已保存的图标颜色对齐，修正此前安装遗留的默认色快捷方式。
-- 无写权限的机器级快捷方式自动跳过，不影响其余快捷方式的更新。
+##### 🔐 SSH 与连接
+
+- russh 协议库升级：接受补零的 ECDSA 主机签名、显式遗留连接允许 2048-bit GEX 组、兼容遗留 RSA 会话，老服务器与嵌入式设备更易连接。
+- 新增「已信任主机」页（设置 → 连接）：浏览、搜索、删除已保存的主机密钥；主机密钥变更时可用「替换密钥并连接」安全替换。
+- ProxyJump 跳板连接保持跳板身份，并复用已保存的路由。
+- 连接导入冲突按名称与分组匹配，导入时预留目标并规范化分组（PR #769）。
+- 新增 `oxideterm terminal --cwd <目录> -- <命令>`：以显式工作目录与参数启动本地终端，例如直接拉起 `claude` 或 `codex`。
+
+##### ⌨️ 终端
+
+- 清屏保留提示行、屏外输入与绝对光标（PR #759）。
+- 窗口 reflow 收窄/加宽与高度变化时保留 scrollback 及其上限（PR #766）。
+- 窗口 resize 时网格保持可见，提示行正常重绘（PR #784）。
+- 组合输入限界，减少输出管线停顿。
+- 遗留编码对无法表示的字符发送 `?`，跨读取分割的 UTF-8 不再判为无效（PR #776、#777）。
+- X/Ymodem 传输容忍启动文本，并重试超时上传。
+- 渲染性能：行样式哈希与字形批次复用、流式链接检测减少分配、回滚快照增量优化。
+
+##### ✍️ 编辑器
+
+- 中文输入法修复：预编辑文本归属独立、IME 选区与缓冲区光标分离、预编辑期间光标可见、无范围标记文本可正常提交（PR #780）。
+
+##### 🗂️ SFTP
+
+- 保存前校验版本，避免并发覆盖；路径身份与显示名分离，符号链接显示为 `名称 -> 目标`，过滤与下载命名正确处理转义字符。
+- tmux 接管按会话标记门控。
+- 独立 SFTP 表单在矮窗口中可滚动到每个字段（对齐上游 31f83dfd0）。
+
+##### 🎨 界面
+
+- 填充型工具栏按钮 hover 保持自身色调与不透明度（PR #783、#786）。
+- knowledge 对话框按键守卫、焦点正确回退、空提交保持输入（PR #781、#785）。
+- 标签条滚动取触控板主轴（PR #782）。
+- 设置弹层与多行输入恢复滚动；侧栏内容刷新不再重放入场动画；Docker 守护进程不可用时显示专用提示（11 种语言）。
+
+##### 🖼️ GPUI 0.3.12
+
+- 框架升级：畸形 XIM 文本恢复、WGPU 30 与 Metal/CoreVideo 集成、DirectX 测试面、非一致性 GPU 适配器（PanVK，PR #765）。
+- 粘贴保护下的多行粘贴默认打开编辑草稿（上游 49c5f4ebf）。
+- 远程 OSC 133 提示/执行钩子按会话能力标记门控（上游 f490d85ac）。
+- Apple 字体光栅缓存按 CoreGraphics face 索引，修复同名不同字形表导致的回退错误（上游 d41fe2d00 的 gpui-ce 子树）。
+
+#### 🧩 自有更新
+
+- 底部命令栏的抽屉展开状态与各标签编写草稿持久化，重启后恢复输入模式、发送节奏与间隔设置。
+- Windows 安装版更换图标颜色后任务栏图标立即更新：改写快捷方式的图标指向并重建任务栏按钮；无写权限的机器级快捷方式自动跳过。
+- 终端选中文本或在历史中搜索时固定视口，新输出不再把视图拉走；同时优化回滚快照的生成。
+
+#### 👥 贡献者
+
+感谢参与本次更新的上游贡献者（链接指向上游仓库）：
+
+- @HarpeLm：清屏提示行保留、reflow 回滚修复、连接导入冲突匹配、编码修复（AnalyseDeCircuit/oxideterm#759、#766、#769、#776、#777）。
+- @m00nLi：编辑器 IME 修复、knowledge 对话框焦点修复、工具栏 hover 色调（#780、#781、#783、#785、#786）。
+- @BilityLeu：终端视口与提示行修复、标签条触控板滚动（#782、#784）。
+- @alkaid-ops：非一致性 GPU 适配器支持（#765）。
 
 ### English
 
-OxideTerm 3.0.1 fixes the Windows taskbar icon not updating after changing the icon color in installed builds. Windows 11 resolves the taskbar button icon from the shortcut associated with the installed executable instead of the live window icon, so icon changes only appeared in the tray and Alt+Tab.
+OxideTerm 3.0.1 is the next release of the Do-er-maintained community fork after 3.0.0: it syncs upstream mainline fixes and the GPUI 0.3.12 framework upgrade, and adds fork-specific improvements, focused on legacy-SSH compatibility with host-key management, terminal scrolling and clear-screen behavior, editor IME correctness, and SFTP save protection.
 
-#### 🖥️ Taskbar icon
+#### 🔄 Upstream changes
 
-- Changing the icon color rewrites the Start Menu, desktop, and taskbar-pinned shortcut icons to the selected variant and rebuilds the taskbar tab so the change applies immediately.
-- Every launch aligns shortcut icons with the saved icon color, fixing default-colored shortcuts left by earlier installs.
-- Machine-wide shortcuts without write permission are skipped without affecting the remaining shortcuts.
+##### 🔐 SSH and connections
+
+- russh protocol fork upgrade: padded ECDSA host signatures, 2048-bit GEX groups for explicit legacy connections, and legacy RSA sessions, improving compatibility with old servers and embedded devices.
+- New "Trusted hosts" page (Settings → Connections): browse, search, and delete saved host keys; changed keys can be replaced safely with "Replace key and connect".
+- ProxyJump connections preserve hop identity and reuse saved routes.
+- Connection-import conflicts match by name and group; destinations are reserved and groups normalized on import (PR #769).
+- New `oxideterm terminal --cwd <dir> -- <command>` launches a local terminal with an explicit working directory and arguments, for example starting `claude` or `codex` directly.
+
+##### ⌨️ Terminal
+
+- Clearing the screen keeps the prompt line, offscreen input, and absolute cursor (PR #759).
+- Reflow keeps scrollback and its limit when narrowing, widening, or changing height (PR #766).
+- Resizing the window keeps the grid visible and preserves prompt redraws (PR #784).
+- Bounded combining input with fewer output-pipeline stalls.
+- Legacy encodings send `?` for unmappable characters, and UTF-8 split across reads is no longer flagged as invalid (PR #776, #777).
+- X/Ymodem transfers tolerate startup text and retry timed-out uploads.
+- Rendering performance: row-style hash and glyph-batch reuse, cheaper streaming link detection, and lighter scrollback snapshots.
+
+##### ✍️ Editor
+
+- IME fixes: marked text keeps its own ownership, IME selection stays separate from the buffer cursor, the caret stays visible during preedit, and marked text commits without a range (PR #780).
+
+##### 🗂️ SFTP
+
+- Saves are version-checked to prevent overwriting concurrent changes; path identity is separated from the display name, symlinks render as `name -> target`, and filtering and download naming handle escaped characters.
+- tmux takeover is gated by a session marker.
+- The standalone SFTP form scrolls to every field in short windows (aligned with upstream 31f83dfd0).
+
+##### 🎨 Interface
+
+- Filled toolbar buttons keep their own hover tint and opacity (PR #783, #786).
+- Knowledge dialogs guard keys, fall focus back correctly, and keep input on empty submits (PR #781, #785).
+- Tab-strip scrolling follows the dominant trackpad axis (PR #782).
+- Settings popovers and multiline inputs scroll again; sidebar content refreshes no longer replay the entrance animation; Docker daemon-unavailable shows a dedicated message in all 11 locales.
+
+##### 🖼️ GPUI 0.3.12
+
+- Framework upgrade: malformed XIM text recovery, WGPU 30 with Metal/CoreVideo integration, the DirectX test surface, and non-conformant GPU adapters (PanVK, PR #765).
+- Protected multiline pastes open the draft editor by default (upstream 49c5f4ebf).
+- Remote OSC 133 prompt/exec hooks are gated by the session capability marker (upstream f490d85ac).
+- Apple font raster caching keys on the CoreGraphics face, fixing wrong glyph tables for same-name faces (upstream d41fe2d00, gpui-ce subtree).
+
+#### 🧩 Fork-specific changes
+
+- The bottom command bar's drawer state and per-tab composer drafts persist across restarts, restoring input mode, pacing, and interval settings.
+- Windows installed builds refresh the taskbar icon immediately after changing the icon variant: shortcut icon targets are rewritten and the taskbar tab rebuilt; machine-wide shortcuts without write permission are skipped.
+- Selecting text or searching in history pins the viewport so incoming output no longer pulls the view away; scrollback snapshot generation is also optimized.
+
+#### 👥 Contributors
+
+Thank you to the upstream contributors whose work is included in this release (links point to the upstream repository):
+
+- @HarpeLm: prompt-line preservation on clear, reflow scrollback fixes, connection-import conflict matching, and encoding fixes (AnalyseDeCircuit/oxideterm#759, #766, #769, #776, #777).
+- @m00nLi: editor IME fixes, knowledge-dialog focus fixes, and toolbar hover tints (#780, #781, #783, #785, #786).
+- @BilityLeu: terminal viewport and prompt fixes, tab-strip trackpad scrolling (#782, #784).
+- @alkaid-ops: non-conformant GPU adapter support (#765).
 
 ## 3.0.0
 
