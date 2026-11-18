@@ -376,7 +376,8 @@
       "risk_dynamic": "Động",
       "category_icon": "Biểu tượng",
       "line_delay_label": "Độ trễ giữa các dòng (ms)",
-      "edit": "Sửa"
+      "edit": "Sửa",
+      "new": "Mới"
     },
     "cwd": {
       "search_directories": "Tìm tệp và thư mục...",

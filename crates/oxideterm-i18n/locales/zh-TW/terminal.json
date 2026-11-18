@@ -376,7 +376,8 @@
       "risk_dynamic": "動態",
       "category_icon": "圖示",
       "line_delay_label": "行間延遲 (ms)",
-      "edit": "編輯"
+      "edit": "編輯",
+      "new": "新增"
     },
     "cwd": {
       "search_directories": "搜尋檔案和目錄...",

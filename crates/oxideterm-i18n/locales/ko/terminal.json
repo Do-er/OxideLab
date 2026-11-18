@@ -376,7 +376,8 @@
       "risk_dynamic": "동적",
       "category_icon": "아이콘",
       "line_delay_label": "줄 간격 지연 (ms)",
-      "edit": "편집"
+      "edit": "편집",
+      "new": "추가"
     },
     "cwd": {
       "search_directories": "파일 및 디렉터리 검색...",

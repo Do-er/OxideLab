@@ -376,7 +376,8 @@
       "risk_dynamic": "動的",
       "category_icon": "アイコン",
       "line_delay_label": "行間遅延 (ms)",
-      "edit": "編集"
+      "edit": "編集",
+      "new": "新規"
     },
     "cwd": {
       "search_directories": "ファイルとディレクトリを検索...",

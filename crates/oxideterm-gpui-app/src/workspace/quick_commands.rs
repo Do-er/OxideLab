@@ -125,7 +125,9 @@ pub(super) struct QuickCommandsState {
 
 #[derive(Clone, PartialEq)]
 pub(in crate::workspace) struct QuickCommandButtonContextMenu {
-    pub(in crate::workspace) command: QuickCommand,
+    /// `Some(command)` targets a command button ("Edit | Delete"); `None` targets
+    /// blank bar space ("New | Manage").
+    pub(in crate::workspace) command: Option<QuickCommand>,
     pub(in crate::workspace) x: f32,
     pub(in crate::workspace) y: f32,
 }

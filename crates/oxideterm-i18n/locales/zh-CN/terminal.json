@@ -430,7 +430,8 @@
       "risk_dynamic": "动态",
       "category_icon": "图标",
       "line_delay_label": "行间延迟 (ms)",
-      "edit": "编辑"
+      "edit": "编辑",
+      "new": "新增"
     },
     "cwd": {
       "search_directories": "搜索文件和目录...",

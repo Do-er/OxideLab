@@ -376,7 +376,8 @@
       "risk_dynamic": "Dinámico",
       "category_icon": "Icono",
       "line_delay_label": "Retardo entre líneas (ms)",
-      "edit": "Editar"
+      "edit": "Editar",
+      "new": "Nuevo"
     },
     "cwd": {
       "search_directories": "Buscar archivos y directorios...",

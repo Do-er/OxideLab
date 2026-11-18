@@ -430,7 +430,8 @@
       "risk_dynamic": "Dynamic",
       "category_icon": "Icon",
       "line_delay_label": "Line delay (ms)",
-      "edit": "Edit"
+      "edit": "Edit",
+      "new": "New"
     },
     "cwd": {
       "search_directories": "Search files and directories...",

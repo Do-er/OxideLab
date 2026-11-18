@@ -137,7 +137,19 @@ impl WorkspaceApp {
                     &self.settings_store.settings().appearance.ui_font_family,
                 ))
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                .on_mouse_down(MouseButton::Right, |_, _, cx| cx.stop_propagation())
+                .on_mouse_down(
+                    MouseButton::Right,
+                    cx.listener(|this, event: &gpui::MouseDownEvent, _window, cx| {
+                        this.clear_all_workspace_tooltips(cx);
+                        this.open_quick_command_button_context_menu(
+                            None,
+                            f32::from(event.position.x),
+                            f32::from(event.position.y),
+                            cx,
+                        );
+                        cx.stop_propagation();
+                    }),
+                )
                 .child(
                     div()
                         .flex()
@@ -157,7 +169,6 @@ impl WorkspaceApp {
                         )
                         .child(self.render_quick_commands_bar_buttons(&snapshot, cx)),
                 )
-                .child(self.render_quick_commands_bar_manager_button(cx))
                 .into_any_element();
 
             if has_background {
@@ -374,7 +385,7 @@ impl WorkspaceApp {
 
     pub(in crate::workspace) fn open_quick_command_button_context_menu(
         &mut self,
-        command: QuickCommand,
+        command: Option<QuickCommand>,
         x: f32,
         y: f32,
         cx: &mut Context<Self>,
@@ -407,73 +418,104 @@ impl WorkspaceApp {
         let theme = self.tokens.ui;
         let viewport = window.viewport_size();
         let viewport_width = f32::from(viewport.width);
-        const CAPSULE_WIDTH: f32 = 148.0;
+        const CAPSULE_WIDTH: f32 = 132.0;
         const CAPSULE_HEIGHT: f32 = 28.0;
 
         let mut pos_x = menu.x - CAPSULE_WIDTH / 2.0;
         pos_x = pos_x.clamp(8.0, (viewport_width - CAPSULE_WIDTH - 8.0).max(8.0));
         let pos_y = (menu.y - CAPSULE_HEIGHT - 12.0).max(8.0);
 
-        let edit_command = menu.command.clone();
-        let edit_btn = div()
-            .id("quick-cmd-capsule-edit")
-            .flex_1()
-            .h_full()
-            .px(px(6.0))
-            .flex()
-            .items_center()
-            .justify_center()
-            .gap(px(4.0))
-            .rounded_full()
-            .hover(|s| s.bg(rgba((theme.bg_hover << 8) | 0xb3)))
-            .cursor_pointer()
-            .text_size(px(self.tokens.metrics.ui_text_xs))
-            .text_color(rgb(theme.text))
-            .child(Self::render_lucide_icon(
-                LucideIcon::Pencil,
-                11.0,
-                rgb(theme.text_muted),
-            ))
-            .child(self.i18n.t("terminal.quick_commands.edit"))
-            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, _window, cx| {
-                this.dismiss_terminal_quick_commands_button_context_menu(cx);
-                this.start_quick_command_edit(edit_command.clone(), cx);
-                cx.stop_propagation();
-            }));
+        let capsule_item = |id: &'static str, label: String, destructive: bool| {
+            div()
+                .id(id)
+                .flex_1()
+                .h_full()
+                .px(px(6.0))
+                .flex()
+                .items_center()
+                .justify_center()
+                .rounded_full()
+                .hover(move |s| {
+                    if destructive {
+                        s.bg(rgba((theme.error << 8) | 0x22))
+                            .text_color(rgb(theme.error))
+                    } else {
+                        s.bg(rgba((theme.bg_hover << 8) | 0xb3))
+                    }
+                })
+                .cursor_pointer()
+                .text_size(px(self.tokens.metrics.ui_text_xs))
+                .text_color(rgb(theme.text))
+                .child(label)
+        };
 
-        let delete_id = menu.command.id.clone();
-        let delete_btn = div()
-            .id("quick-cmd-capsule-delete")
-            .flex_1()
-            .h_full()
-            .px(px(6.0))
-            .flex()
-            .items_center()
-            .justify_center()
-            .gap(px(4.0))
-            .rounded_full()
-            .hover(|s| {
-                s.bg(rgba((theme.error << 8) | 0x22))
-                    .text_color(rgb(theme.error))
-            })
-            .cursor_pointer()
-            .text_size(px(self.tokens.metrics.ui_text_xs))
-            .text_color(rgb(theme.text))
-            .child(Self::render_lucide_icon(
-                LucideIcon::Trash2,
-                11.0,
-                rgb(theme.text_muted),
-            ))
-            .child(self.i18n.t("terminal.quick_commands.delete"))
-            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, _window, cx| {
-                let id = delete_id.clone();
-                this.dismiss_terminal_quick_commands_button_context_menu(cx);
-                this.terminal.update(cx, |terminal, _cx| {
-                    terminal.quick_commands.delete_command(&id);
-                });
-                cx.notify();
-                cx.stop_propagation();
-            }));
+        let (left_btn, right_btn) = if let Some(command) = &menu.command {
+            let edit_command = command.clone();
+            let left = capsule_item(
+                "quick-cmd-capsule-edit",
+                self.i18n.t("terminal.quick_commands.edit"),
+                false,
+            )
+            .on_mouse_down(
+                MouseButton::Left,
+                cx.listener(move |this, _event, _window, cx| {
+                    this.dismiss_terminal_quick_commands_button_context_menu(cx);
+                    this.start_quick_command_edit(edit_command.clone(), cx);
+                    cx.stop_propagation();
+                }),
+            );
+
+            let delete_id = command.id.clone();
+            let right = capsule_item(
+                "quick-cmd-capsule-delete",
+                self.i18n.t("terminal.quick_commands.delete"),
+                true,
+            )
+            .on_mouse_down(
+                MouseButton::Left,
+                cx.listener(move |this, _event, _window, cx| {
+                    let id = delete_id.clone();
+                    this.dismiss_terminal_quick_commands_button_context_menu(cx);
+                    this.terminal.update(cx, |terminal, _cx| {
+                        terminal.quick_commands.delete_command(&id);
+                    });
+                    cx.notify();
+                    cx.stop_propagation();
+                }),
+            );
+
+            (left, right)
+        } else {
+            let left = capsule_item(
+                "quick-cmd-capsule-new",
+                self.i18n.t("terminal.quick_commands.new"),
+                false,
+            )
+            .on_mouse_down(
+                MouseButton::Left,
+                cx.listener(|this, _event, _window, cx| {
+                    this.dismiss_terminal_quick_commands_button_context_menu(cx);
+                    this.start_quick_command_create_with_content(String::new(), cx);
+                    cx.stop_propagation();
+                }),
+            );
+
+            let right = capsule_item(
+                "quick-cmd-capsule-manage",
+                self.i18n.t("terminal.quick_commands.manage"),
+                false,
+            )
+            .on_mouse_down(
+                MouseButton::Left,
+                cx.listener(|this, _event, window, cx| {
+                    this.dismiss_terminal_quick_commands_button_context_menu(cx);
+                    this.open_quick_commands_manager(window, cx);
+                    cx.stop_propagation();
+                }),
+            );
+
+            (left, right)
+        };
 
         div()
             .id("quick-commands-button-capsule-menu")
@@ -496,7 +538,7 @@ impl WorkspaceApp {
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
             .on_mouse_down(MouseButton::Right, |_, _, cx| cx.stop_propagation())
             .on_scroll(|_, _, cx| cx.stop_propagation())
-            .child(edit_btn)
+            .child(left_btn)
             .child(
                 div()
                     .flex_none()
@@ -504,7 +546,7 @@ impl WorkspaceApp {
                     .h(px(12.0))
                     .bg(rgba((theme.border << 8) | 0x66)),
             )
-            .child(delete_btn)
+            .child(right_btn)
             .into_any_element()
     }
 
@@ -582,7 +624,7 @@ impl WorkspaceApp {
                     cx.listener(move |this, event: &gpui::MouseDownEvent, _window, cx| {
                         this.clear_all_workspace_tooltips(cx);
                         this.open_quick_command_button_context_menu(
-                            command_for_menu.clone(),
+                            Some(command_for_menu.clone()),
                             f32::from(event.position.x),
                             f32::from(event.position.y),
                             cx,
@@ -616,60 +658,6 @@ impl WorkspaceApp {
                 cx.stop_propagation();
             })
             .child(button_row)
-            .into_any_element()
-    }
-
-    fn render_quick_commands_bar_manager_button(&self, cx: &mut Context<Self>) -> AnyElement {
-        let theme = self.tokens.ui;
-        let tooltip_id = "quick-commands-bar-manager-btn".to_string();
-        let tooltip_id_hover = tooltip_id.clone();
-        let tooltip_title = self.i18n.t("terminal.quick_commands.manage");
-        let tooltip_title_move = tooltip_title.clone();
-
-        div()
-            .id("quick-commands-bar-manager-btn")
-            .flex_none()
-            .h(px(22.0))
-            .w(px(22.0))
-            .flex()
-            .items_center()
-            .justify_center()
-            .rounded(px(self.tokens.radii.sm))
-            .border_1()
-            .border_color(rgba((theme.border << 8) | 0x80))
-            .bg(rgba((theme.bg_panel << 8) | 0xcc))
-            .hover(|style| {
-                style
-                    .bg(rgba((theme.bg_hover << 8) | 0xe6))
-                    .border_color(rgb(theme.accent))
-            })
-            .cursor_pointer()
-            .child(Self::render_lucide_icon(
-                LucideIcon::Settings,
-                12.0,
-                rgb(theme.text_muted),
-            ))
-            .on_mouse_move(cx.listener(move |this, event: &gpui::MouseMoveEvent, _window, cx| {
-                this.queue_workspace_tooltip(
-                    tooltip_id.clone(),
-                    tooltip_title_move.clone(),
-                    f32::from(event.position.x) + 12.0,
-                    f32::from(event.position.y) + 16.0,
-                    cx,
-                );
-            }))
-            .on_hover(cx.listener(move |this, hovered: &bool, _window, cx| {
-                if !*hovered {
-                    this.clear_workspace_tooltip(&tooltip_id_hover, cx);
-                }
-            }))
-            .on_mouse_down(
-                MouseButton::Left,
-                cx.listener(|this, _event, window, cx| {
-                    this.open_quick_commands_manager(window, cx);
-                    cx.stop_propagation();
-                }),
-            )
             .into_any_element()
     }
 
