@@ -9,7 +9,7 @@ pub struct TerminalSession {
 impl Drop for TerminalSession {
     fn drop(&mut self) {
         if let Some(control) = &self.kitty_file_transmission {
-            control.revoke();
+            control.close_session();
         }
     }
 }
@@ -203,6 +203,7 @@ impl TerminalSession {
             graphics_options,
             TerminalEncoding::Utf8,
             1000,
+            TerminalPalette::default(),
         )
     }
 
@@ -213,6 +214,7 @@ impl TerminalSession {
         graphics_options: GraphicsOptions,
         encoding: TerminalEncoding,
         scrollback_lines: usize,
+        initial_palette: TerminalPalette,
     ) -> Self {
         let kitty_file_transmission = Some(graphics_options.kitty_file_transmission.clone());
         let audit = config.audit_context().map(|context| context.consumer());
@@ -226,6 +228,7 @@ impl TerminalSession {
                 graphics_options,
                 encoding,
                 scrollback_lines,
+                initial_palette,
             )),
             kitty_file_transmission,
         }
@@ -850,14 +853,15 @@ impl TerminalSession {
         &self,
         display_offset: usize,
         rows: usize,
+        previous: Option<&TerminalSnapshot>,
     ) -> TerminalSnapshot {
         self.backend
-            .snapshot_with_display_offset(display_offset, rows)
+            .snapshot_with_display_offset(display_offset, rows, previous)
     }
 
     pub fn shutdown(&mut self) {
         if let Some(control) = &self.kitty_file_transmission {
-            control.revoke();
+            control.close_session();
         }
         self.backend.shutdown();
     }

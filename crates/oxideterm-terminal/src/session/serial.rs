@@ -1181,6 +1181,7 @@ impl TerminalSessionBackend for SerialSession {
         &self,
         display_offset: usize,
         rows: usize,
+        previous: Option<&TerminalSnapshot>,
     ) -> TerminalSnapshot {
         let term = self.term.lock();
         snapshot_from_term_with_display_offset(
@@ -1195,6 +1196,7 @@ impl TerminalSessionBackend for SerialSession {
             &self.palette,
             display_offset,
             rows,
+            previous,
         )
     }
 

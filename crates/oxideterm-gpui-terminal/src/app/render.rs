@@ -20,9 +20,10 @@ use oxideterm_gpui_ui::progress::progress;
 use oxideterm_gpui_ui::scroll::ScrollableElement;
 use oxideterm_gpui_ui::separator::{SeparatorOrientation, separator};
 use oxideterm_terminal::{
-    DetectedModemProtocol, ModemTransferDirection, SerialControlLine, SerialDisplayMode,
-    SerialFlowControl, SerialLineEnding, SerialParity, SerialSendMode, SerialSessionConfig,
-    TermMode, TerminalCommandMark, TerminalCursorShape, TerminalLifecycle, TerminalSessionKind,
+    DetectedModemProtocol, KittyFileTransmissionControl, KittyFileTransmissionPrompt,
+    ModemTransferDirection, SerialControlLine, SerialDisplayMode, SerialFlowControl,
+    SerialLineEnding, SerialParity, SerialSendMode, SerialSessionConfig, TermMode,
+    TerminalCommandMark, TerminalCursorShape, TerminalLifecycle, TerminalSessionKind,
     TerminalSnapshot, TmuxAction, TmuxUiState,
 };
 
@@ -764,9 +765,11 @@ impl Render for TerminalPane {
             .when_some(self.render_paste_overlay(window, cx), |pane, overlay| {
                 pane.child(overlay)
             })
-            .when(
-                self.kitty_file_transmission_confirm_open && self.paste_editor.is_none(),
-                |pane| pane.child(self.render_kitty_file_transmission_confirm(cx)),
+            .when_some(
+                self.kitty_file_transmission_prompt
+                    .clone()
+                    .filter(|_| self.paste_editor.is_none()),
+                |pane, prompt| pane.child(self.render_kitty_file_transmission_confirm(prompt, cx)),
             )
             .when_some(self.modem_progress.clone(), |pane, transfer| {
                 pane.child(self.render_modem_progress_overlay(transfer, cx))
@@ -790,7 +793,7 @@ impl Render for TerminalPane {
             .when(
                 self.snapshot.display_offset > 0
                     && self.paste_editor.is_none()
-                    && !self.kitty_file_transmission_confirm_open,
+                    && self.kitty_file_transmission_prompt.is_none(),
                 |pane| pane.child(self.render_scroll_to_bottom_button(cx)),
             )
     }
@@ -2127,7 +2130,15 @@ impl TerminalPane {
             // momentarily render a different window of scrollback lines.
             let target_offset =
                 (terminal.display_offset() as isize + relative_delta).max(0) as usize;
-            terminal.snapshot_with_display_offset(target_offset, rows)
+            terminal.snapshot_with_display_offset(
+                target_offset,
+                rows,
+                Some(
+                    self.smooth_scroll_snapshot_cache
+                        .as_ref()
+                        .map_or(&self.snapshot, |cached| &cached.snapshot),
+                ),
+            )
         };
         if let Some(snapshot_started) = snapshot_started {
             // Count only cache misses because cached overscan snapshots do not rebuild terminal
@@ -2349,8 +2360,13 @@ impl TerminalPane {
                                 self.terminal_exited,
                                 |this, _, _, cx| {
                                     this.dismiss_terminal_context_menu(cx);
-                                    this.kitty_file_transmission_confirm_open = true;
-                                    cx.notify();
+                                    if !this.terminal_exited {
+                                        this.kitty_file_transmission_prompt =
+                                            this.kitty_file_transmission.as_ref().and_then(
+                                                KittyFileTransmissionControl::authorization_prompt,
+                                            );
+                                        cx.notify();
+                                    }
                                 },
                                 cx,
                             ),
@@ -3037,8 +3053,13 @@ impl TerminalPane {
         cx.write_to_clipboard(ClipboardItem::new_string(output));
     }
 
-    fn render_kitty_file_transmission_confirm(&self, cx: &mut Context<Self>) -> AnyElement {
+    fn render_kitty_file_transmission_confirm(
+        &self,
+        prompt: KittyFileTransmissionPrompt,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let labels = &self.preferences.kitty_file_transmission_labels;
+        let cancel = prompt.clone();
         confirm_dialog(
             &self.theme.tokens,
             ConfirmDialogView {
@@ -3048,12 +3069,12 @@ impl TerminalPane {
                 cancel_label: div().child(labels.cancel.clone()).into_any_element(),
                 confirm_label: div().child(labels.allow.clone()).into_any_element(),
             },
-            cx.listener(|this, _event, _window, cx| {
-                this.deny_kitty_file_transmission(cx);
+            cx.listener(move |this, _event, _window, cx| {
+                this.resolve_kitty_file_transmission(&cancel, false, cx);
                 cx.stop_propagation();
             }),
-            cx.listener(|this, _event, _window, cx| {
-                this.confirm_kitty_file_transmission(cx);
+            cx.listener(move |this, _event, _window, cx| {
+                this.resolve_kitty_file_transmission(&prompt, true, cx);
                 cx.stop_propagation();
             }),
         )
@@ -3087,6 +3108,44 @@ mod tests {
                 Some(self.image.clone()),
             )
         }
+    }
+
+    #[gpui::test]
+    fn smooth_scroll_context_refreshes_with_the_source_snapshot(cx: &mut gpui::TestAppContext) {
+        let (pane, cx) = cx.add_window_view(|window, cx| {
+            super::TerminalPane::new_recording_playback(10, 4, Default::default(), window, cx)
+                .unwrap()
+        });
+        pane.update(cx, |pane, _| {
+            let snapshot = {
+                let mut terminal = pane.terminal.lock();
+                terminal.feed_recording_output(b"'abcdefghijklmnopqrstuvwx'\r\nDONE");
+                terminal.snapshot()
+            };
+            pane.snapshot = pane.stamp_snapshot(snapshot);
+            let before = pane.smooth_scroll_overscan_snapshot(0, 5);
+            assert_eq!(
+                before.logical_context_for_row(0).unwrap().text.trim_end(),
+                "'abcdefghijklmnopqrstuvwx'"
+            );
+            let changed_overscan = pane.smooth_scroll_overscan_snapshot(0, 4);
+            assert!(std::sync::Arc::ptr_eq(
+                &before.logical_context[0].text,
+                &changed_overscan.logical_context[0].text,
+            ));
+            let snapshot = {
+                let mut terminal = pane.terminal.lock();
+                terminal.feed_recording_output(b"\x1b[3;1HZ\x1b[4;1H");
+                terminal.snapshot()
+            };
+            pane.snapshot = pane.stamp_snapshot(snapshot);
+            let after = pane.smooth_scroll_overscan_snapshot(0, 4);
+            assert_eq!(after.lines[0].text(), before.lines[0].text());
+            assert_eq!(
+                after.logical_context_for_row(0).unwrap().text.trim_end(),
+                "'abcdefghijklmnopqrsZuvwx'"
+            );
+        });
     }
 
     #[gpui::test]

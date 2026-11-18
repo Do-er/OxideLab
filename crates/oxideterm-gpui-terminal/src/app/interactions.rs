@@ -134,7 +134,7 @@ impl TerminalPane {
             self.request_context_action(TerminalContextAction::Reconnect, false, cx);
             return true;
         }
-        if self.kitty_file_transmission_confirm_open
+        if let Some(prompt) = self.kitty_file_transmission_prompt.clone()
             && !modifiers.platform
             && !modifiers.control
             && !modifiers.alt
@@ -142,11 +142,11 @@ impl TerminalPane {
             // Only unmodified confirmation keys may resolve the security prompt.
             match key {
                 "enter" => {
-                    self.confirm_kitty_file_transmission(cx);
+                    self.resolve_kitty_file_transmission(&prompt, true, cx);
                     return true;
                 }
                 "escape" => {
-                    self.deny_kitty_file_transmission(cx);
+                    self.resolve_kitty_file_transmission(&prompt, false, cx);
                     return true;
                 }
                 _ => {}
@@ -1133,10 +1133,11 @@ impl TerminalPane {
 
         // Cross-page selections outlive a viewport snapshot. Materialize only the selected grid
         // range when copying text or deriving a new selection-highlight query.
-        let snapshot = self
-            .terminal
-            .lock()
-            .snapshot_with_display_offset(request.display_offset, request.rows);
+        let snapshot = self.terminal.lock().snapshot_with_display_offset(
+            request.display_offset,
+            request.rows,
+            Some(&self.snapshot),
+        );
         selected_text_for_selection(&snapshot, selection)
     }
 
@@ -4892,6 +4893,7 @@ mod tests {
         cols: usize,
     ) -> TerminalSnapshot {
         TerminalSnapshot {
+            logical_context: Vec::new(),
             generation: 1,
             cols,
             rows: lines.len(),

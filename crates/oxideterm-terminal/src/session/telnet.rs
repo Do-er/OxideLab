@@ -386,6 +386,7 @@ impl TelnetSession {
                             sink.interrupt();
                         }
                         self.audit_exit(oxideterm_audit::AuditOutcome::Interrupted);
+                        self.graphics_ingress.end_stream();
                         self.lifecycle = TerminalLifecycle::Exited(None);
                         self.pending_events.push(TerminalEvent::ChildExited(None));
                         report.mark_changed();
@@ -449,6 +450,7 @@ impl TelnetSession {
                         sink.interrupt();
                     }
                     self.audit_exit(oxideterm_audit::AuditOutcome::Failed);
+                    self.graphics_ingress.end_stream();
                     self.lifecycle = TerminalLifecycle::Exited(None);
                     self.feed_utf8_terminal_output(
                         format!("\r\nTelnet connection failed: {error}\r\n").as_bytes(),
@@ -473,6 +475,7 @@ impl TelnetSession {
                         } else {
                             oxideterm_audit::AuditOutcome::Interrupted
                         });
+                        self.graphics_ingress.end_stream();
                         self.lifecycle = TerminalLifecycle::Exited(None);
                         self.pending_events.push(TerminalEvent::ChildExited(None));
                         report.mark_changed();
@@ -1073,7 +1076,12 @@ impl TerminalSessionBackend for TelnetSession {
         )
     }
 
-    fn snapshot_with_display_offset(&self, display_offset: usize, rows: usize) -> TerminalSnapshot {
+    fn snapshot_with_display_offset(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
         let term = self.term.lock();
         snapshot_from_term_with_display_offset(
             &term,
@@ -1087,6 +1095,7 @@ impl TerminalSessionBackend for TelnetSession {
             &self.palette,
             display_offset,
             rows,
+            previous,
         )
     }
 

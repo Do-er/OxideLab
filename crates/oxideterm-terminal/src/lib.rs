@@ -20,6 +20,7 @@ mod backpressure;
 mod color;
 mod send_plan;
 mod data;
+mod logical_context;
 mod editor_integration;
 mod integration_scripts;
 mod local_graphics_event_loop;
@@ -53,10 +54,12 @@ pub use send_plan::{
     TerminalSendPlanError, build_terminal_send_plan,
 };
 pub use data::{
-    GraphicsOptions, KittyFileTransmissionControl, TerminalAttrs, TerminalCell, TerminalColor,
-    TerminalCursorShape, TerminalImageAnimationState, TerminalImageData, TerminalImageFrame,
-    TerminalImageId, TerminalImageProtocol, TerminalImageSnapshot, TerminalRow,
-    TerminalSearchMatch, TerminalSearchRange, TerminalSnapshot, TerminalStyleOrigin,
+    GraphicsOptions, KittyFileTransmissionControl, KittyFileTransmissionPrompt, TerminalAttrs,
+    TerminalCell, TerminalColor, TerminalCursorShape, TerminalImageAnimationState,
+    TerminalImageData, TerminalImageFrame, TerminalImageId, TerminalImageProtocol,
+    TerminalImageSnapshot, TerminalLogicalContext, TerminalLogicalContextRow,
+    TerminalLogicalMember, TerminalRow, TerminalSearchMatch, TerminalSearchRange, TerminalSnapshot,
+    TerminalStyleOrigin,
 };
 pub use editor_integration::{
     EMACS_FREE_TYPE_INTEGRATION_SOURCE, TerminalEditorApplication, TerminalEditorCapabilities,
