@@ -174,21 +174,21 @@ impl WorkspaceApp {
             let tab_id = tab.id;
             let tab_width = item.width;
             let tab_text = self.tab_display_title(tab);
+            let reconnect_node_id = self.reconnect_node_id_for_tab(tab, cx);
+            let icon = self.tab_session_icon(tab, reconnect_node_id.as_ref(), cx);
             if item.kind == TabStripItemKind::Returning {
                 scroll_viewport =
                     scroll_viewport.child(self.render_detached_return_tab_placeholder(
-                        tab_id, &tab.kind, &tab_text, tab_width, cx,
+                        tab_id, icon, &tab_text, tab_width, cx,
                     ));
                 continue;
             }
             let tab_index = self.tab_index_by_id(tab_id, cx).unwrap();
-            let reconnect_node_id = self.reconnect_node_id_for_tab(tab, cx);
             let reconnect_job = reconnect_node_id.as_ref().and_then(|node_id| {
                 self.workspace_runtime
                     .read(cx)
                     .reconnect_active_progress(node_id)
             });
-            let icon = tab_kind_icon(self, &tab.kind, cx);
             let current_visible_index = visible_tab_index;
             visible_tab_index += 1;
             let active = Some(tab_id) == active_tab_id;
@@ -308,10 +308,10 @@ impl WorkspaceApp {
                             })),
                     )
                 })
-                .child(Self::render_lucide_icon(
-                    icon,
+                .child(icon.render(
                     self.tokens.metrics.tab_icon_size,
                     tab_text_color,
+                    cx,
                 ))
                 .child(
                     div()
@@ -415,7 +415,7 @@ impl WorkspaceApp {
     fn render_detached_return_tab_placeholder(
         &self,
         tab_id: TabId,
-        tab_kind: &TabKind,
+        icon: super::super::session_icons::SessionIcon,
         tab_title: &str,
         tab_width: f32,
         cx: &Context<Self>,
@@ -434,10 +434,10 @@ impl WorkspaceApp {
             .border_color(rgba((accent << 8) | 0x88))
             .bg(rgba((accent << 8) | 0x18))
             .text_color(rgba((theme.text << 8) | 0xcc))
-            .child(Self::render_lucide_icon(
-                tab_kind_icon(self, tab_kind, cx),
+            .child(icon.render(
                 self.tokens.metrics.tab_icon_size,
                 rgba((accent << 8) | 0xcc),
+                cx,
             ))
             .child(
                 div()
@@ -792,6 +792,20 @@ impl WorkspaceApp {
                 cx.stop_propagation();
             }),
         )
+    }
+
+    fn tab_session_icon(
+        &self,
+        tab: &Tab,
+        node_id: Option<&NodeId>,
+        cx: &Context<Self>,
+    ) -> super::super::session_icons::SessionIcon {
+        if tab.kind == TabKind::SshTerminal
+            && let Some(node_id) = node_id
+        {
+            return self.node_session_icon(node_id);
+        }
+        tab_kind_icon(self, &tab.kind, cx).into()
     }
 
     pub(super) fn reconnect_node_id_for_tab(&self, tab: &Tab, cx: &App) -> Option<NodeId> {
