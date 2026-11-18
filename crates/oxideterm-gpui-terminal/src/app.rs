@@ -2426,7 +2426,7 @@ impl TerminalPane {
         self.ssh_reconnect_state == SshReconnectState::StartingShell
     }
 
-    fn ssh_reconnect_pending(&self) -> bool {
+    pub fn ssh_reconnect_pending(&self) -> bool {
         self.ssh_reconnect_state != SshReconnectState::Idle
     }
 
@@ -2456,6 +2456,18 @@ impl TerminalPane {
     ) -> Result<()> {
         self.terminal.lock().reconnect_ssh(config)?;
         self.ssh_reconnect_state = SshReconnectState::StartingShell;
+        let _ = self.scheduler_wake_sender.try_send(());
+        cx.notify();
+        Ok(())
+    }
+
+    pub fn restart_local(
+        &mut self,
+        config: LocalPtyConfig,
+        cx: &mut Context<Self>,
+    ) -> Result<()> {
+        self.terminal.lock().restart_local(config)?;
+        self.set_selection(None);
         let _ = self.scheduler_wake_sender.try_send(());
         cx.notify();
         Ok(())

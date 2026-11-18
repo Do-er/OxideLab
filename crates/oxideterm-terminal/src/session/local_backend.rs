@@ -63,6 +63,10 @@ impl TerminalSessionBackend for LocalPtySession {
         LocalPtySession::write_input(self, bytes)
     }
 
+    fn restart_local(&mut self, config: LocalPtyConfig) -> Result<()> {
+        LocalPtySession::restart(self, config)
+    }
+
     fn write_protocol_bytes(&mut self, bytes: &[u8]) -> Result<()> {
         LocalPtySession::write_protocol_bytes(self, bytes)
     }

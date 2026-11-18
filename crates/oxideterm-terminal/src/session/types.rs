@@ -155,6 +155,9 @@ pub trait TerminalSessionBackend: Send {
     fn reconnect_ssh(&mut self, _config: SshSessionConfig) -> Result<()> {
         bail!("Only SSH terminals support this reconnect operation")
     }
+    fn restart_local(&mut self, _config: LocalPtyConfig) -> Result<()> {
+        bail!("Only local terminals support this restart operation")
+    }
     fn write_protocol_bytes(&mut self, bytes: &[u8]) -> Result<()>;
     fn write_text(&mut self, text: &str) -> Result<()>;
     fn paste_text(&mut self, text: &str) -> Result<()>;

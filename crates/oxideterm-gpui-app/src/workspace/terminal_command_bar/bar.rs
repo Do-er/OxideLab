@@ -42,6 +42,9 @@ impl WorkspaceApp {
             .i18n
             .t("settings_view.connections.shell_integration.toolbar_action");
         let can_split = self.can_split_active_pane(cx);
+        let active_pane_reconnecting = active_pane_id
+            .and_then(|pane_id| self.tab_host.read(cx).panes().get(&pane_id).cloned())
+            .is_some_and(|pane| pane.read(cx).ssh_reconnect_pending());
         let broadcast_targets =
             self.terminal_broadcast_target_panes(active_pane_id.unwrap_or(PaneId(0)), cx);
         let broadcast_enabled = active_pane_id
@@ -331,6 +334,19 @@ impl WorkspaceApp {
                                 // Transport readiness controls the disabled state; keeping SSH
                                 // actions visible makes their placement match local terminals.
                                 actions
+                                    .child(self.terminal_command_action_button(
+                                        LucideIcon::RotateCcw,
+                                        rgb(theme.text_muted),
+                                        active_pane_reconnecting,
+                                        None,
+                                        "terminal-command-reconnect-terminal",
+                                        self.i18n.t("sessions.tree.actions.reconnect"),
+                                        |this, _event, _window, cx| {
+                                            this.reload_active_terminal_pane(cx);
+                                            cx.stop_propagation();
+                                        },
+                                        cx,
+                                    ))
                                     .child(self.terminal_command_action_button(
                                         LucideIcon::SplitSquareHorizontal,
                                         rgb(theme.text_muted),

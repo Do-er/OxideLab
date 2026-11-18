@@ -17,6 +17,21 @@ impl WorkspaceApp {
         if !pane.read(cx).can_reconnect_ssh() {
             return;
         }
+        self.trigger_ssh_terminal_reconnect(pane_id, false, cx);
+    }
+
+    fn trigger_ssh_terminal_reconnect(
+        &mut self,
+        pane_id: PaneId,
+        allow_while_running: bool,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(pane) = self.tab_host.read(cx).panes().get(&pane_id).cloned() else {
+            return;
+        };
+        if pane.read(cx).ssh_reconnect_pending() {
+            return;
+        }
         let Some(session_id) = self
             .tabs(cx)
             .iter()
@@ -32,7 +47,12 @@ impl WorkspaceApp {
             return;
         };
         if self.node_is_ready_for_terminal(&node_id) {
-            self.reconnect_ssh_terminal_session(session_id, &node_id, cx);
+            self.reconnect_ssh_terminal_session_with_options(
+                session_id,
+                &node_id,
+                allow_while_running,
+                cx,
+            );
             return;
         }
         pane.update(cx, |pane, cx| pane.set_ssh_reconnect_pending(true, cx));
@@ -55,10 +75,63 @@ impl WorkspaceApp {
         }
     }
 
+    pub(in crate::workspace) fn reload_active_terminal_pane(&mut self, cx: &mut Context<Self>) {
+        let Some(pane_id) = self.active_pane_id(cx) else {
+            return;
+        };
+        let Some(pane) = self.tab_host.read(cx).panes().get(&pane_id).cloned() else {
+            return;
+        };
+        match pane.read(cx).session_kind() {
+            oxideterm_terminal::TerminalSessionKind::SshPty => {
+                // Reopen only this pane's shell channel on the shared SSH connection when
+                // active, leaving sibling panes, SFTP, and forwards intact.
+                self.trigger_ssh_terminal_reconnect(pane_id, true, cx);
+            }
+            oxideterm_terminal::TerminalSessionKind::LocalPty => {
+                let Some(session_id) = self
+                    .tabs(cx)
+                    .iter()
+                    .find_map(|tab| tab.root_pane.as_ref()?.session_id_for_pane(pane_id))
+                else {
+                    return;
+                };
+                let mut local_config = self.local_terminal_config();
+                if let Some(instance) = self.tab_host.read(cx).local_sessions.get(&session_id) {
+                    local_config.shell = instance.shell.clone();
+                    local_config.cwd = instance.cwd.clone();
+                    local_config.remove_env = instance.remove_env.clone();
+                }
+                if let Err(error) = pane.update(cx, |pane, cx| pane.restart_local(local_config, cx))
+                {
+                    self.push_command_palette_toast(
+                        self.i18n.t("sessions.actions.reconnect"),
+                        Some(error.to_string()),
+                        TerminalNoticeVariant::Error,
+                        cx,
+                    );
+                    return;
+                }
+                self.stop_public_mcp_recordings_for_session(session_id, cx);
+            }
+            _ => {}
+        }
+    }
+
     pub(in crate::workspace) fn reconnect_ssh_terminal_session(
         &mut self,
         session_id: TerminalSessionId,
         node_id: &NodeId,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        self.reconnect_ssh_terminal_session_with_options(session_id, node_id, false, cx)
+    }
+
+    fn reconnect_ssh_terminal_session_with_options(
+        &mut self,
+        session_id: TerminalSessionId,
+        node_id: &NodeId,
+        allow_while_running: bool,
         cx: &mut Context<Self>,
     ) -> bool {
         if !self
@@ -89,7 +162,7 @@ impl WorkspaceApp {
                 )
             })
             .map(|connection| connection.connection_id().to_string());
-        if reuse_connection_id.is_some() && pane.read(cx).lifecycle().is_running() {
+        if !allow_while_running && reuse_connection_id.is_some() && pane.read(cx).lifecycle().is_running() {
             return false;
         }
         let result = self

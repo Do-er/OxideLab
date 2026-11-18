@@ -1,5 +1,6 @@
 pub struct LocalPtySession {
     pub(crate) audit: Option<oxideterm_audit::AuditContext>,
+    listener: LocalEventListener,
     term: Arc<FairMutex<Term<LocalEventListener>>>,
     notifier: LocalGraphicsNotifier,
     event_rx: LocalEventReceiver,
@@ -21,10 +22,27 @@ pub struct LocalPtySession {
     #[cfg(windows)]
     process_job: Option<WindowsTerminalJob>,
     graphics: TerminalGraphicsState,
+    graphics_options: GraphicsOptions,
     encoding: TerminalEncoding,
+    scrollback_lines: usize,
     input_encoder: TerminalInputEncoder,
     tmux_display: Arc<crate::tmux::TmuxDisplay>,
     palette: TerminalPalette,
+}
+
+struct LocalPtyRuntime {
+    notifier: LocalGraphicsNotifier,
+    graphics_rx: Receiver<TerminalGraphicsEvent>,
+    magic_rx: Receiver<TerminalMagicKind>,
+    terminal_event_rx: Receiver<TerminalEvent>,
+    stats_rx: Receiver<LocalPtyReadReport>,
+    io_thread: JoinHandle<()>,
+    process: ProcessState,
+    launch_shell: crate::ShellInfo,
+    shell_integration: Option<LocalShellIntegration>,
+    shell_integration_launch_state: TerminalCwdIntegrationLaunchState,
+    #[cfg(windows)]
+    process_job: Option<WindowsTerminalJob>,
 }
 
 pub type LocalTerminal = LocalPtySession;
@@ -90,22 +108,17 @@ impl LocalPtySession {
         )
     }
 
-    pub(crate) fn spawn_with_config_graphics_encoding_and_audit(
-        cols: usize,
-        rows: usize,
+    fn spawn_local_pty_runtime(
+        size: TerminalSize,
         local_config: LocalPtyConfig,
         graphics_options: GraphicsOptions,
         encoding: TerminalEncoding,
         scrollback_lines: usize,
-        audit: Option<oxideterm_audit::AuditContext>,
-    ) -> Result<Self> {
-        let size = TerminalSize {
-            cols: cols.max(2),
-            rows: rows.max(2),
-            cell_width: 0,
-            cell_height: 0,
-        };
-
+        audit: Option<&oxideterm_audit::AuditContext>,
+        term: Arc<FairMutex<Term<LocalEventListener>>>,
+        mut listener: LocalEventListener,
+        tmux_display: Arc<crate::tmux::TmuxDisplay>,
+    ) -> Result<LocalPtyRuntime> {
         let shell = local_config.shell.clone().unwrap_or_else(default_shell);
         let direct_command = local_config.command.is_some();
         // Some PTY backends report a successful fork even when chdir or exec fails in the child.
@@ -151,24 +164,15 @@ impl LocalPtySession {
         };
         let shell_args = launch.args;
 
-        let (mut listener, event_rx) = local_event_channel();
         let (protocol_tx, protocol_rx) = unbounded();
         // Only the outer terminal replies directly. tmux pane listeners keep
         // their per-pane routing through the control-mode owner.
         listener.protocol_tx = Some(protocol_tx);
-        let tmux_display = Arc::new(crate::tmux::TmuxDisplay::default());
         let (graphics_tx, graphics_rx) = unbounded();
         let (magic_tx, magic_rx) = unbounded();
         let (terminal_event_tx, terminal_event_rx) = unbounded();
         let (stats_tx, stats_rx) = unbounded();
 
-        let terminal_config = interactive_terminal_config(scrollback_lines);
-
-        let term = Arc::new(FairMutex::new(Term::new(
-            terminal_config,
-            &size,
-            listener.clone(),
-        )));
         let cwd = local_config
             .cwd
             .filter(|path| !path.as_os_str().is_empty())
@@ -219,14 +223,13 @@ impl LocalPtySession {
         let process = ProcessState::new(shell_pid, pty_master, cwd);
         // The PTY reader owns output capture even while its pane is not draining events.
         let recording_sink = audit
-            .as_ref()
             .map(oxideterm_audit::AuditContext::recording_sink);
         if let Some(sink) = &recording_sink {
             sink.resize(size.cols as u16, size.rows as u16);
         }
         let tmux_graphics_options = graphics_options.clone();
         let event_loop = LocalGraphicsEventLoop::new(
-            term.clone(),
+            term,
             listener.clone(),
             protocol_rx,
             pty,
@@ -240,7 +243,7 @@ impl LocalPtySession {
             encoding,
             recording_sink,
             crate::tmux::TmuxController::new(
-                tmux_display.clone(),
+                tmux_display,
                 listener,
                 size,
                 encoding,
@@ -253,34 +256,133 @@ impl LocalPtySession {
         let notifier = LocalGraphicsNotifier(pty_tx);
         let io_thread = event_loop.spawn();
 
-        Ok(Self {
-            audit,
-            term,
+        Ok(LocalPtyRuntime {
             notifier,
-            event_rx,
             graphics_rx,
             magic_rx,
             terminal_event_rx,
             stats_rx,
+            io_thread,
+            process,
+            launch_shell: shell,
+            shell_integration: launch.integration,
+            shell_integration_launch_state: launch.integration_state,
+            #[cfg(windows)]
+            process_job,
+        })
+    }
+
+    pub(crate) fn spawn_with_config_graphics_encoding_and_audit(
+        cols: usize,
+        rows: usize,
+        local_config: LocalPtyConfig,
+        graphics_options: GraphicsOptions,
+        encoding: TerminalEncoding,
+        scrollback_lines: usize,
+        audit: Option<oxideterm_audit::AuditContext>,
+    ) -> Result<Self> {
+        let size = TerminalSize {
+            cols: cols.max(2),
+            rows: rows.max(2),
+            cell_width: 0,
+            cell_height: 0,
+        };
+        let (listener, event_rx) = local_event_channel();
+        let tmux_display = Arc::new(crate::tmux::TmuxDisplay::default());
+        let terminal_config = interactive_terminal_config(scrollback_lines);
+        let term = Arc::new(FairMutex::new(Term::new(
+            terminal_config,
+            &size,
+            listener.clone(),
+        )));
+        let runtime = Self::spawn_local_pty_runtime(
+            size,
+            local_config,
+            graphics_options.clone(),
+            encoding,
+            scrollback_lines,
+            audit.as_ref(),
+            term.clone(),
+            listener.clone(),
+            tmux_display.clone(),
+        )?;
+
+        Ok(Self {
+            audit,
+            listener,
+            term,
+            notifier: runtime.notifier,
+            event_rx,
+            graphics_rx: runtime.graphics_rx,
+            magic_rx: runtime.magic_rx,
+            terminal_event_rx: runtime.terminal_event_rx,
+            stats_rx: runtime.stats_rx,
             pending_events: Vec::new(),
-            io_thread: Some(io_thread),
+            io_thread: Some(runtime.io_thread),
             size,
             title: None,
             resize_requested: 0,
             resize_completed: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             lifecycle: TerminalLifecycle::Running,
-            process,
-            launch_shell: shell,
-            _shell_integration: launch.integration,
-            shell_integration_launch_state: launch.integration_state,
+            process: runtime.process,
+            launch_shell: runtime.launch_shell,
+            _shell_integration: runtime.shell_integration,
+            shell_integration_launch_state: runtime.shell_integration_launch_state,
             #[cfg(windows)]
-            process_job,
+            process_job: runtime.process_job,
             graphics: TerminalGraphicsState::default(),
+            graphics_options,
             encoding,
+            scrollback_lines,
             input_encoder: TerminalInputEncoder::new(encoding),
             tmux_display,
             palette: TerminalPalette::default(),
         })
+    }
+
+    pub(crate) fn restart(&mut self, local_config: LocalPtyConfig) -> Result<()> {
+        let saved_audit = self.audit.clone();
+        let runtime = Self::spawn_local_pty_runtime(
+            self.size,
+            local_config,
+            self.graphics_options.clone(),
+            self.encoding,
+            self.scrollback_lines,
+            saved_audit.as_ref(),
+            self.term.clone(),
+            self.listener.clone(),
+            self.tmux_display.clone(),
+        )?;
+
+        self.shutdown();
+        // Restore audit context consumed by shutdown so the restarted session keeps auditing.
+        self.audit = saved_audit;
+        self.term.lock().reset_session_preserving_history();
+        self.notifier = runtime.notifier;
+        self.graphics_rx = runtime.graphics_rx;
+        self.magic_rx = runtime.magic_rx;
+        self.terminal_event_rx = runtime.terminal_event_rx;
+        self.stats_rx = runtime.stats_rx;
+        self.io_thread = Some(runtime.io_thread);
+        self.title = None;
+        self.lifecycle = TerminalLifecycle::Running;
+        self.process = runtime.process;
+        self.launch_shell = runtime.launch_shell;
+        self._shell_integration = runtime.shell_integration;
+        self.shell_integration_launch_state = runtime.shell_integration_launch_state;
+        #[cfg(windows)]
+        {
+            self.process_job = runtime.process_job;
+        }
+        self.graphics = TerminalGraphicsState::default();
+        self.input_encoder = TerminalInputEncoder::new(self.encoding);
+        let _ = self
+            .notifier
+            .0
+            .send(LocalGraphicsMsg::SetPalette(self.palette));
+        self.pending_events.push(TerminalEvent::SessionRestarted);
+        self.listener.activity.notify();
+        Ok(())
     }
 
     pub fn drain_output(&mut self) -> bool {

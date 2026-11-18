@@ -71,6 +71,10 @@ impl TerminalSession {
         self.backend.reconnect_ssh(config)
     }
 
+    pub fn restart_local(&mut self, config: LocalPtyConfig) -> Result<()> {
+        self.backend.restart_local(config)
+    }
+
     pub fn local_default(cols: usize, rows: usize) -> Result<Self> {
         Self::local_with_graphics_options(cols, rows, GraphicsOptions::default())
     }
