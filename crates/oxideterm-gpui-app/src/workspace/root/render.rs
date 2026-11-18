@@ -1366,9 +1366,6 @@ impl WorkspaceApp {
                 ),
                 |root| root.child(self.render_node_disconnect_confirm_dialog(cx)),
             )
-            .when(tab_close_confirm_open, |root| {
-                root.child(self.render_tab_close_confirm_dialog(cx))
-            })
             .when_some(
                 self.render_host_process_confirm_dialog(cx),
                 |root, dialog| root.child(dialog),
@@ -1573,6 +1570,11 @@ impl WorkspaceApp {
             })
             .when(self.mermaid_zoom.is_some(), |root| {
                 root.child(self.render_mermaid_zoom_modal(window, cx))
+            })
+            // Keep quit and tab-close confirmations above onboarding and other
+            // workspace-wide overlays so users can always confirm or cancel exit.
+            .when(tab_close_confirm_open, |root| {
+                root.child(self.render_tab_close_confirm_dialog(cx))
             })
             .children(overlay_layers)
             .child(WorkspaceImeElement::new(

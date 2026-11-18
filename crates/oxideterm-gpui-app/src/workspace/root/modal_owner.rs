@@ -168,7 +168,7 @@ impl ActiveWindowModalOwner {
             Self::TerminalTriggerQuickCommand => 15,
             Self::CloudSync { .. } => 16,
             Self::NodeDisconnect { .. } => 17,
-            Self::TabClose { .. } => 18,
+            Self::TabClose { .. } => 51,
             Self::HostProcessConfirm { .. } => 19,
             Self::HostDockerConfirm { .. } => 21,
             Self::HostDockerLogs => 22,
@@ -1506,5 +1506,20 @@ mod tests {
         let exiting_key = exiting_owner.key_route("x");
         assert!(exiting_key.consumes_key());
         assert_eq!(exiting_key.dispatch_owner, None);
+    }
+
+    #[test]
+    fn tab_close_confirm_wins_over_onboarding_and_version_migration() {
+        let projection = ActiveWindowModalProjection {
+            onboarding_open: true,
+            version_migration_open: true,
+            tab_close_phase: Some(VISIBLE),
+            ..Default::default()
+        };
+        let owner = projection.top_owner().expect("tab close modal owner");
+        assert_eq!(owner, ActiveWindowModalOwner::TabClose { phase: VISIBLE });
+        let enter = owner.key_route("enter");
+        assert!(enter.consumes_key());
+        assert_eq!(enter.dispatch_owner, Some(owner));
     }
 }
