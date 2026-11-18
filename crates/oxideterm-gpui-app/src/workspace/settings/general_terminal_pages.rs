@@ -59,6 +59,7 @@ impl WorkspaceApp {
             3 => {
                 let data_dir_info = self.settings_data_directory_info();
                 let data_dir = data_dir_info.path.display().to_string();
+                let data_dir_for_copy = data_dir.clone();
                 self.settings_card(
                     "settings_view.general.data_directory",
                     "settings_view.general.data_directory_hint",
@@ -76,7 +77,8 @@ impl WorkspaceApp {
                                     .flex()
                                     .items_center()
                                     .gap(px(8.0))
-                                    .p(px(8.0))
+                                    .px(px(8.0))
+                                    .py(px(5.0))
                                     .rounded(px(self.tokens.radii.md))
                                     .border_1()
                                     .border_color(rgba((self.tokens.ui.border << 8) | 0x80))
@@ -97,7 +99,12 @@ impl WorkspaceApp {
                                             ))
                                             .truncate()
                                             .child(data_dir),
-                                    ),
+                                    )
+                                    .child(self.settings_path_copy_button(
+                                        "settings-copy-data-dir",
+                                        data_dir_for_copy,
+                                        cx,
+                                    )),
                             )
                             .when(data_dir_info.can_change, |row| {
                                 row.child(self.settings_data_directory_change_button(cx))
@@ -211,18 +218,33 @@ impl WorkspaceApp {
                                         )
                                         .child(self.text_badge(badge_label, badge_color)),
                                 )
-                                .child(
+                                .child({
+                                    let cli_path_for_copy = cli_path.clone();
                                     div()
                                         .w_full()
                                         .min_w(px(0.0))
-                                        .text_size(px(self.tokens.metrics.ui_text_xs))
-                                        .font_family(settings_mono_font_family(
-                                            self.settings_store.settings(),
+                                        .flex()
+                                        .flex_row()
+                                        .items_center()
+                                        .gap(px(6.0))
+                                        .child(
+                                            div()
+                                                .flex_1()
+                                                .min_w(px(0.0))
+                                                .text_size(px(self.tokens.metrics.ui_text_xs))
+                                                .font_family(settings_mono_font_family(
+                                                    self.settings_store.settings(),
+                                                ))
+                                                .text_color(rgb(self.tokens.ui.text_muted))
+                                                .truncate()
+                                                .child(cli_path),
+                                        )
+                                        .child(self.settings_path_copy_button(
+                                            "settings-copy-cli-path",
+                                            cli_path_for_copy,
+                                            cx,
                                         ))
-                                        .text_color(rgb(self.tokens.ui.text_muted))
-                                        .truncate()
-                                        .child(cli_path),
-                                )
+                                })
                                 .when_some(reinstall_hint, |column, hint| {
                                     column.child(
                                         div()

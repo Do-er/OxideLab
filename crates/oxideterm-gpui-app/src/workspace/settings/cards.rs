@@ -4,6 +4,31 @@ use super::*;
 const BACKGROUND_BLUR_COMMIT_DELAY: Duration = Duration::from_millis(150);
 
 impl WorkspaceApp {
+    pub(in crate::workspace) fn settings_path_copy_button(
+        &self,
+        element_id: &'static str,
+        value: String,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        self.workspace_tooltip_icon_button(
+            LucideIcon::Copy,
+            13.0,
+            rgb(self.tokens.ui.text_muted),
+            IconButtonOptions {
+                hover_background: Some(rgb(self.tokens.ui.bg_hover)),
+                ..IconButtonOptions::opaque_toolbar(24.0, ButtonRadius::Sm)
+            },
+            self.i18n.t("settings_view.help.shortcut_copy"),
+            element_id,
+            true,
+            move |_event, _window, cx| {
+                cx.write_to_clipboard(ClipboardItem::new_string(value.clone()));
+                cx.stop_propagation();
+            },
+            cx.entity(),
+        )
+    }
+
     pub(in crate::workspace) fn settings_select_trigger(
         &self,
         select_id: SettingsSelect,

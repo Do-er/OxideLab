@@ -145,24 +145,28 @@ impl WorkspaceApp {
                 "settings_view.general.portable_root_dir",
                 status.portable_root_dir.clone(),
                 true,
+                Some("settings-copy-portable-root-dir"),
                 cx,
             ))
             .child(self.portable_value_box(
                 "settings_view.general.portable_activation",
                 portable_activation_label(&self.i18n, status.activation),
                 false,
+                None,
                 cx,
             ))
             .child(self.portable_value_box(
                 "settings_view.general.portable_config_path",
                 status.config_path.clone(),
                 true,
+                Some("settings-copy-portable-config-path"),
                 cx,
             ))
             .child(self.portable_value_box(
                 "settings_view.general.data_directory",
                 status.data_dir.clone(),
                 true,
+                Some("settings-copy-portable-data-dir"),
                 cx,
             ))
             .child(self.portable_value_box(
@@ -172,6 +176,10 @@ impl WorkspaceApp {
                         .t("settings_view.general.portable_instance_lock_unavailable")
                 }),
                 true,
+                status
+                    .instance_lock_path
+                    .as_ref()
+                    .map(|_| "settings-copy-portable-lock-path"),
                 cx,
             ))
             .into_any_element()
@@ -182,24 +190,38 @@ impl WorkspaceApp {
         label_key: &str,
         value: String,
         mono: bool,
+        copy_button_id: Option<&'static str>,
         cx: &mut Context<Self>,
     ) -> AnyElement {
-        let mut value_row = div()
+        let value_for_copy = value.clone();
+        let mut text_el = div()
+            .flex_1()
+            .min_w(px(0.0))
+            .text_size(px(self.tokens.metrics.ui_text_xs))
+            .text_color(rgb(self.tokens.ui.text))
+            .line_height(px((self.tokens.metrics.ui_text_xs + 4.0).max(16.0)))
+            .child(value);
+        if mono {
+            text_el =
+                text_el.font_family(settings_mono_font_family(self.settings_store.settings()));
+        }
+
+        let value_row = div()
             .mt(px(4.0))
             .w_full()
             .min_w(px(0.0))
             .rounded(px(self.tokens.radii.sm))
             .bg(rgb(self.tokens.ui.bg))
             .px(px(10.0))
-            .py(px(8.0))
-            .text_size(px(self.tokens.metrics.ui_text_xs))
-            .text_color(rgb(self.tokens.ui.text))
-            .line_height(px((self.tokens.metrics.ui_text_xs + 4.0).max(16.0)))
-            .child(value);
-        if mono {
-            value_row =
-                value_row.font_family(settings_mono_font_family(self.settings_store.settings()));
-        }
+            .py(px(if copy_button_id.is_some() { 5.0 } else { 8.0 }))
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(px(6.0))
+            .child(text_el)
+            .when_some(copy_button_id, |row, element_id| {
+                row.child(self.settings_path_copy_button(element_id, value_for_copy, cx))
+            });
 
         div()
             .w_full()
@@ -363,12 +385,14 @@ impl WorkspaceApp {
                         "settings_view.general.portable_migration_current_dir",
                         current_data_dir,
                         true,
+                        Some("settings-copy-portable-migration-current-dir"),
                         cx,
                     ))
                     .child(self.portable_value_box(
                         "settings_view.general.portable_migration_target_dir",
                         portable_data_dir,
                         true,
+                        Some("settings-copy-portable-migration-target-dir"),
                         cx,
                     ))
                     .child(self.portable_settings_text(
