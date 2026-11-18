@@ -2887,9 +2887,16 @@ impl Element for TerminalElement {
                 rgb(color),
             ));
         }
+        let cell_width = self.metrics.cell_width_f32();
+        let available_grid_width = (f32::from(bounds.size.width)
+            - TERMINAL_CONTENT_PADDING * 2.0
+            - grid_gutter_width)
+            .max(cell_width * 2.0);
+        let content_width = self.snapshot.cols as f32 * cell_width;
+        let max_scroll = (content_width - available_grid_width).max(0.0);
         if let Some(horizontal_scrollbar) = terminal_horizontal_scrollbar_for_viewport(
             f32::from(grid_viewport_width),
-            timestamp_gutter_width,
+            max_scroll,
             f32::from(self.scroll_x_offset),
         ) {
             paint_horizontal_scrollbar(
