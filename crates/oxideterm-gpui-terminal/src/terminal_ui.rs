@@ -42,10 +42,13 @@ pub(crate) const TERMINAL_CONTENT_PADDING: f32 = 0.0;
 const NESTED_SEMANTIC_COLOR_COUNT: u8 = 6;
 const TERMINAL_SEMANTIC_ERROR_LINE_BAND_OPACITY: f32 = 0.11;
 const TERMINAL_SEMANTIC_WARNING_LINE_BAND_OPACITY: f32 = 0.08;
-pub(crate) const SCROLLBAR_WIDTH: f32 = 10.0;
+pub(crate) const SCROLLBAR_WIDTH: f32 = 8.0;
+pub(crate) const SCROLLBAR_ACTIVE_WIDTH: f32 = 12.0;
+pub(crate) const SCROLLBAR_HIT_WIDTH: f32 = 16.0;
 pub(crate) const SCROLLBAR_GAP: f32 = 0.0;
-pub(crate) const SCROLLBAR_RESERVED_WIDTH: f32 = SCROLLBAR_WIDTH;
+pub(crate) const SCROLLBAR_HIDE_DELAY: Duration = Duration::from_secs(1);
 pub(crate) const SCROLLBAR_MIN_THUMB: f32 = 24.0;
+pub(crate) const SEARCH_SCROLLBAR_MARKER_HEIGHT: f32 = 2.0;
 pub(crate) const TERMINAL_TIMESTAMP_TIME_CELLS: usize = 10;
 pub(crate) const TERMINAL_TIMESTAMP_GUTTER_GAP_CELLS: f32 = 1.0;
 
@@ -326,9 +329,7 @@ impl TerminalRenderTier {
 }
 
 pub(crate) fn terminal_scrollbar_x_for_viewport(viewport_width: Pixels) -> Pixels {
-    // Tauri/xterm uses overviewRuler.width as right-side terminal viewport
-    // chrome. Anchor the native scrollbar to that viewport edge instead of
-    // deriving its x-position from the rounded PTY column count.
+    // Overlay the viewport edge independently of rounded PTY columns.
     px((f32::from(viewport_width) - TERMINAL_CONTENT_PADDING - SCROLLBAR_WIDTH).max(0.0))
 }
 
@@ -1242,20 +1243,6 @@ pub(crate) fn terminal_timestamp_gutter_width(
     } else {
         0.0
     }
-}
-
-/// Calculates the available horizontal span for terminal grid columns, reserving
-/// space for left gutters (timestamps, command marks) and right-side scrollbar chrome.
-pub(crate) fn terminal_grid_span_for_viewport(
-    viewport_width: Pixels,
-    cell_width: f32,
-    left_gutter_width: f32,
-) -> f32 {
-    (f32::from(viewport_width)
-        - TERMINAL_CONTENT_PADDING * 2.0
-        - left_gutter_width
-        - SCROLLBAR_RESERVED_WIDTH)
-        .max(cell_width * 2.0)
 }
 
 /// Emulator-owned identity is stable across scrolling, eviction and local row movement.
