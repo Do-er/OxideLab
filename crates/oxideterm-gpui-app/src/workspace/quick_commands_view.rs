@@ -3438,6 +3438,7 @@ impl WorkspaceApp {
         let command_for_insert = command.command.clone();
         let command_for_run = command.clone();
         let command_for_primary_action = command.clone();
+        let command_id_for_clone = command.id.clone();
         let command_id_for_delete = command.id.clone();
         let command_id_for_hover = command.id.clone();
         let command_id_for_drop = command.id.clone();
@@ -3609,17 +3610,43 @@ impl WorkspaceApp {
                             }),
                         ),
                 )
-                .child(self.quick_command_action_button(
-                    LucideIcon::Trash2,
-                    move |this, _event, _window, cx| {
-                        this.terminal.update(cx, |terminal, _cx| {
-                            terminal.quick_commands.delete_command(&command_id_for_delete)
-                        });
-                        cx.stop_propagation();
-                        cx.notify();
-                    },
-                    cx,
-                ));
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(4.0))
+                        .child({
+                            let command_id_for_clone = command_id_for_clone.clone();
+                            self.quick_command_action_button(
+                                LucideIcon::Copy,
+                                move |this, _event, _window, cx| {
+                                    let cloned = this.terminal.update(cx, |terminal, _cx| {
+                                        terminal
+                                            .quick_commands
+                                            .store
+                                            .clone_command(&command_id_for_clone)
+                                    });
+                                    if let Some(cloned) = cloned {
+                                        this.start_quick_command_edit(cloned, cx);
+                                    }
+                                    cx.stop_propagation();
+                                    cx.notify();
+                                },
+                                cx,
+                            )
+                        })
+                        .child(self.quick_command_action_button(
+                            LucideIcon::Trash2,
+                            move |this, _event, _window, cx| {
+                                this.terminal.update(cx, |terminal, _cx| {
+                                    terminal.quick_commands.delete_command(&command_id_for_delete)
+                                });
+                                cx.stop_propagation();
+                                cx.notify();
+                            },
+                            cx,
+                        )),
+                );
             return row.into_any_element();
         }
 
@@ -3840,7 +3867,25 @@ impl WorkspaceApp {
                 ))
             })
             .when(managing, |row| {
+                let command_id_for_clone = command_id_for_clone.clone();
                 row.child(self.quick_command_action_button(
+                    LucideIcon::Copy,
+                    move |this, _event, _window, cx| {
+                        let cloned = this.terminal.update(cx, |terminal, _cx| {
+                            terminal
+                                .quick_commands
+                                .store
+                                .clone_command(&command_id_for_clone)
+                        });
+                        if let Some(cloned) = cloned {
+                            this.start_quick_command_edit(cloned, cx);
+                        }
+                        cx.stop_propagation();
+                        cx.notify();
+                    },
+                    cx,
+                ))
+                .child(self.quick_command_action_button(
                     LucideIcon::Trash2,
                     move |this, _event, _window, cx| {
                         this.terminal.update(cx, |terminal, _cx| {

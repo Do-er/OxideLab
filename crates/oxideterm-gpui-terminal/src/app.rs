@@ -4661,6 +4661,11 @@ impl TerminalPane {
     }
 
     fn restore_live_output_after_user_input(&mut self) {
+        if self.selection.is_some() {
+            // User input resumes live terminal interaction; clear any lingering selection so
+            // bottom-selection viewport pinning does not freeze subsequent command output.
+            self.set_selection(None);
+        }
         if !viewport_needs_live_output_restore(
             self.snapshot.display_offset,
             self.smooth_scroll_offset_px,

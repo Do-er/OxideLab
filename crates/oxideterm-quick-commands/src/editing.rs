@@ -135,11 +135,7 @@ pub fn upsert_quick_command(
     let command = QuickCommand {
         id: draft.id.unwrap_or_else(new_quick_command_id),
         name: draft.name.trim().to_string(),
-        command: draft
-            .command
-            .trim_start()
-            .trim_end_matches([' ', '\t'])
-            .to_string(),
+        command: draft.command.trim_start().to_string(),
         category: draft.category.map_or(existing_category, |category| {
             if categories.iter().any(|item| item.id == category) {
                 category

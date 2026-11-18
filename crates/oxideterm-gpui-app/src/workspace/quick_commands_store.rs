@@ -85,11 +85,7 @@ impl QuickCommandsState {
         let command = QuickCommand {
             id: draft.id.unwrap_or_else(new_quick_command_id),
             name: draft.name.trim().to_string(),
-            command: draft
-                .command
-                .trim_start()
-                .trim_end_matches([' ', '\t'])
-                .to_string(),
+            command: draft.command.trim_start().to_string(),
             category: if self
                 .categories
                 .iter()
@@ -170,6 +166,27 @@ impl QuickCommandsState {
         if delete_quick_command(&mut self.commands, id) {
             self.persist();
         }
+    }
+
+    pub(in crate::workspace) fn clone_command(&mut self, id: &str) -> Option<QuickCommand> {
+        let index = self.commands.iter().position(|command| command.id == id)?;
+        let source = self.commands[index].clone();
+        let now = now_ms();
+        let mut cloned = source.clone();
+        cloned.id = new_quick_command_id();
+        cloned.created_at = now;
+        cloned.updated_at = now;
+        self.commands.insert(index + 1, cloned.clone());
+        let category = source.category;
+        let mut sort_order = 1i64;
+        for command in &mut self.commands {
+            if command.category == category {
+                command.sort_order = sort_order;
+                sort_order += 1;
+            }
+        }
+        self.persist();
+        Some(cloned)
     }
 
     pub(in crate::workspace) fn move_command_to(&mut self, source_id: &str, target_id: &str) -> bool {
