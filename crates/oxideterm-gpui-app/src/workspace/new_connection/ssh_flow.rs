@@ -670,14 +670,13 @@ impl WorkspaceApp {
             .node_metadata(&parent_node_id)
             .is_some_and(|snapshot| snapshot.readiness == NodeReadiness::Ready);
         if !parent_ready {
-            let message = format!(
-                "{}: {}",
-                self.i18n.t("sessions.tree.actions.drill_in"),
-                self.i18n.t("ssh.drill_down.parent_not_ready")
-            );
+            let detail = self.i18n.t("ssh.drill_down.parent_not_ready");
+            let title = self.i18n.t("sessions.tree.actions.drill_in");
+            let message = format!("{title}: {detail}");
             self.session_manager.update(cx, |session_manager, cx| {
                 session_manager.set_status(Some(message), cx);
             });
+            self.report_workspace_error_notice(title, Some(detail), cx);
             return;
         }
 

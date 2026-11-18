@@ -18,7 +18,8 @@
     "severity": {
       "info": "信息",
       "warn": "警告",
-      "error": "错误"
+      "error": "错误",
+      "critical": "严重"
     },
     "category": {
       "connection": "连接",
@@ -32,7 +33,11 @@
       "security": "安全",
       "automation": "自动化",
       "system": "系统",
-      "audit": "审计管理"
+      "audit": "审计管理",
+      "plugin": "插件",
+      "agent": "智能体",
+      "update": "更新",
+      "health": "健康状态"
     },
     "events": {
       "connected": "已连接",
@@ -411,6 +416,9 @@
       "done": "已完成",
       "failed": "失败",
       "cancelled": "已取消"
-    }
+    },
+    "filter_status": "按状态筛选",
+    "unread": "未读",
+    "mark_all_read": "全部标为已读"
   }
 }

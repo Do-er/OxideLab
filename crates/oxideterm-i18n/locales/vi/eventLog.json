@@ -18,7 +18,8 @@
     "severity": {
       "info": "Thông tin",
       "warn": "Cảnh báo",
-      "error": "Lỗi"
+      "error": "Lỗi",
+      "critical": "Nghiêm trọng"
     },
     "category": {
       "connection": "Kết nối",
@@ -32,7 +33,11 @@
       "security": "Bảo mật",
       "automation": "Tự động hóa",
       "system": "Hệ thống",
-      "audit": "Quản lý kiểm toán"
+      "audit": "Quản lý kiểm toán",
+      "plugin": "Plugin",
+      "agent": "Tác nhân",
+      "update": "Cập nhật",
+      "health": "Tình trạng"
     },
     "events": {
       "connected": "Đã kết nối",
@@ -411,6 +416,9 @@
       "done": "Hoàn tất",
       "failed": "Thất bại",
       "cancelled": "Đã hủy"
-    }
+    },
+    "filter_status": "Lọc theo trạng thái",
+    "unread": "Chưa đọc",
+    "mark_all_read": "Đánh dấu tất cả đã đọc"
   }
 }

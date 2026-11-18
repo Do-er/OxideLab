@@ -14,9 +14,9 @@ const TOOLTIP_SWITCH_ROW_TOLERANCE: f32 = 12.0;
 const TOOLTIP_SWITCH_MAX_DISTANCE: f32 = 96.0;
 const CONNECTION_TRACE_UPDATE_COALESCE: Duration = Duration::from_millis(300);
 const CONNECTION_TRACE_SUCCESS_TTL: Duration = Duration::from_millis(900);
+const CONNECTION_TRACE_FAILED_TTL: Duration = Duration::from_secs(5);
 const CONNECTION_TRACE_HISTORY_LIMIT: usize = 12;
 const DISMISSED_CONNECTION_TRACE_LIMIT: usize = 64;
-const CONNECTION_CARD_LAYER_PRIORITY: usize = 40;
 const TERMINAL_FONT_SIZE_HUD_HORIZONTAL_PADDING: f32 = 20.0;
 const TERMINAL_FONT_SIZE_HUD_VERTICAL_PADDING: f32 = 12.0;
 const TERMINAL_FONT_SIZE_HUD_VALUE_TEXT_SIZE: f32 = 24.0;
@@ -922,7 +922,7 @@ impl WorkspaceOverlayEntity {
                     trace.flush_deadline = None;
                     trace.latest = event.clone();
                     trace.displayed = Some(event);
-                    trace.expires_at = None;
+                    trace.expires_at = Some(now + CONNECTION_TRACE_FAILED_TTL);
                     changed = true;
                 }
                 ConnectionTraceStatus::Cancelled => {
@@ -1223,14 +1223,14 @@ impl WorkspaceOverlayEntity {
         {
             layers.push(render_zen_hint(tokens, &hint.label));
         }
-        if let Some(toasts) = self.render_toasts(tokens, native_update, cx) {
+        if let Some(toasts) = self.render_toasts(
+            tokens,
+            i18n,
+            native_update,
+            show_connection_cards,
+            cx,
+        ) {
             layers.push(toasts);
-        }
-        // Connection cards use a deferred layer and must yield while the MFA dialog owns input.
-        if show_connection_cards {
-            if let Some(connection_cards) = self.render_connection_cards(tokens, i18n, cx) {
-                layers.push(connection_cards);
-            }
         }
         if let Some(hud) = self.terminal_font_size_hud {
             layers.push(render_terminal_font_size_hud(
@@ -1245,12 +1245,20 @@ impl WorkspaceOverlayEntity {
     fn render_toasts(
         &self,
         tokens: &ThemeTokens,
+        i18n: &I18n,
         native_update: Option<ToastView>,
+        show_connection_cards: bool,
         cx: &mut Context<Self>,
     ) -> Option<AnyElement> {
+        let has_connection_toasts = show_connection_cards
+            && self
+                .connection_trace_cards
+                .values()
+                .any(|trace| trace.displayed.is_some());
         if self.standard_toasts.is_empty()
             && self.plugin_progress_toasts.is_empty()
             && native_update.is_none()
+            && !has_connection_toasts
         {
             return None;
         }
@@ -1353,53 +1361,82 @@ impl WorkspaceOverlayEntity {
                 ),
             }
         });
-        Some(toaster(tokens, standard.chain(plugin).chain(native_update)).into_any_element())
-    }
-
-    fn render_connection_cards(
-        &self,
-        tokens: &ThemeTokens,
-        i18n: &I18n,
-        cx: &mut Context<Self>,
-    ) -> Option<AnyElement> {
-        let overlay = cx.entity();
-        let cards = self
-            .connection_trace_cards
-            .iter()
-            .filter_map(|(attempt_id, trace)| {
-                let event = trace.displayed.as_ref()?;
-                Some(render_connection_card(
-                    tokens,
-                    i18n,
-                    attempt_id,
-                    event,
-                    &trace.history,
-                    trace.presence.phase(),
-                    overlay.clone(),
-                ))
+        let connection = show_connection_cards
+            .then(|| {
+                self.connection_trace_cards
+                    .iter()
+                    .filter_map(|(attempt_id, trace)| {
+                        let event = trace.displayed.as_ref()?;
+                        let attempt_id_for_close = attempt_id.clone();
+                        let overlay = overlay.clone();
+                        let variant = match event.status {
+                            ConnectionTraceStatus::Ready => ToastVariant::Success,
+                            ConnectionTraceStatus::Failed => ToastVariant::Error,
+                            ConnectionTraceStatus::Running | ConnectionTraceStatus::Cancelled => {
+                                ToastVariant::Default
+                            }
+                        };
+                        let description = match event.status {
+                            ConnectionTraceStatus::Failed => {
+                                match (&event.endpoint, &event.detail) {
+                                    (Some(endpoint), Some(detail)) => {
+                                        Some(format!("{endpoint} · {detail}"))
+                                    }
+                                    (Some(endpoint), None) => Some(endpoint.clone()),
+                                    (None, Some(detail)) => Some(detail.clone()),
+                                    (None, None) => None,
+                                }
+                            }
+                            _ => event.endpoint.clone(),
+                        };
+                        let status_text = (event.status != ConnectionTraceStatus::Failed)
+                            .then(|| connection_trace_status_text(i18n, event));
+                        let progress = (event.status == ConnectionTraceStatus::Running)
+                            .then_some(event.progress.clamp(0.0, 100.0));
+                        Some(ToastView {
+                            id: format!("connection-{attempt_id}"),
+                            phase: trace.presence.phase(),
+                            title: connection_trace_title(i18n, event),
+                            description,
+                            status_text,
+                            progress,
+                            variant,
+                            actions: None,
+                            close: Some(
+                                toast_close(tokens)
+                                    .debug_selector(|| "connection-card-close".to_string())
+                                    .on_mouse_down(
+                                        MouseButton::Left,
+                                        move |_event, _window, cx| {
+                                            let _ = overlay.update(cx, |overlay, cx| {
+                                                if overlay.dismiss_connection_trace(
+                                                    &attempt_id_for_close,
+                                                    cx.background_executor().now(),
+                                                ) {
+                                                    overlay.schedule_next_deadline(cx);
+                                                    cx.notify();
+                                                }
+                                            });
+                                            cx.stop_propagation();
+                                        },
+                                    )
+                                    .into_any_element(),
+                            ),
+                        })
+                    })
+                    .collect::<Vec<_>>()
             })
-            .collect::<Vec<_>>();
-        if cards.is_empty() {
-            return None;
-        }
-
+            .into_iter()
+            .flatten();
         Some(
-            deferred(
-                div()
-                    .absolute()
-                    .top(px(
-                        tokens.metrics.titlebar_height + tokens.metrics.tabbar_height
-                    ))
-                    .right_0()
-                    .flex()
-                    .flex_col()
-                    .gap(px(tokens.spacing.three))
-                    .p(px(tokens.metrics.ui_toast_padding))
-                    .w(px(tokens.metrics.ui_toast_width))
-                    .max_w(px(tokens.metrics.ui_toast_width))
-                    .children(cards),
-            )
-            .with_priority(CONNECTION_CARD_LAYER_PRIORITY)
+            deferred(toaster(
+                tokens,
+                standard
+                    .chain(plugin)
+                    .chain(connection)
+                    .chain(native_update),
+            ))
+            .with_priority(35)
             .into_any_element(),
         )
     }
@@ -1407,394 +1444,6 @@ impl WorkspaceOverlayEntity {
     #[cfg(test)]
     fn notice_wake(&self) -> delivery::ActiveDeliveryWake {
         self._notice_wake.clone()
-    }
-}
-
-fn render_connection_card(
-    tokens: &ThemeTokens,
-    i18n: &I18n,
-    attempt_id: &str,
-    event: &ConnectionTraceEvent,
-    history: &VecDeque<ConnectionTraceEvent>,
-    phase: oxideterm_gpui_ui::motion::ExitPhase,
-    overlay: Entity<WorkspaceOverlayEntity>,
-) -> AnyElement {
-    let status_color = match event.status {
-        ConnectionTraceStatus::Ready => tokens.ui.success,
-        ConnectionTraceStatus::Failed => tokens.ui.error,
-        ConnectionTraceStatus::Running | ConnectionTraceStatus::Cancelled => tokens.ui.accent,
-    };
-    let title = connection_trace_title(i18n, event);
-    let status = (event.status != ConnectionTraceStatus::Failed)
-        .then(|| connection_trace_status_text(i18n, event));
-    let endpoint = event.endpoint.clone();
-    let attempt_id_for_close = attempt_id.to_string();
-    // Reserve header space for the close action; the absolute toast control
-    // overlaps connection labels in the narrower corner card.
-    let close = oxideterm_gpui_ui::icon_button(
-        tokens,
-        svg()
-            .path("lucide/x.svg")
-            .size(px(tokens.metrics.ui_toast_close_size))
-            .text_color(rgb(tokens.ui.text))
-            .into_any_element(),
-        oxideterm_gpui_ui::IconButtonOptions::opaque_toolbar(
-            tokens.metrics.ui_toast_close_size + tokens.spacing.two,
-            oxideterm_gpui_ui::button::ButtonRadius::Sm,
-        ),
-    )
-    .flex_none()
-    .self_start()
-    .debug_selector(|| "connection-card-close".to_string())
-    .on_mouse_down(MouseButton::Left, move |_event, _window, cx| {
-        let _ = overlay.update(cx, |overlay, cx| {
-            if overlay
-                .dismiss_connection_trace(&attempt_id_for_close, cx.background_executor().now())
-            {
-                overlay.schedule_next_deadline(cx);
-                cx.notify();
-            }
-        });
-        cx.stop_propagation();
-    })
-    .into_any_element();
-
-    let header = div()
-        .w_full()
-        .flex()
-        .items_center()
-        .gap(px(tokens.spacing.three))
-        .child(
-            div()
-                .size(px(44.0))
-                .flex_none()
-                .rounded(px(tokens.radii.md))
-                .bg(rgba((status_color << 8) | 0x24))
-                .border_1()
-                .border_color(rgba((status_color << 8) | 0x66))
-                .flex()
-                .items_center()
-                .justify_center()
-                .text_size(px(12.0))
-                .font_weight(gpui::FontWeight::SEMIBOLD)
-                .text_color(rgb(status_color))
-                .child("SSH"),
-        )
-        .child(
-            div()
-                .min_w_0()
-                .flex_1()
-                .debug_selector(|| "connection-card-heading".to_string())
-                .overflow_hidden()
-                .flex()
-                .flex_col()
-                .gap(px(3.0))
-                .child(
-                    div()
-                        .text_size(px(18.0))
-                        .font_weight(gpui::FontWeight::SEMIBOLD)
-                        .text_color(rgb(tokens.ui.text))
-                        .child(title),
-                )
-                .when_some(endpoint, |header, endpoint| {
-                    header.child(
-                        div()
-                            .text_size(px(12.0))
-                            .text_color(rgb(tokens.ui.text_muted))
-                            .child(format!("SSH  {endpoint}")),
-                    )
-                })
-                .when_some(status, |header, status| {
-                    header.child(
-                        div()
-                            .text_size(px(13.0))
-                            .text_color(rgb(status_color))
-                            .child(status),
-                    )
-                }),
-        )
-        .child(close);
-
-    let mut card = oxideterm_gpui_ui::semantic_surface(
-        tokens,
-        oxideterm_gpui_ui::SurfaceOptions::new(oxideterm_gpui_ui::SurfaceKind::TerminalOverlay)
-            .padding(oxideterm_gpui_ui::SurfacePadding::Spacious),
-    )
-    .w_full()
-    .debug_selector(|| "connection-card".to_string())
-    .flex()
-    .flex_col()
-    .gap(px(tokens.spacing.three * 2.0))
-    .occlude()
-    .on_mouse_down(MouseButton::Left, |_event, _window, cx| {
-        cx.stop_propagation();
-    })
-    .child(header)
-    .child(render_connection_stage_path(
-        tokens, i18n, attempt_id, event,
-    ));
-
-    if let Some(error_log) = render_connection_error_log(tokens, event) {
-        card = card.child(error_log);
-    }
-    card = card.child(render_connection_history(tokens, i18n, history));
-
-    oxideterm_gpui_ui::motion::fade(
-        tokens,
-        format!("connection-card-{attempt_id}"),
-        card,
-        oxideterm_gpui_ui::motion::MotionDuration::Overlay,
-        phase == oxideterm_gpui_ui::motion::ExitPhase::Visible,
-    )
-}
-
-fn render_connection_stage_path(
-    tokens: &ThemeTokens,
-    i18n: &I18n,
-    attempt_id: &str,
-    event: &ConnectionTraceEvent,
-) -> AnyElement {
-    const STAGES: [(ConnectionTraceStage, &str); 4] = [
-        (
-            ConnectionTraceStage::OpeningTransport,
-            "connections.trace.stage.opening_transport",
-        ),
-        (
-            ConnectionTraceStage::SshHandshake,
-            "connections.trace.stage.ssh_handshake",
-        ),
-        (
-            ConnectionTraceStage::Authentication,
-            "connections.trace.stage.authentication",
-        ),
-        (ConnectionTraceStage::Ready, "connections.trace.stage.ready"),
-    ];
-    let current = connection_trace_path_index(event.stage);
-    let failed = event.status == ConnectionTraceStatus::Failed;
-    let ready = event.status == ConnectionTraceStatus::Ready;
-
-    let nodes = STAGES
-        .iter()
-        .enumerate()
-        .map(|(index, (_, label_key))| {
-            let completed = ready || index < current;
-            let active = !ready && index == current;
-            let color = if failed && active {
-                tokens.ui.error
-            } else if completed {
-                tokens.ui.success
-            } else if active {
-                tokens.ui.accent
-            } else {
-                tokens.ui.text_muted
-            };
-            let marker_text = if completed { "✓" } else { "" };
-            let marker = div()
-                .size(px(30.0))
-                .flex_none()
-                .rounded_full()
-                .border_1()
-                .border_color(rgba((color << 8) | 0xaa))
-                .bg(rgb(tokens.ui.bg_elevated))
-                .flex()
-                .items_center()
-                .justify_center()
-                .text_size(px(14.0))
-                .font_weight(gpui::FontWeight::SEMIBOLD)
-                .text_color(rgb(color))
-                .child(marker_text);
-            let marker =
-                if active && !failed && tokens.motion.enabled && tokens.motion.spatial_enabled {
-                    marker
-                        .with_animation(
-                            format!("connection-stage-{attempt_id}-{index}"),
-                            Animation::new(oxideterm_gpui_ui::motion::scaled_duration(
-                                tokens, 1200,
-                            ))
-                            .repeat(),
-                            |marker, progress| {
-                                let wave = if progress < 0.5 {
-                                    progress * 2.0
-                                } else {
-                                    (1.0 - progress) * 2.0
-                                };
-                                marker.opacity(0.7 + wave * 0.3)
-                            },
-                        )
-                        .into_any_element()
-                } else {
-                    marker.into_any_element()
-                };
-            div()
-                .flex_1()
-                .min_w_0()
-                .flex()
-                .flex_col()
-                .items_center()
-                .gap(px(tokens.spacing.two))
-                .child(marker)
-                .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(rgb(color))
-                        .whitespace_nowrap()
-                        .child(i18n.t(label_key)),
-                )
-                .into_any_element()
-        })
-        .collect::<Vec<_>>();
-
-    let current_connector = current.min(STAGES.len() - 1);
-    let connectors = (0..STAGES.len() - 1)
-        .map(|index| {
-            let complete = ready || index < current_connector;
-            div()
-                .absolute()
-                .top(px(14.0))
-                .left(relative((index as f32 + 0.5) / STAGES.len() as f32))
-                .w(relative(1.0 / STAGES.len() as f32))
-                .h(px(2.0))
-                .bg(rgb(if complete {
-                    tokens.ui.success
-                } else {
-                    tokens.ui.border
-                }))
-                .into_any_element()
-        })
-        .collect::<Vec<_>>();
-
-    div()
-        .relative()
-        .w_full()
-        .child(
-            div()
-                .absolute()
-                .top_0()
-                .left_0()
-                .right_0()
-                .children(connectors),
-        )
-        .child(div().relative().w_full().flex().children(nodes))
-        .into_any_element()
-}
-
-fn render_connection_history(
-    tokens: &ThemeTokens,
-    i18n: &I18n,
-    history: &VecDeque<ConnectionTraceEvent>,
-) -> AnyElement {
-    let rows = history.iter().map(|entry| {
-        let color = match entry.status {
-            ConnectionTraceStatus::Ready => tokens.ui.success,
-            ConnectionTraceStatus::Failed => tokens.ui.error,
-            ConnectionTraceStatus::Running | ConnectionTraceStatus::Cancelled => {
-                tokens.ui.text_muted
-            }
-        };
-        let detail = entry
-            .detail
-            .clone()
-            .filter(|detail| !detail.is_empty())
-            .filter(|_| entry.status != ConnectionTraceStatus::Failed);
-        let text_color = if entry.status == ConnectionTraceStatus::Failed {
-            tokens.ui.error
-        } else {
-            tokens.ui.text_muted
-        };
-        div()
-            .w_full()
-            .flex()
-            .items_start()
-            .gap(px(tokens.spacing.two))
-            .child(
-                div()
-                    .mt(px(7.0))
-                    .size(px(6.0))
-                    .flex_none()
-                    .rounded_full()
-                    .bg(rgb(color)),
-            )
-            .child(
-                div()
-                    .min_w_0()
-                    .flex_1()
-                    .flex()
-                    .flex_col()
-                    .gap(px(2.0))
-                    .text_size(px(12.0))
-                    .line_height(px(18.0))
-                    .text_color(rgb(text_color))
-                    .child(i18n.t(connection_trace_stage_key(entry.stage)))
-                    .when_some(detail, |row, detail| {
-                        row.child(
-                            div()
-                                .text_color(rgb(if entry.status == ConnectionTraceStatus::Failed {
-                                    tokens.ui.error
-                                } else {
-                                    tokens.ui.text_muted
-                                }))
-                                .child(detail),
-                        )
-                    }),
-            )
-    });
-
-    oxideterm_gpui_ui::semantic_surface(
-        tokens,
-        oxideterm_gpui_ui::SurfaceOptions::new(oxideterm_gpui_ui::SurfaceKind::InsetGroup)
-            .padding(oxideterm_gpui_ui::SurfacePadding::Normal),
-    )
-    .w_full()
-    .max_h(px(210.0))
-    .overflow_y_scrollbar()
-    .flex()
-    .flex_col()
-    .gap(px(tokens.spacing.two))
-    .children(rows)
-    .into_any_element()
-}
-
-fn render_connection_error_log(
-    tokens: &ThemeTokens,
-    event: &ConnectionTraceEvent,
-) -> Option<AnyElement> {
-    if event.status != ConnectionTraceStatus::Failed {
-        return None;
-    }
-    let detail = event.detail.clone().filter(|detail| !detail.is_empty())?;
-    Some(
-        oxideterm_gpui_ui::semantic_surface(
-            tokens,
-            oxideterm_gpui_ui::SurfaceOptions::new(oxideterm_gpui_ui::SurfaceKind::InsetGroup)
-                .padding(oxideterm_gpui_ui::SurfacePadding::Normal),
-        )
-        .w_full()
-        .max_h(px(210.0))
-        .overflow_y_scrollbar()
-        .border_color(rgba((tokens.ui.error << 8) | 0x88))
-        .bg(rgba((tokens.ui.error << 8) | 0x12))
-        .text_size(px(13.0))
-        .line_height(px(19.0))
-        .text_color(rgb(tokens.ui.error))
-        .whitespace_normal()
-        .child(detail)
-        .into_any_element(),
-    )
-}
-
-fn connection_trace_path_index(stage: ConnectionTraceStage) -> usize {
-    match stage {
-        ConnectionTraceStage::Queued
-        | ConnectionTraceStage::Preparing
-        | ConnectionTraceStage::OpeningTransport => 0,
-        ConnectionTraceStage::SshHandshake | ConnectionTraceStage::HostKey => 1,
-        ConnectionTraceStage::Authentication
-        | ConnectionTraceStage::KerberosCredentials
-        | ConnectionTraceStage::GssapiExchange
-        | ConnectionTraceStage::FallbackAuthentication => 2,
-        ConnectionTraceStage::Pty
-        | ConnectionTraceStage::ShellReady
-        | ConnectionTraceStage::Ready => 3,
     }
 }
 
@@ -2613,7 +2262,7 @@ mod tests {
             let mut tokens = oxideterm_theme::default_tokens();
             tokens.apply_motion(oxideterm_theme::UiMotionProfile::Off);
             let cards = self.overlay.update(cx, |overlay, cx| {
-                overlay.render_connection_cards(&tokens, &I18n::default(), cx)
+                overlay.render_toasts(&tokens, &I18n::default(), None, true, cx)
             });
             div().size_full().children(cards)
         }
@@ -2640,23 +2289,23 @@ mod tests {
         };
         overlay.update(cx, |overlay, _| {
             overlay.apply_connection_trace_events(vec![event.clone()], Instant::now());
+            assert!(
+                overlay
+                    .connection_trace_cards
+                    .get("failed-reconnect")
+                    .and_then(|trace| trace.expires_at)
+                    .is_some()
+            );
         });
         let (_, cx) = cx.add_window_view(|_, _| ConnectionCardTestRoot {
             overlay: overlay.clone(),
         });
         cx.simulate_resize(gpui::size(px(720.0), px(600.0)));
         cx.update(|window, cx| window.draw(cx).clear(cx));
-        let card = cx.debug_bounds("connection-card").expect("visible card");
-        let heading = cx.debug_bounds("connection-card-heading").expect("heading");
         let close = cx
             .debug_bounds("connection-card-close")
             .expect("close button");
-        assert!(card.contains(&close.origin) && card.contains(&close.bottom_right()));
-        assert!(close.size.width >= px(24.0) && close.size.height >= px(24.0));
-        assert!(
-            close.left() >= heading.right(),
-            "close target overlaps the heading"
-        );
+        assert!(close.size.width >= px(20.0) && close.size.height >= px(20.0));
         cx.simulate_click(close.center(), gpui::Modifiers::default());
         cx.update(|_, cx| {
             overlay.update(cx, |overlay, _| {

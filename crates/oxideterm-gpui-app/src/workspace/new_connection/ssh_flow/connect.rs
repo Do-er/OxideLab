@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use super::*;
+use crate::workspace::WorkspaceNotificationScope;
 
 impl WorkspaceApp {
     pub(in crate::workspace) fn ssh_worker_sender(
@@ -295,12 +296,21 @@ impl WorkspaceApp {
                             );
                             let reported_to_form =
                                 self.connection_flow.update(cx, |connection_flow, cx| {
-                                    connection_flow.set_form_feedback(Some(false), Some(error), cx)
+                                    connection_flow.set_form_feedback(
+                                        Some(false),
+                                        Some(error.clone()),
+                                        cx,
+                                    )
                                 });
                             if !reported_to_form {
                                 self.session_manager.update(cx, |session_manager, cx| {
                                     session_manager.set_status(Some(session_message), cx);
                                 });
+                                self.report_workspace_error_notice(
+                                    self.i18n.t("sessionManager.toast.test_failed"),
+                                    Some(error),
+                                    cx,
+                                );
                             }
                         }
                     }
@@ -353,8 +363,15 @@ impl WorkspaceApp {
                             });
                         if !reported_to_form {
                             self.session_manager.update(cx, |session_manager, cx| {
-                                session_manager.set_status(Some(error), cx);
+                                session_manager.set_status(Some(error.clone()), cx);
                             });
+                            self.report_ssh_preflight_failure(
+                                Some(title),
+                                WorkspaceNotificationScope::Global,
+                                error,
+                                "standalone_sftp_connect",
+                                cx,
+                            );
                         }
                     }
                 },
@@ -416,8 +433,15 @@ impl WorkspaceApp {
                             });
                         if !reported_to_form {
                             self.session_manager.update(cx, |session_manager, cx| {
-                                session_manager.set_status(Some(error), cx);
+                                session_manager.set_status(Some(error.clone()), cx);
                             });
+                            self.report_ssh_preflight_failure(
+                                Some(title),
+                                WorkspaceNotificationScope::Global,
+                                error,
+                                "standalone_sftp_connect",
+                                cx,
+                            );
                         }
                     }
                 },
@@ -555,8 +579,22 @@ impl WorkspaceApp {
                 });
                 if !reported_to_form {
                     self.session_manager.update(cx, |session_manager, cx| {
-                        session_manager.set_status(Some(message), cx);
+                        session_manager.set_status(Some(message.clone()), cx);
                     });
+                    let target = Self::format_ssh_target(&config.username, &host, port);
+                    let scope = match &intent {
+                        SshConnectionIntent::ConnectSaved { id, .. } => {
+                            WorkspaceNotificationScope::Connection(id.clone())
+                        }
+                        _ => WorkspaceNotificationScope::Global,
+                    };
+                    self.report_ssh_preflight_failure(
+                        Some(target),
+                        scope,
+                        message,
+                        "ssh_preflight",
+                        cx,
+                    );
                 }
                 cx.notify();
             }
@@ -1217,8 +1255,15 @@ impl WorkspaceApp {
         });
         if !reported_to_form {
             self.session_manager.update(cx, |session_manager, cx| {
-                session_manager.set_status(Some(error), cx);
+                session_manager.set_status(Some(error.clone()), cx);
             });
+            self.report_ssh_preflight_failure(
+                None,
+                WorkspaceNotificationScope::Global,
+                error,
+                "proxy_session_tree",
+                cx,
+            );
         }
         cx.notify();
     }
@@ -1264,10 +1309,19 @@ impl WorkspaceApp {
             SshConnectionIntent::ConnectTemporary => {
                 self.connection_flow
                     .update(cx, |flow, cx| flow.clear_host_key_challenge(cx));
+                let target = Self::format_ssh_target(&config.username, &config.host, config.port);
                 if let Err(error) = self.connect_verified_temporary_ssh(config, title, cx) {
+                    let message = error.to_string();
                     self.session_manager.update(cx, |manager, cx| {
-                        manager.set_status(Some(error.to_string()), cx);
+                        manager.set_status(Some(message.clone()), cx);
                     });
+                    self.report_ssh_preflight_failure(
+                        Some(target),
+                        WorkspaceNotificationScope::Global,
+                        message,
+                        "connect_temporary_ssh",
+                        cx,
+                    );
                 }
             }
             SshConnectionIntent::Connect(connection_options) => {
@@ -1282,6 +1336,7 @@ impl WorkspaceApp {
                     .is_some_and(|chain| !chain.is_empty())
                 {
                     let expansion_id = format!("manual-{}", self.next_ssh_node_id);
+                    let target = Self::format_ssh_target(&config.username, &config.host, config.port);
                     match self.expand_saved_connection_tree(&expansion_id, config, title.clone()) {
                         Ok(expansion) => {
                             if let Some(node) = self.ssh_nodes.get_mut(&expansion.target_node_id) {
@@ -1313,8 +1368,15 @@ impl WorkspaceApp {
                         Err(error) => {
                             let message = error.to_string();
                             self.session_manager.update(cx, |session_manager, cx| {
-                                session_manager.set_status(Some(message), cx);
+                                session_manager.set_status(Some(message.clone()), cx);
                             });
+                            self.report_ssh_preflight_failure(
+                                Some(target),
+                                WorkspaceNotificationScope::Global,
+                                message,
+                                "connect_ssh_node",
+                                cx,
+                            );
                         }
                     }
                     return;
@@ -1464,7 +1526,7 @@ impl WorkspaceApp {
                 match self.create_mosh_terminal_tab_for_connection(
                     terminal_config,
                     options.terminal,
-                    title,
+                    title.clone(),
                     runtime_connection_attempt_id.clone(),
                     window,
                     cx,
@@ -1497,8 +1559,15 @@ impl WorkspaceApp {
                             );
                         }
                         self.session_manager.update(cx, |session_manager, cx| {
-                            session_manager.set_status(Some(error), cx);
+                            session_manager.set_status(Some(error.clone()), cx);
                         });
+                        self.report_ssh_preflight_failure(
+                            Some(title),
+                            WorkspaceNotificationScope::Global,
+                            error,
+                            "connect_mosh",
+                            cx,
+                        );
                     }
                 }
             }
@@ -1745,8 +1814,17 @@ impl WorkspaceApp {
                             });
                         if !reported_to_form {
                             self.session_manager.update(cx, |session_manager, cx| {
-                                session_manager.set_status(Some(message), cx);
+                                session_manager.set_status(Some(message.clone()), cx);
                             });
+                            let target =
+                                Self::format_ssh_target(&config.username, &config.host, config.port);
+                            self.report_ssh_preflight_failure(
+                                Some(target),
+                                WorkspaceNotificationScope::Global,
+                                message,
+                                "connect_ssh_drill_down",
+                                cx,
+                            );
                         }
                         cx.notify();
                         return;

@@ -18,7 +18,8 @@
     "severity": {
       "info": "資訊",
       "warn": "警告",
-      "error": "錯誤"
+      "error": "錯誤",
+      "critical": "嚴重"
     },
     "category": {
       "connection": "連線",
@@ -32,7 +33,11 @@
       "security": "安全性",
       "automation": "自動化",
       "system": "系統",
-      "audit": "稽核管理"
+      "audit": "稽核管理",
+      "plugin": "外掛",
+      "agent": "代理程式",
+      "update": "更新",
+      "health": "健康狀態"
     },
     "events": {
       "connected": "已連線",
@@ -411,6 +416,9 @@
       "done": "已完成",
       "failed": "失敗",
       "cancelled": "已取消"
-    }
+    },
+    "filter_status": "依狀態篩選",
+    "unread": "未讀",
+    "mark_all_read": "全部標為已讀"
   }
 }

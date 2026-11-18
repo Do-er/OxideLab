@@ -339,13 +339,31 @@ impl WorkspaceApp {
                             ReconnectPhase::Failed,
                             Some(error.clone()),
                         );
+                        let target = self.connection_target_label(&node_id);
+                        let title = match target {
+                            Some(target) => format!("{} ({target})", self.i18n.t("ssh.errors.generic_title")),
+                            None => self.i18n.t("ssh.errors.generic_title"),
+                        };
                         self.push_notification_entry(
                             WorkspaceNotificationKind::Connection,
                             WorkspaceNotificationSeverity::Error,
-                            "Reconnect failed",
+                            title,
                             Some(error.clone()),
                             WorkspaceNotificationScope::Node(node_id.0.clone()),
                             Some(format!("reconnect-failed:{}", node_id.0)),
+                        );
+                    } else if let Some((title, detail)) = &connection_failure_notice {
+                        let full_title = match self.connection_target_label(&node_id) {
+                            Some(target) => format!("{title} ({target})"),
+                            None => title.clone(),
+                        };
+                        self.push_notification_entry(
+                            WorkspaceNotificationKind::Connection,
+                            WorkspaceNotificationSeverity::Error,
+                            full_title,
+                            detail.clone(),
+                            WorkspaceNotificationScope::Node(node_id.0.clone()),
+                            Some(format!("connect-failed:{}", node_id.0)),
                         );
                     }
                     match action {
@@ -387,16 +405,14 @@ impl WorkspaceApp {
                             self.finish_reconnect_job(&node_id, Err(error.clone()), cx);
                         }
                         runtime_entity::ReconnectFailureAction::InitialConnect => {
-                            if let Some((title, description)) = connection_failure_notice {
-                                self.push_notification_entry(
-                                    WorkspaceNotificationKind::Connection,
-                                    WorkspaceNotificationSeverity::Error,
-                                    title,
-                                    description,
-                                    WorkspaceNotificationScope::Node(node_id.0.clone()),
-                                    Some(format!("connect-failed:{}", node_id.0)),
-                                );
-                            }
+                            self.log_connection_event(
+                                &node_id,
+                                None,
+                                "event_log.events.node_state_error",
+                                WorkspaceEventSeverity::Error,
+                                Some(error.clone()),
+                                "connect_node",
+                            );
                         }
                     }
                     let cleanup_node_id = self
@@ -1359,10 +1375,14 @@ impl WorkspaceApp {
             if let Some((title, variant, phase, detail)) = notice {
                 self.log_reconnect_phase(node_id, phase, detail.clone());
                 if let Some(error) = detail.clone() {
+                    let notif_title = match self.connection_target_label(node_id) {
+                        Some(target) => format!("{title} ({target})"),
+                        None => title.clone(),
+                    };
                     self.push_notification_entry(
                         WorkspaceNotificationKind::Connection,
                         WorkspaceNotificationSeverity::Error,
-                        "Reconnect failed",
+                        notif_title,
                         Some(error),
                         WorkspaceNotificationScope::Node(node_id.0.clone()),
                         Some(format!("reconnect-failed:{}", node_id.0)),

@@ -18,7 +18,8 @@
     "severity": {
       "info": "情報",
       "warn": "警告",
-      "error": "エラー"
+      "error": "エラー",
+      "critical": "重大"
     },
     "category": {
       "connection": "接続",
@@ -32,7 +33,11 @@
       "security": "セキュリティ",
       "automation": "自動化",
       "system": "システム",
-      "audit": "監査管理"
+      "audit": "監査管理",
+      "plugin": "プラグイン",
+      "agent": "エージェント",
+      "update": "アップデート",
+      "health": "状態"
     },
     "events": {
       "connected": "接続完了",
@@ -411,6 +416,9 @@
       "done": "完了",
       "failed": "失敗",
       "cancelled": "キャンセル済み"
-    }
+    },
+    "filter_status": "状態で絞り込み",
+    "unread": "未読",
+    "mark_all_read": "すべて既読にする"
   }
 }

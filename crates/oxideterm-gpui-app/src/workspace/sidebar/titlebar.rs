@@ -331,16 +331,10 @@ impl WorkspaceApp {
     ) -> AnyElement {
         let theme = self.tokens.ui;
         let active_tab_kind = self.active_content_tab(cx).map(|tab| tab.kind.clone());
-        // Do Not Disturb suppresses the count, but a critical notification
-        // still upgrades the badge color once the count is visible again.
+        // Do Not Disturb suppresses the indicator dot on the title-bar button.
         let notifications_silenced = self.notification_center.notifications.dnd_enabled;
-        let notification_badge_count = if notifications_silenced {
-            0
-        } else {
-            self.notification_center.notifications.unread_count
-        };
-        let notification_badge_is_error = !notifications_silenced
-            && self.notification_center.notifications.unread_critical_count > 0;
+        let show_notification_dot = !notifications_silenced
+            && self.notification_center.notifications.unread_count > 0;
 
         div()
             .flex_none()
@@ -367,41 +361,16 @@ impl WorkspaceApp {
                     hover_background: Some(rgb(theme.bg_hover)),
                     ..IconButtonOptions::opaque_toolbar(action_button_size, ButtonRadius::Md)
                 };
-                let badge = (entry == TitlebarEntry::Notifications && notification_badge_count > 0)
+                let badge = (entry == TitlebarEntry::Notifications && show_notification_dot)
                     .then(|| {
-                        let badge_color = if notification_badge_is_error {
-                            theme.error
-                        } else {
-                            theme.accent
-                        };
-                        let badge_text_color = if badge_color == theme.accent {
-                            theme.accent_text
-                        } else {
-                            theme.bg
-                        };
                         div()
                             .absolute()
-                            // Straddle the button corner like the activity rail
-                            // badge did. The -3px offsets land exactly on the
-                            // title bar's own edge, so the pill stays visible
-                            // without growing the bar height.
-                            .right(px(-3.0))
-                            .top(px(-3.0))
-                            .min_w(px(14.0))
-                            .h(px(14.0))
-                            .px(px(3.0))
-                            .flex()
-                            .items_center()
-                            .justify_center()
+                            .right(px(3.0))
+                            .top(px(3.0))
+                            .w(px(6.0))
+                            .h(px(6.0))
                             .rounded_full()
-                            .bg(rgb(badge_color))
-                            .text_color(rgb(badge_text_color))
-                            .text_size(px(9.0))
-                            .child(if notification_badge_count > 99 {
-                                "99+".to_string()
-                            } else {
-                                notification_badge_count.to_string()
-                            })
+                            .bg(rgb(theme.error))
                     });
 
                 div()

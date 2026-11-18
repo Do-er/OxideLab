@@ -154,7 +154,6 @@ impl WorkspaceApp {
         let has_background = self.background_surface_active("session_manager");
         let (
             view_mode,
-            status,
             row_action_menu,
             view_mode_menu_open,
             sort_menu_open,
@@ -164,7 +163,6 @@ impl WorkspaceApp {
             let session_manager = self.session_manager.read(cx);
             (
                 session_manager.view_mode,
-                session_manager.status.clone(),
                 (!session_manager.show_group_manager)
                     .then(|| session_manager.row_action_menu.clone())
                     .flatten(),
@@ -200,21 +198,6 @@ impl WorkspaceApp {
             .text_color(rgb(theme.text))
             .child(self.render_session_manager_toolbar(window, has_background, cx))
             .child(div().flex_1().min_h(px(0.0)).min_w(px(0.0)).child(content))
-            .when_some(status, |surface, status| {
-                surface.child(
-                    div()
-                        .h(px(32.0))
-                        .flex()
-                        .items_center()
-                        .px_4()
-                        .border_t_1()
-                        .border_color(theme_border(theme.border, has_background))
-                        .bg(theme_bg(theme.bg, has_background))
-                        .text_size(px(self.tokens.metrics.ui_text_sm))
-                        .text_color(rgb(theme.accent))
-                        .child(status),
-                )
-            })
             .when_some(row_action_menu, |surface, menu| {
                 let menu =
                     self.render_session_manager_row_action_menu(menu, window, has_background, cx);

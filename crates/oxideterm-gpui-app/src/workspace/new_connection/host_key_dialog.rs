@@ -120,8 +120,9 @@ impl WorkspaceApp {
                 });
                 if !reported_to_form {
                     self.session_manager.update(cx, |session_manager, cx| {
-                        session_manager.set_status(Some(message), cx);
+                        session_manager.set_status(Some(message.clone()), cx);
                     });
+                    self.report_workspace_error_notice(message, None, cx);
                 }
                 cx.notify();
                 return;

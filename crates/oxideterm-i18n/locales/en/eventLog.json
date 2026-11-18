@@ -18,7 +18,8 @@
     "severity": {
       "info": "Info",
       "warn": "Warning",
-      "error": "Error"
+      "error": "Error",
+      "critical": "Critical"
     },
     "category": {
       "connection": "Connection",
@@ -32,7 +33,11 @@
       "security": "Security",
       "automation": "Automation",
       "system": "System",
-      "audit": "Audit management"
+      "audit": "Audit management",
+      "plugin": "Plugin",
+      "agent": "Agent",
+      "update": "Update",
+      "health": "Health"
     },
     "events": {
       "connected": "Connected",
@@ -411,6 +416,9 @@
       "done": "Completed",
       "failed": "Failed",
       "cancelled": "Cancelled"
-    }
+    },
+    "filter_status": "Filter by Status",
+    "unread": "Unread",
+    "mark_all_read": "Mark All Read"
   }
 }

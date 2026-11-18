@@ -241,7 +241,7 @@ impl ConnectionTerminalOptions {
 }
 
 pub const DEFAULT_X11_UNTRUSTED_TIMEOUT_SECONDS: u32 = 20 * 60;
-pub const DEFAULT_SSH_CONNECT_TIMEOUT_SECONDS: u64 = 30;
+pub const DEFAULT_SSH_CONNECT_TIMEOUT_SECONDS: u64 = 5;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

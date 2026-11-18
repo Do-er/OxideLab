@@ -18,7 +18,8 @@
     "severity": {
       "info": "Info",
       "warn": "Avviso",
-      "error": "Errore"
+      "error": "Errore",
+      "critical": "Critico"
     },
     "category": {
       "connection": "Connessione",
@@ -32,7 +33,11 @@
       "security": "Sicurezza",
       "automation": "Automazione",
       "system": "Sistema",
-      "audit": "Gestione audit"
+      "audit": "Gestione audit",
+      "plugin": "Plugin",
+      "agent": "Agente",
+      "update": "Aggiornamento",
+      "health": "Salute"
     },
     "events": {
       "connected": "Connesso",
@@ -411,6 +416,9 @@
       "done": "Completato",
       "failed": "Non riuscito",
       "cancelled": "Annullato"
-    }
+    },
+    "filter_status": "Filtra per stato",
+    "unread": "Non letti",
+    "mark_all_read": "Segna tutto come letto"
   }
 }

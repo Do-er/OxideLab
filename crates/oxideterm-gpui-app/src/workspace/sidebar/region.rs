@@ -583,14 +583,63 @@ impl WorkspaceApp {
     }
 
     fn render_notifications_toolbar(&self, cx: &mut Context<Self>) -> AnyElement {
+        let notifications = &self.notification_center.notifications;
+        let dnd_enabled = notifications.dnd_enabled;
+        let dnd_tooltip = if dnd_enabled {
+            self.i18n.t("event_log.dnd.disable")
+        } else {
+            self.i18n.t("event_log.dnd.enable")
+        };
+        let status_label = match notifications.filter.status {
+            WorkspaceNotificationStatusFilter::All => self.i18n.t("event_log.all"),
+            WorkspaceNotificationStatusFilter::Unread => self.i18n.t("event_log.unread"),
+        };
+        let severity_label = match notifications.filter.severity {
+            WorkspaceNotificationSeverityFilter::All => self.i18n.t("event_log.all"),
+            WorkspaceNotificationSeverityFilter::Critical => {
+                self.i18n.t("event_log.severity.critical")
+            }
+            WorkspaceNotificationSeverityFilter::Error => self.i18n.t("event_log.severity.error"),
+            WorkspaceNotificationSeverityFilter::Warning => self.i18n.t("event_log.severity.warn"),
+            WorkspaceNotificationSeverityFilter::Info => self.i18n.t("event_log.severity.info"),
+        };
+        let kind_label = match notifications.filter.kind {
+            WorkspaceNotificationKindFilter::All => self.i18n.t("event_log.all"),
+            WorkspaceNotificationKindFilter::Connection => {
+                self.i18n.t("event_log.category.connection")
+            }
+            WorkspaceNotificationKindFilter::Security => {
+                self.i18n.t("event_log.category.security")
+            }
+            WorkspaceNotificationKindFilter::Transfer => self.i18n.t("event_log.category.file"),
+            WorkspaceNotificationKindFilter::Update => self.i18n.t("event_log.category.update"),
+            WorkspaceNotificationKindFilter::Health => self.i18n.t("event_log.category.health"),
+            WorkspaceNotificationKindFilter::Plugin => self.i18n.t("event_log.category.plugin"),
+            WorkspaceNotificationKindFilter::Agent => self.i18n.t("event_log.category.agent"),
+        };
+        let mut active_filters = Vec::new();
+        if notifications.filter.status != WorkspaceNotificationStatusFilter::All {
+            active_filters.push(status_label.clone());
+        }
+        if notifications.filter.severity != WorkspaceNotificationSeverityFilter::All {
+            active_filters.push(severity_label.clone());
+        }
+        if notifications.filter.kind != WorkspaceNotificationKindFilter::All {
+            active_filters.push(kind_label.clone());
+        }
+        let active_filter_summary = (!active_filters.is_empty()).then(|| active_filters.join(" · "));
+
         self.activity_toolbar_shell()
             .flex()
             .items_center()
+            .gap(px(4.0))
             .child(
                 self.activity_toolbar_group()
                     .child(self.render_activity_icon_button(
+                        "notifications-dnd",
+                        dnd_tooltip,
                         LucideIcon::Bell,
-                        self.notification_center.notifications.dnd_enabled,
+                        dnd_enabled,
                         |this, _event, _window, cx| {
                             this.notification_center.notifications.dnd_enabled =
                                 !this.notification_center.notifications.dnd_enabled;
@@ -599,9 +648,10 @@ impl WorkspaceApp {
                         cx,
                     ))
                     .child(self.render_activity_icon_button(
+                        "notifications-filter-status",
+                        format!("{}: {status_label}", self.i18n.t("event_log.filter_status")),
                         LucideIcon::ListTree,
-                        self.notification_center.notifications.filter.status
-                            != WorkspaceNotificationStatusFilter::All,
+                        notifications.filter.status != WorkspaceNotificationStatusFilter::All,
                         |this, _event, _window, cx| {
                             this.cycle_notification_status_filter();
                             cx.notify();
@@ -609,9 +659,13 @@ impl WorkspaceApp {
                         cx,
                     ))
                     .child(self.render_activity_icon_button(
+                        "notifications-filter-severity",
+                        format!(
+                            "{}: {severity_label}",
+                            self.i18n.t("event_log.filter_severity")
+                        ),
                         LucideIcon::AlertCircle,
-                        self.notification_center.notifications.filter.severity
-                            != WorkspaceNotificationSeverityFilter::All,
+                        notifications.filter.severity != WorkspaceNotificationSeverityFilter::All,
                         |this, _event, _window, cx| {
                             this.cycle_notification_severity_filter();
                             cx.notify();
@@ -619,9 +673,10 @@ impl WorkspaceApp {
                         cx,
                     ))
                     .child(self.render_activity_icon_button(
+                        "notifications-filter-kind",
+                        format!("{}: {kind_label}", self.i18n.t("event_log.filter_category")),
                         LucideIcon::Hash,
-                        self.notification_center.notifications.filter.kind
-                            != WorkspaceNotificationKindFilter::All,
+                        notifications.filter.kind != WorkspaceNotificationKindFilter::All,
                         |this, _event, _window, cx| {
                             this.cycle_notification_kind_filter();
                             cx.notify();
@@ -629,23 +684,32 @@ impl WorkspaceApp {
                         cx,
                     )),
             )
-            .when(
-                self.notification_center.notifications.dnd_enabled,
-                |toolbar| {
-                    toolbar.child(oxideterm_gpui_ui::status_pill(
-                        &self.tokens,
-                        self.i18n.t("event_log.dnd.on"),
-                        oxideterm_gpui_ui::StatusPillOptions::new(
-                            oxideterm_gpui_ui::StatusTone::Warning,
-                        )
-                        .compact(),
-                    ))
-                },
-            )
+            .when(dnd_enabled, |toolbar| {
+                toolbar.child(oxideterm_gpui_ui::status_pill(
+                    &self.tokens,
+                    self.i18n.t("event_log.dnd.on"),
+                    oxideterm_gpui_ui::StatusPillOptions::new(
+                        oxideterm_gpui_ui::StatusTone::Warning,
+                    )
+                    .compact(),
+                ))
+            })
+            .when_some(active_filter_summary, |toolbar, summary| {
+                toolbar.child(oxideterm_gpui_ui::status_pill(
+                    &self.tokens,
+                    summary,
+                    oxideterm_gpui_ui::StatusPillOptions::new(
+                        oxideterm_gpui_ui::StatusTone::Accent,
+                    )
+                    .compact(),
+                ))
+            })
             .child(div().flex_1())
             .child(
                 self.activity_toolbar_group()
                     .child(self.render_activity_icon_button(
+                        "notifications-mark-read",
+                        self.i18n.t("event_log.mark_all_read"),
                         LucideIcon::Check,
                         false,
                         |this, _event, _window, cx| {
@@ -655,6 +719,8 @@ impl WorkspaceApp {
                         cx,
                     ))
                     .child(self.render_activity_icon_button(
+                        "notifications-clear",
+                        self.i18n.t("event_log.clear"),
                         LucideIcon::Trash2,
                         false,
                         |this, _event, _window, cx| {
@@ -669,6 +735,8 @@ impl WorkspaceApp {
 
     fn render_activity_icon_button(
         &self,
+        element_id: &'static str,
+        tooltip: String,
         icon: LucideIcon,
         active: bool,
         listener: impl Fn(&mut Self, &MouseDownEvent, &mut Window, &mut Context<Self>) + 'static,
@@ -680,7 +748,8 @@ impl WorkspaceApp {
         } else {
             rgb(theme.text_muted)
         };
-        self.workspace_icon_action_button(
+        let workspace = cx.entity();
+        self.workspace_tooltip_icon_button(
             icon,
             ACTIVITY_TOOLBAR_ICON_SIZE,
             icon_color,
@@ -695,10 +764,15 @@ impl WorkspaceApp {
                     oxideterm_gpui_ui::button::ButtonRadius::Sm,
                 )
             },
-            listener,
-            cx,
+            tooltip,
+            element_id,
+            true,
+            move |event, window, cx| {
+                let _ = workspace.update(cx, |this, cx| listener(this, event, window, cx));
+                cx.stop_propagation();
+            },
+            cx.entity(),
         )
-        .into_any_element()
     }
 
     fn activity_toolbar_shell(&self) -> gpui::Div {

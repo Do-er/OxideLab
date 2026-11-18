@@ -834,6 +834,99 @@ impl WorkspaceApp {
         );
     }
 
+    pub(in crate::workspace) fn format_ssh_target(
+        username: &str,
+        host: &str,
+        port: u16,
+    ) -> String {
+        if port == 22 {
+            format!("{username}@{host}")
+        } else {
+            format!("{username}@{host}:{port}")
+        }
+    }
+
+    pub(in crate::workspace) fn connection_target_label(&self, node_id: &NodeId) -> Option<String> {
+        self.ssh_nodes
+            .get(node_id)
+            .map(|node| Self::format_ssh_target(&node.endpoint.username, &node.endpoint.host, node.endpoint.port))
+    }
+
+    pub(in crate::workspace) fn report_ssh_preflight_failure(
+        &mut self,
+        target: Option<String>,
+        scope: WorkspaceNotificationScope,
+        message: String,
+        source: &'static str,
+        cx: &mut Context<Self>,
+    ) {
+        let base_title = self.i18n.t("ssh.errors.generic_title");
+        let full_title = match &target {
+            Some(target) if !target.is_empty() => format!("{base_title} ({target})"),
+            _ => base_title,
+        };
+        let description = self
+            .ssh_algorithm_diagnostic_message(&message)
+            .unwrap_or_else(|| message.clone());
+        self.push_workspace_notice(
+            TerminalNotice {
+                title: full_title.clone(),
+                description: Some(description.clone()),
+                status_text: None,
+                progress: None,
+                variant: TerminalNoticeVariant::Error,
+            },
+            cx,
+        );
+        let dedupe_key = target
+            .as_deref()
+            .filter(|target| !target.is_empty())
+            .map(|target| format!("preflight-failed:{target}"));
+        self.push_notification_entry(
+            WorkspaceNotificationKind::Connection,
+            WorkspaceNotificationSeverity::Error,
+            full_title,
+            Some(description.clone()),
+            scope.clone(),
+            dedupe_key,
+        );
+        let log_detail = match &target {
+            Some(target) if !target.is_empty() => Some(format!("{target} · {description}")),
+            _ => Some(description),
+        };
+        let connection_id = match scope {
+            WorkspaceNotificationScope::Connection(id) => Some(id),
+            _ => None,
+        };
+        self.push_event_log_entry(
+            WorkspaceEventSeverity::Error,
+            WorkspaceEventCategory::Connection,
+            None,
+            connection_id,
+            "event_log.events.node_state_error",
+            log_detail,
+            source,
+        );
+    }
+
+    pub(in crate::workspace) fn report_workspace_error_notice(
+        &self,
+        title: String,
+        description: Option<String>,
+        cx: &App,
+    ) {
+        self.push_workspace_notice(
+            TerminalNotice {
+                title,
+                description,
+                status_text: None,
+                progress: None,
+                variant: TerminalNoticeVariant::Error,
+            },
+            cx,
+        );
+    }
+
     pub(in crate::workspace) fn log_connection_event(
         &mut self,
         node_id: &NodeId,
@@ -843,6 +936,11 @@ impl WorkspaceApp {
         detail: Option<String>,
         source: &'static str,
     ) {
+        let detail = match (self.connection_target_label(node_id), detail) {
+            (Some(target), Some(detail)) if !detail.is_empty() => Some(format!("{target} · {detail}")),
+            (Some(target), _) => Some(target),
+            (None, detail) => detail,
+        };
         self.push_event_log_entry(
             severity,
             WorkspaceEventCategory::Connection,
