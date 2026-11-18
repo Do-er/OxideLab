@@ -2087,6 +2087,7 @@ impl WorkspaceApp {
             WorkspaceImeTarget::Settings(
                 SettingsInput::TerminalFontSize
                 | SettingsInput::TerminalFontWeight
+                | SettingsInput::TerminalCharacterSpacing
                 | SettingsInput::TerminalLineHeight
                 | SettingsInput::TerminalPaddingHorizontal
                 | SettingsInput::TerminalPaddingVertical
