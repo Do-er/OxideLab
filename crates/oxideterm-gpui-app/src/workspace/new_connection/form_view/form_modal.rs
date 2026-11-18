@@ -25,7 +25,6 @@ struct ConnectionFormModalSnapshot {
     telnet_profile_id: Option<String>,
     saved_password_keychain_id: Option<String>,
     account_credential_id: Option<String>,
-    password_loaded: bool,
     key_path: String,
     managed_key_id: String,
     cert_path: String,
@@ -82,7 +81,6 @@ impl ConnectionFormModalSnapshot {
             telnet_profile_id: form.telnet_profile_id.clone(),
             saved_password_keychain_id: form.saved_password_keychain_id.clone(),
             account_credential_id: form.account_credential_id.clone(),
-            password_loaded: form.password_loaded,
             key_path: form.key_path.clone(),
             managed_key_id: form.managed_key_id.clone(),
             cert_path: form.cert_path.clone(),
@@ -1014,32 +1012,32 @@ impl WorkspaceApp {
                                                                                 auth_card = auth_card.child(self.render_account_credential_selector(false, cx));
                                                                                 if form.account_credential_id.is_none() {
                                                                                     let pw_child = if edit_properties_mode && form.saved_password_keychain_id.is_some() {
-                                                                                        if form.password_loaded {
-                                                                                            self.render_connection_secret_field(
-                                                                                                self.i18n.t("sessionManager.edit_properties.saved_password"),
-                                                                                                String::new(),
-                                                                                                NewConnectionField::Password,
+                                                                                        self.render_edit_saved_password_field(cx)
+                                                                                    } else {
+                                                                                        let keeps_saved_password = (mosh_edit_mode
+                                                                                            || standalone_sftp_edit_mode)
+                                                                                            && form.saved_password_keychain_id.is_some();
+                                                                                        let label = if keeps_saved_password {
+                                                                                            // Mosh and standalone SFTP edits keep the
+                                                                                            // reveal/replace/keep contract in a tooltip.
+                                                                                            self.render_connection_label_with_help(
+                                                                                                "edit-saved-password-help",
+                                                                                                "edit-saved-password",
+                                                                                                "ssh.form.password",
+                                                                                                "sessionManager.edit_properties.password_hint",
                                                                                                 cx,
                                                                                             )
                                                                                         } else {
-                                                                                            self.render_edit_saved_password_field(cx)
-                                                                                        }
-                                                                                    } else {
+                                                                                            self.i18n.t("ssh.form.password").into_any_element()
+                                                                                        };
                                                                                         self.render_connection_secret_field(
-                                                                                            self.i18n.t("ssh.form.password"),
+                                                                                            label,
                                                                                             String::new(),
                                                                                             NewConnectionField::Password,
                                                                                             cx,
                                                                                         )
                                                                                     };
                                                                                     auth_card = auth_card.child(pw_child);
-                                                                                    if (edit_properties_mode || mosh_edit_mode || standalone_sftp_edit_mode)
-                                                                                        && form.saved_password_keychain_id.is_some()
-                                                                                    {
-                                                                                        auth_card = auth_card.child(self.render_connection_hint(
-                                                                                            self.i18n.t("sessionManager.edit_properties.password_hint"),
-                                                                                        ));
-                                                                                    }
                                                                                     let save_pw_checkbox = self.render_connection_checkbox(
                                                                                         self.i18n.t("ssh.form.save_password"),
                                                                                         form.save_password,

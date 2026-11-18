@@ -801,7 +801,7 @@ impl WorkspaceApp {
 
     pub(super) fn render_connection_secret_field(
         &self,
-        label: String,
+        label: impl IntoElement,
         placeholder: String,
         field: NewConnectionField,
         cx: &mut Context<Self>,
@@ -931,68 +931,107 @@ impl WorkspaceApp {
     }
 
     pub(super) fn render_edit_saved_password_field(&self, cx: &mut Context<Self>) -> AnyElement {
-        let Some((input, _)) = self.render_connection_secret_input(
+        let Some((password_loaded, loading, error)) = self
+            .connection_form_state(cx)
+            .form
+            .as_ref()
+            .map(|form| {
+                (
+                    form.password_loaded,
+                    form.password_load_id.is_some(),
+                    form.password_load_error,
+                )
+            })
+        else {
+            return div().into_any_element();
+        };
+        // The locked-state placeholder advertises the reveal action, so a
+        // loaded draft must not show it while the user edits the value.
+        let placeholder = if password_loaded {
+            String::new()
+        } else {
             self.i18n
-                .t("sessionManager.edit_properties.password_placeholder"),
+                .t("sessionManager.edit_properties.password_placeholder")
+        };
+        let Some((input, secret_visible)) = self.render_connection_secret_input(
+            placeholder,
             NewConnectionField::Password,
             cx,
         ) else {
             return div().into_any_element();
         };
-        let Some(form) = self.connection_form_state(cx).form.as_ref() else {
-            return div().into_any_element();
-        };
-        let loading = form.password_load_id.is_some();
-        let error = form.password_load_error;
-        let button = if loading {
-            oxideterm_gpui_ui::button::icon_button(
-                &self.tokens,
-                self.render_loading_icon(
-                    "saved-password-loading",
-                    SECRET_VISIBILITY_ICON_SIZE,
-                    rgb(self.tokens.ui.text_muted),
-                ),
-                IconButtonOptions {
-                    loading: true,
-                    ..IconButtonOptions::opaque_toolbar(
-                        SECRET_VISIBILITY_BUTTON_SIZE,
-                        ButtonRadius::Sm,
-                    )
-                },
-            )
-            .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
-        } else {
-            self.workspace_icon_action_button(
-                LucideIcon::Eye,
-                SECRET_VISIBILITY_ICON_SIZE,
-                rgb(self.tokens.ui.text_muted),
-                IconButtonOptions {
-                    hover_background: Some(rgba((self.tokens.ui.bg_hover << 8) | 0x99)),
-                    ..IconButtonOptions::opaque_toolbar(
-                        SECRET_VISIBILITY_BUTTON_SIZE,
-                        ButtonRadius::Sm,
-                    )
-                },
-                |this, _, _, cx| {
-                    this.reveal_edit_saved_password(cx);
-                    cx.stop_propagation();
-                },
+        let control = if password_loaded {
+            // A loaded draft stays editable; the stock visibility toggle also
+            // releases a store preview back to locked keychain storage.
+            self.render_connection_secret_visibility(
+                input,
+                NewConnectionField::Password,
+                secret_visible,
                 cx,
             )
+        } else {
+            let button = if loading {
+                oxideterm_gpui_ui::button::icon_button(
+                    &self.tokens,
+                    self.render_loading_icon(
+                        "saved-password-loading",
+                        SECRET_VISIBILITY_ICON_SIZE,
+                        rgb(self.tokens.ui.text_muted),
+                    ),
+                    IconButtonOptions {
+                        loading: true,
+                        ..IconButtonOptions::opaque_toolbar(
+                            SECRET_VISIBILITY_BUTTON_SIZE,
+                            ButtonRadius::Sm,
+                        )
+                    },
+                )
+                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
+            } else {
+                self.workspace_icon_action_button(
+                    LucideIcon::Eye,
+                    SECRET_VISIBILITY_ICON_SIZE,
+                    rgb(self.tokens.ui.text_muted),
+                    IconButtonOptions {
+                        hover_background: Some(rgba((self.tokens.ui.bg_hover << 8) | 0x99)),
+                        ..IconButtonOptions::opaque_toolbar(
+                            SECRET_VISIBILITY_BUTTON_SIZE,
+                            ButtonRadius::Sm,
+                        )
+                    },
+                    |this, _, _, cx| {
+                        this.reveal_edit_saved_password(cx);
+                        cx.stop_propagation();
+                    },
+                    cx,
+                )
+            };
+            div()
+                .relative()
+                .child(input)
+                .child(
+                    button
+                        .absolute()
+                        .right(px(SECRET_VISIBILITY_BUTTON_OFFSET))
+                        .top(px(SECRET_VISIBILITY_BUTTON_OFFSET)),
+                )
+                .into_any_element()
         };
-        let control = div().relative().child(input).child(
-            button
-                .absolute()
-                .right(px(SECRET_VISIBILITY_BUTTON_OFFSET))
-                .top(px(SECRET_VISIBILITY_BUTTON_OFFSET)),
-        );
         div()
             .flex()
             .flex_col()
             .gap_1()
             .child(form_field(
                 &self.tokens,
-                self.i18n.t("sessionManager.edit_properties.saved_password"),
+                // The reveal/replace/keep contract is a hover tooltip so the
+                // field does not carry a permanent hint line.
+                self.render_connection_label_with_help(
+                    "edit-saved-password-help",
+                    "edit-saved-password",
+                    "sessionManager.edit_properties.saved_password",
+                    "sessionManager.edit_properties.password_hint",
+                    cx,
+                ),
                 control,
             ))
             .when_some(error, |this, error| {
@@ -2034,16 +2073,31 @@ impl WorkspaceApp {
                             cx,
                         ))
                         .child(self.render_connection_secret_field(
-                            self.i18n.t("ssh.form.password"),
+                            if saved_credential_present {
+                                // The saved-credential contract lives in the label
+                                // tooltip so the endpoint column stays compact.
+                                self.render_connection_label_with_help(
+                                    if secondary {
+                                        "secondary-sftp-password-help"
+                                    } else {
+                                        "primary-sftp-password-help"
+                                    },
+                                    if secondary {
+                                        "secondary-sftp-password"
+                                    } else {
+                                        "primary-sftp-password"
+                                    },
+                                    "ssh.form.password",
+                                    "sessionManager.edit_properties.password_hint",
+                                    cx,
+                                )
+                            } else {
+                                self.i18n.t("ssh.form.password").into_any_element()
+                            },
                             String::new(),
                             password_field,
                             cx,
                         ))
-                        .when(saved_credential_present, |content| {
-                            content.child(self.render_connection_hint(
-                                self.i18n.t("sessionManager.edit_properties.password_hint"),
-                            ))
-                        })
                         .when(!saved_credential_present, |content| {
                             content.child(self.render_connection_checkbox(
                                 self.i18n.t("ssh.form.save_password"),
@@ -4493,7 +4547,7 @@ impl WorkspaceApp {
             .into_any_element()
     }
 
-    fn render_connection_label_with_help(
+    pub(super) fn render_connection_label_with_help(
         &self,
         trigger_id: &'static str,
         tooltip_id: &'static str,
