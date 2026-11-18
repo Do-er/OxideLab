@@ -2590,6 +2590,7 @@ impl WorkspaceApp {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let title = ssh_connection_display_title(&title);
         if intent == SshConnectionIntent::Test {
             self.start_ssh_test_flow(config, title, cx);
             return;
@@ -3136,6 +3137,7 @@ impl WorkspaceApp {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let title = ssh_connection_display_title(&title);
         if let Err(error) = prepare_tree_connect_config(&mut config) {
             let reported_to_form = self.connection_flow.update(cx, |connection_flow, cx| {
                 connection_flow.set_form_feedback(None, Some(error.clone()), cx)
