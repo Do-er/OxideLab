@@ -3,11 +3,8 @@ use super::*;
 pub(in crate::workspace) const ONBOARDING_TOTAL_STEPS: usize = 5;
 pub(in crate::workspace) const ONBOARDING_STEPS_MOTION_ID: &str = "onboarding-steps";
 pub(in crate::workspace) const ONBOARDING_ANIMATION_MOTION_ID: &str = "onboarding-animation";
-pub(in crate::workspace) const ONBOARDING_ICON_SIZE: f32 = 16.0;
-pub(in crate::workspace) const ONBOARDING_STEP_ICON_SLOT: f32 = 28.0;
-pub(in crate::workspace) const ONBOARDING_ACCENT_SUBTLE_ALPHA: u32 = 0x0d; // Tauri accent/5.
-pub(in crate::workspace) const ONBOARDING_ACCENT_BORDER_ALPHA: u32 = 0x33; // Tauri accent/20.
-pub(in crate::workspace) const ONBOARDING_CARD_ALPHA: u32 = 0xcc; // Browser panels sit over the dialog backdrop but stay readable.
+pub(in crate::workspace) const ONBOARDING_ACCENT_SUBTLE_ALPHA: u32 = 0x0d;
+pub(in crate::workspace) const ONBOARDING_HAIRLINE_ALPHA: u32 = 0x66;
 pub(in crate::workspace) const ONBOARDING_DISABLED_OPACITY: f32 = 0.45;
 
 pub(in crate::workspace) const ONBOARDING_FONT_OPTIONS: [(FontFamily, &str, bool); 4] = [
@@ -59,7 +56,6 @@ pub(in crate::workspace) struct OnboardingState {
     pub(in crate::workspace) import_state: OnboardingImportState,
     pub(in crate::workspace) imported_count: usize,
     pub(in crate::workspace) host_count: Option<usize>,
-    pub(in crate::workspace) features_expanded: bool,
     pub(in crate::workspace) scroll_handle: ScrollHandle,
 }
 
@@ -75,7 +71,6 @@ impl OnboardingState {
             import_state: OnboardingImportState::Idle,
             imported_count: 0,
             host_count: None,
-            features_expanded: false,
             scroll_handle: ScrollHandle::new(),
         }
     }
@@ -90,7 +85,6 @@ impl OnboardingState {
         self.import_state = OnboardingImportState::Idle;
         self.imported_count = 0;
         self.host_count = None;
-        self.features_expanded = false;
         self.scroll_handle = ScrollHandle::new();
     }
 }

@@ -4,55 +4,31 @@ use oxideterm_gpui_ui::{ActionSlotRowOptions, action_slot_row, checkbox};
 impl WorkspaceApp {
     pub(in crate::workspace) fn onboarding_step_heading(
         &self,
-        icon: LucideIcon,
         title_key: &str,
         desc_key: &str,
     ) -> AnyElement {
         div()
             .flex()
-            .items_start()
-            .gap(px(10.0))
+            .flex_col()
+            .gap(px(4.0))
             .child(
                 div()
-                    .size(px(ONBOARDING_STEP_ICON_SLOT))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .flex_shrink_0()
-                    .child(Self::render_lucide_icon(
-                        icon,
-                        20.0,
-                        rgb(self.tokens.ui.accent),
-                    )),
+                    .text_size(px(self.tokens.metrics.ui_text_base))
+                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                    .text_color(rgb(self.tokens.ui.text_heading))
+                    .child(self.i18n.t(title_key)),
             )
             .child(
                 div()
-                    .min_w_0()
-                    .flex_1()
-                    .pt(px(1.0))
-                    .flex()
-                    .flex_col()
-                    .gap(px(3.0))
-                    .child(
-                        div()
-                            .text_size(px(22.0))
-                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                            .text_color(rgb(self.tokens.ui.text))
-                            .child(self.i18n.t(title_key)),
-                    )
-                    .child(
-                        div()
-                            .text_size(px(self.tokens.metrics.ui_text_sm))
-                            .text_color(rgb(self.tokens.ui.text_muted))
-                            .child(self.i18n.t(desc_key)),
-                    ),
+                    .text_size(px(self.tokens.metrics.ui_text_xs))
+                    .text_color(rgb(self.tokens.ui.text_muted))
+                    .child(self.i18n.t(desc_key)),
             )
             .into_any_element()
     }
 
     pub(in crate::workspace) fn onboarding_section(
         &self,
-        icon: LucideIcon,
         title_key: &str,
         hint_key: Option<&str>,
         body: AnyElement,
@@ -60,29 +36,18 @@ impl WorkspaceApp {
         div()
             .flex()
             .flex_col()
-            .gap(px(10.0))
+            .gap(px(8.0))
             .child(
                 div()
                     .flex()
                     .flex_col()
-                    .gap(px(4.0))
+                    .gap(px(2.0))
                     .child(
                         div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .child(Self::render_lucide_icon(
-                                icon,
-                                ONBOARDING_ICON_SIZE,
-                                rgb(self.tokens.ui.accent),
-                            ))
-                            .child(
-                                div()
-                                    .text_size(px(self.tokens.metrics.ui_text_sm))
-                                    .font_weight(gpui::FontWeight::MEDIUM)
-                                    .text_color(rgb(self.tokens.ui.text))
-                                    .child(self.i18n.t(title_key)),
-                            ),
+                            .text_size(px(self.tokens.metrics.ui_text_sm))
+                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                            .text_color(rgb(self.tokens.ui.text_heading))
+                            .child(self.i18n.t(title_key)),
                     )
                     .when_some(hint_key, |row, key| {
                         row.child(
@@ -97,45 +62,88 @@ impl WorkspaceApp {
             .into_any_element()
     }
 
+    pub(in crate::workspace) fn onboarding_hairline(&self) -> AnyElement {
+        div()
+            .h(px(1.0))
+            .w_full()
+            .bg(rgba(
+                (self.tokens.ui.border << 8) | ONBOARDING_HAIRLINE_ALPHA,
+            ))
+            .into_any_element()
+    }
+
     pub(in crate::workspace) fn onboarding_feature_tile(
         &self,
         icon: LucideIcon,
         key: &'static str,
-        _cx: &mut Context<Self>,
     ) -> AnyElement {
-        self.onboarding_info_card(
-            Some((icon, self.tokens.ui.accent)),
-            &format!("onboarding.{key}"),
-            Some(&format!("onboarding.{key}_desc")),
-            false,
-            _cx,
-        )
+        div()
+            .min_w(px(0.0))
+            .flex()
+            .items_start()
+            .gap(px(10.0))
+            .py(px(2.0))
+            .child(
+                div()
+                    .pt(px(2.0))
+                    .flex_none()
+                    .child(Self::render_lucide_icon(
+                        icon,
+                        15.0,
+                        rgb(self.tokens.ui.text_muted),
+                    )),
+            )
+            .child(
+                div()
+                    .min_w(px(0.0))
+                    .flex_1()
+                    .flex()
+                    .flex_col()
+                    .gap(px(1.0))
+                    .child(
+                        div()
+                            .text_size(px(self.tokens.metrics.ui_text_sm))
+                            .font_weight(gpui::FontWeight::MEDIUM)
+                            .text_color(rgb(self.tokens.ui.text))
+                            .child(self.i18n.t(&format!("onboarding.{key}"))),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(self.tokens.metrics.ui_text_xs))
+                            .text_color(rgb(self.tokens.ui.text_muted))
+                            .child(self.i18n.t(&format!("onboarding.{key}_desc"))),
+                    ),
+            )
+            .into_any_element()
     }
 
-    pub(in crate::workspace) fn onboarding_feature_card(
+    pub(in crate::workspace) fn onboarding_feature_row(
         &self,
         icon: LucideIcon,
         key: &str,
         badge: Option<&str>,
-        highlight: bool,
     ) -> AnyElement {
         let trailing = badge
             .map(|badge| {
                 div()
                     .rounded(px(self.tokens.radii.xs))
                     .border_1()
-                    .border_color(rgb(self.tokens.ui.border))
-                    .px(px(4.0))
+                    .border_color(rgba(
+                        (self.tokens.ui.border << 8) | ONBOARDING_HAIRLINE_ALPHA,
+                    ))
+                    .bg(rgb(self.tokens.ui.bg_sunken))
+                    .px(px(5.0))
                     .py(px(1.0))
-                    .text_size(px(9.0))
+                    .font_family(SharedString::from(
+                        FontFamily::Jetbrains.terminal_family_name(""),
+                    ))
+                    .text_size(px(self.tokens.metrics.ui_text_xs))
                     .text_color(rgb(self.tokens.ui.text_muted))
                     .child(badge.to_string())
                     .into_any_element()
             })
             .into_iter()
             .collect::<Vec<_>>();
-        // The shared body slot owns the flexible width so localized titles do
-        // not collapse to their minimum-content width inside the two-column grid.
         let content = div()
             .min_w(px(0.0))
             .flex()
@@ -157,20 +165,13 @@ impl WorkspaceApp {
             .into_any_element();
         div()
             .py(px(8.0))
-            .px(px(10.0))
-            .rounded(px(self.tokens.radii.md))
-            .when(highlight, |card| {
-                card.bg(rgba(
-                    (self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_SUBTLE_ALPHA,
-                ))
-            })
             .child(action_slot_row(
                 &self.tokens,
                 ActionSlotRowOptions::new().align_start().gap(10.0),
                 Some(Self::render_lucide_icon(
                     icon,
-                    16.0,
-                    rgb(self.tokens.ui.accent),
+                    15.0,
+                    rgb(self.tokens.ui.text_muted),
                 )),
                 content,
                 trailing,
@@ -181,7 +182,6 @@ impl WorkspaceApp {
     pub(in crate::workspace) fn onboarding_timeline_item(
         &self,
         number: usize,
-        icon: LucideIcon,
         key: &str,
     ) -> AnyElement {
         div()
@@ -191,47 +191,43 @@ impl WorkspaceApp {
             .gap(px(12.0))
             .child(
                 div()
-                    .size(px(28.0))
+                    .size(px(22.0))
+                    .mt(px(1.0))
                     .flex_none()
                     .rounded_full()
+                    .border_1()
+                    .border_color(rgba(
+                        (self.tokens.ui.border << 8) | ONBOARDING_HAIRLINE_ALPHA,
+                    ))
+                    .bg(rgb(self.tokens.ui.bg_panel))
                     .flex()
                     .items_center()
                     .justify_center()
-                    .bg(rgba(
-                        (self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_BORDER_ALPHA,
+                    .font_family(SharedString::from(
+                        FontFamily::Jetbrains.terminal_family_name(""),
                     ))
-                    .text_size(px(self.tokens.metrics.ui_text_sm))
-                    .text_color(rgb(self.tokens.ui.accent))
+                    .text_size(px(self.tokens.metrics.ui_text_xs))
+                    .font_weight(gpui::FontWeight::MEDIUM)
+                    .text_color(rgb(self.tokens.ui.text_muted))
                     .child(number.to_string()),
             )
             .child(
                 div()
                     .flex_1()
-                    .min_w_0()
+                    .min_w(px(0.0))
                     .flex()
                     .flex_col()
-                    .gap(px(6.0))
-                    .child(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .child(Self::render_lucide_icon(
-                                icon,
-                                16.0,
-                                rgb(self.tokens.ui.accent),
-                            ))
-                            .child(
-                                div()
-                                    .text_size(px(self.tokens.metrics.ui_text_sm))
-                                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                                    .text_color(rgb(self.tokens.ui.text))
-                                    .child(self.i18n.t(&format!("onboarding.{key}"))),
-                            ),
-                    )
+                    .gap(px(2.0))
                     .child(
                         div()
                             .text_size(px(self.tokens.metrics.ui_text_sm))
+                            .font_weight(gpui::FontWeight::MEDIUM)
+                            .text_color(rgb(self.tokens.ui.text))
+                            .child(self.i18n.t(&format!("onboarding.{key}"))),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(self.tokens.metrics.ui_text_xs))
                             .text_color(rgb(self.tokens.ui.text_muted))
                             .child(self.i18n.t(&format!("onboarding.{key}_desc"))),
                     ),
@@ -244,16 +240,11 @@ impl WorkspaceApp {
         title_key: &str,
         items: &[(LucideIcon, &str)],
     ) -> AnyElement {
-        let mut grid = div().grid().grid_cols(2).gap(px(8.0));
+        let mut grid = div().grid().grid_cols(2).gap_x(px(12.0)).gap_y(px(6.0));
         for (icon, key) in items {
             grid = grid.child(self.onboarding_capability_chip(*icon, key));
         }
-        self.onboarding_section(
-            LucideIcon::ListChecks,
-            title_key,
-            None,
-            grid.into_any_element(),
-        )
+        self.onboarding_group_label(title_key, grid.into_any_element())
     }
 
     pub(in crate::workspace) fn onboarding_capability_list(
@@ -261,11 +252,27 @@ impl WorkspaceApp {
         title_key: &str,
         items: &[(LucideIcon, &str)],
     ) -> AnyElement {
-        let mut list = div().flex().flex_col().gap(px(6.0));
+        let mut list = div().flex().flex_col().gap(px(4.0));
         for (icon, key) in items {
             list = list.child(self.onboarding_capability_chip(*icon, key));
         }
-        self.onboarding_section(LucideIcon::Shield, title_key, None, list.into_any_element())
+        self.onboarding_group_label(title_key, list.into_any_element())
+    }
+
+    fn onboarding_group_label(&self, title_key: &str, body: AnyElement) -> AnyElement {
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(6.0))
+            .child(
+                div()
+                    .text_size(px(self.tokens.metrics.ui_text_xs))
+                    .font_weight(gpui::FontWeight::MEDIUM)
+                    .text_color(rgb(self.tokens.ui.text_muted))
+                    .child(self.i18n.t(title_key)),
+            )
+            .child(body)
+            .into_any_element()
     }
 
     pub(in crate::workspace) fn onboarding_capability_chip(
@@ -276,19 +283,24 @@ impl WorkspaceApp {
         div()
             .flex()
             .items_start()
-            .gap(px(8.0))
-            .py(px(6.0))
-            .child(Self::render_lucide_icon(
-                icon,
-                14.0,
-                rgb(self.tokens.ui.accent),
-            ))
+            .gap(px(7.0))
+            .py(px(2.0))
+            .child(
+                div()
+                    .pt(px(2.0))
+                    .flex_none()
+                    .child(Self::render_lucide_icon(
+                        icon,
+                        13.0,
+                        rgb(self.tokens.ui.text_muted),
+                    )),
+            )
             .child(
                 div()
                     .flex_1()
                     .min_w_0()
                     .text_size(px(self.tokens.metrics.ui_text_xs))
-                    .text_color(rgb(self.tokens.ui.text))
+                    .text_color(rgb(self.tokens.ui.text_muted))
                     .child(self.i18n.t(&format!("onboarding.{key}"))),
             )
             .into_any_element()
@@ -305,20 +317,24 @@ impl WorkspaceApp {
     ) -> AnyElement {
         div()
             .flex()
-            .items_center()
-            .gap(px(12.0))
-            .p(px(14.0))
+            .items_start()
+            .gap(px(10.0))
+            .px(px(12.0))
+            .py(px(10.0))
             .rounded(px(self.tokens.radii.md))
             .border_1()
             .border_color(if checked {
-                rgba((self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_BORDER_ALPHA)
+                rgb(self.tokens.ui.accent)
             } else {
                 rgb(self.tokens.ui.border)
             })
             .bg(if checked {
                 rgba((self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_SUBTLE_ALPHA)
             } else {
-                rgb(self.tokens.ui.bg_card)
+                rgb(self.tokens.ui.bg_panel)
+            })
+            .when(enabled, |card| {
+                card.hover(|style| style.bg(rgb(self.tokens.ui.bg_hover)))
             })
             .opacity(if enabled {
                 1.0
@@ -330,11 +346,18 @@ impl WorkspaceApp {
             } else {
                 CursorStyle::OperationNotAllowed
             })
-            .child(checkbox::checkbox(&self.tokens, String::new(), checked))
+            .child(div().pt(px(1.0)).flex_none().child(checkbox::checkbox(
+                &self.tokens,
+                String::new(),
+                checked,
+            )))
             .child(
                 div()
                     .flex_1()
                     .min_w(px(0.0))
+                    .flex()
+                    .flex_col()
+                    .gap(px(2.0))
                     .child(
                         div()
                             .text_size(px(self.tokens.metrics.ui_text_sm))
@@ -361,66 +384,49 @@ impl WorkspaceApp {
             .into_any_element()
     }
 
-    pub(in crate::workspace) fn onboarding_info_card(
+    pub(in crate::workspace) fn onboarding_info_row(
         &self,
-        icon: Option<(LucideIcon, u32)>,
+        icon: LucideIcon,
+        color: u32,
         title_key: &str,
-        detail_key: Option<&str>,
-        accent: bool,
-        _cx: &mut Context<Self>,
-    ) -> AnyElement {
-        let title = self.i18n.t(title_key);
-        let detail = detail_key.map(|key| self.i18n.t(key)).unwrap_or_default();
-        self.onboarding_info_card_with_text(icon, title, detail, accent)
-    }
-
-    pub(in crate::workspace) fn onboarding_info_card_with_text(
-        &self,
-        icon: Option<(LucideIcon, u32)>,
-        title: String,
-        detail: String,
-        accent: bool,
+        detail_key: &str,
     ) -> AnyElement {
         div()
             .flex()
+            .items_start()
             .gap(px(10.0))
-            .py(px(8.0))
-            .rounded(px(self.tokens.radii.md))
-            .when(accent, |card| {
-                card.bg(rgba(
-                    (self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_SUBTLE_ALPHA,
-                ))
-            })
-            .when_some(icon, |card, (icon, color)| {
-                card.child(Self::render_lucide_icon(icon, 16.0, rgb(color)))
-            })
+            .py(px(6.0))
+            .child(
+                div()
+                    .pt(px(2.0))
+                    .flex_none()
+                    .child(Self::render_lucide_icon(icon, 14.0, rgb(color))),
+            )
             .child(
                 div()
                     .min_w(px(0.0))
                     .flex_1()
                     .flex()
                     .flex_col()
-                    .gap(px(3.0))
+                    .gap(px(2.0))
                     .child(
                         div()
                             .text_size(px(self.tokens.metrics.ui_text_sm))
                             .font_weight(gpui::FontWeight::MEDIUM)
                             .text_color(rgb(self.tokens.ui.text))
-                            .child(title),
+                            .child(self.i18n.t(title_key)),
                     )
-                    .when(!detail.is_empty(), |column| {
-                        column.child(
-                            div()
-                                .text_size(px(self.tokens.metrics.ui_text_xs))
-                                .text_color(rgb(self.tokens.ui.text_muted))
-                                .child(detail),
-                        )
-                    }),
+                    .child(
+                        div()
+                            .text_size(px(self.tokens.metrics.ui_text_xs))
+                            .text_color(rgb(self.tokens.ui.text_muted))
+                            .child(self.i18n.t(detail_key)),
+                    ),
             )
             .into_any_element()
     }
 
-    pub(in crate::workspace) fn onboarding_clickable_card(
+    pub(in crate::workspace) fn onboarding_inline_link(
         &self,
         icon: LucideIcon,
         text: String,
@@ -430,22 +436,20 @@ impl WorkspaceApp {
         div()
             .flex()
             .items_center()
-            .gap(px(10.0))
-            .p(px(12.0))
-            .rounded(px(self.tokens.radii.md))
-            .border_1()
-            .border_color(rgb(self.tokens.ui.border))
-            .bg(rgb(self.tokens.ui.bg_sunken))
+            .gap(px(7.0))
+            .py(px(4.0))
+            .rounded(px(self.tokens.radii.sm))
+            .hover(|style| style.text_color(rgb(self.tokens.ui.text)))
             .cursor(CursorStyle::PointingHand)
             .child(Self::render_lucide_icon(
                 icon,
-                14.0,
+                13.0,
                 rgb(self.tokens.ui.text_muted),
             ))
             .child(
                 div()
                     .flex_1()
-                    .text_size(px(11.0))
+                    .text_size(px(self.tokens.metrics.ui_text_xs))
                     .text_color(rgb(self.tokens.ui.text_muted))
                     .child(text),
             )
@@ -459,7 +463,7 @@ impl WorkspaceApp {
             .into_any_element()
     }
 
-    pub(in crate::workspace) fn onboarding_tip(
+    pub(in crate::workspace) fn onboarding_quiet_note(
         &self,
         key: &str,
         replacements: &[(&str, String)],
@@ -467,23 +471,23 @@ impl WorkspaceApp {
         let text = self.onboarding_i18n_with(key, replacements);
         div()
             .flex()
-            .gap(px(10.0))
-            .p(px(12.0))
-            .rounded(px(self.tokens.radii.md))
-            .border_1()
-            .border_color(rgba(
-                (self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_BORDER_ALPHA,
-            ))
-            .bg(rgba(
-                (self.tokens.ui.accent << 8) | ONBOARDING_ACCENT_SUBTLE_ALPHA,
-            ))
-            .child(Self::render_lucide_icon(
-                LucideIcon::Info,
-                14.0,
-                rgb(self.tokens.ui.accent),
-            ))
+            .items_start()
+            .gap(px(6.0))
+            .pt(px(2.0))
             .child(
                 div()
+                    .pt(px(2.0))
+                    .flex_none()
+                    .child(Self::render_lucide_icon(
+                        LucideIcon::Info,
+                        13.0,
+                        rgb(self.tokens.ui.text_muted),
+                    )),
+            )
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
                     .text_size(px(self.tokens.metrics.ui_text_xs))
                     .text_color(rgb(self.tokens.ui.text_muted))
                     .child(text),
@@ -505,13 +509,5 @@ impl WorkspaceApp {
 
     pub(in crate::workspace) fn open_onboarding_disclaimer(&mut self, cx: &mut Context<Self>) {
         self.open_help_legal_notice(cx);
-    }
-}
-
-pub(in crate::workspace) fn platform_cmd(suffix: &str) -> String {
-    if cfg!(target_os = "macos") {
-        format!("⌘{suffix}")
-    } else {
-        format!("Ctrl+{suffix}")
     }
 }
