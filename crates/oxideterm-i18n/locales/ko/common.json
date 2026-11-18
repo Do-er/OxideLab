@@ -64,7 +64,7 @@
     "application_close_failed": "{{path}}의 파일 사용 상태를 확인하거나 해제할 수 없습니다. 시스템 트레이에서 {{app}}을(를) 종료하고 이 폴더를 사용하는 다른 앱도 닫은 후 다시 시도를 누르세요. 취소하면 파일을 교체하지 않고 설치를 중단합니다."
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "셸 실행기"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "원격 연결, 터미널 및 운영을 하나의 네이티브 작업 공간에서",
       "new_connection": "새 연결",
       "new_connection_hint": "원격 연결을 만들고 저장합니다",

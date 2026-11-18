@@ -71,13 +71,13 @@ pub(crate) fn app_icon_variant_file_name(variant: AppIconVariant) -> &'static st
         AppIconVariant::WhiteGraphite => "white-graphite.png",
         AppIconVariant::WhiteGreen => "white-green.png",
         AppIconVariant::WhitePurple => "white-purple.png",
-        AppIconVariant::WhiteRed => "white-red.png",
+        AppIconVariant::WhiteRed => "white-pink.png",
         AppIconVariant::FilledOrange => "filled-orange.png",
         AppIconVariant::FilledBlue => "filled-blue.png",
         AppIconVariant::FilledGraphite => "filled-graphite.png",
         AppIconVariant::FilledGreen => "filled-green.png",
         AppIconVariant::FilledPurple => "filled-purple.png",
-        AppIconVariant::FilledRed => "filled-red.png",
+        AppIconVariant::FilledRed => "filled-pink.png",
     }
 }
 
@@ -150,7 +150,7 @@ fn app_icon_variant_png(variant: AppIconVariant) -> &'static [u8] {
         AppIconVariant::WhitePurple => {
             include_bytes!("../resources/icons/variants/white-purple.png")
         }
-        AppIconVariant::WhiteRed => include_bytes!("../resources/icons/variants/white-red.png"),
+        AppIconVariant::WhiteRed => include_bytes!("../resources/icons/variants/white-pink.png"),
         AppIconVariant::FilledOrange => {
             include_bytes!("../resources/icons/variants/filled-orange.png")
         }
@@ -164,7 +164,7 @@ fn app_icon_variant_png(variant: AppIconVariant) -> &'static [u8] {
         AppIconVariant::FilledPurple => {
             include_bytes!("../resources/icons/variants/filled-purple.png")
         }
-        AppIconVariant::FilledRed => include_bytes!("../resources/icons/variants/filled-red.png"),
+        AppIconVariant::FilledRed => include_bytes!("../resources/icons/variants/filled-pink.png"),
     }
 }
 

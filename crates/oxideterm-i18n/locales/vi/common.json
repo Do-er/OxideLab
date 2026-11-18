@@ -64,7 +64,7 @@
     "application_close_failed": "Không thể giải phóng hoặc kiểm tra các tệp đang được sử dụng trong {{path}}. Hãy thoát {{app}} từ khay hệ thống và đóng các ứng dụng khác đang dùng thư mục này, rồi nhấn Thử lại. Hủy sẽ dừng cài đặt mà không thay thế tệp."
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "Trình khởi chạy shell"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "Kết nối từ xa, terminal và vận hành trong một không gian làm việc gốc",
       "new_connection": "Kết nối mới",
       "new_connection_hint": "Tạo và lưu kết nối từ xa",

@@ -64,7 +64,7 @@
     "application_close_failed": "Impossible de libérer les fichiers de {{path}} ou de vérifier leur utilisation. Quittez {{app}} depuis la zone de notification et fermez les autres applications utilisant ce dossier, puis cliquez sur Réessayer. Annuler arrête l’installation sans remplacer de fichiers."
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "Lanceur de shell"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "Connexions distantes, terminaux et opérations dans un espace de travail natif",
       "new_connection": "Nouvelle connexion",
       "new_connection_hint": "Créer et enregistrer une connexion distante",

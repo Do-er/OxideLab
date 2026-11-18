@@ -1,13 +1,11 @@
 <div align="center">
 
-<img src="docs/media/oxideterm-native-hero.png" alt="OxideTerm: your servers, one workspace" width="920">
+# OxideLab
 
-# ⚡ OxideTerm
+**A native Rust + GPUI terminal and debugging workspace tailored for backend development and embedded systems.**
 
-**A free, native SSH client and remote operations workspace with a bring-your-own-key AI assistant.**
-
-SSH · Mosh · Telnet · Serial · RDP/VNC · SFTP · port forwarding · built-in editor, all in one GPU-rendered app.
-No account. No subscription. No telemetry. No Electron.
+Serial · SSH · Mosh · Telnet · SFTP · port forwarding · quick command composer · built-in editor, all in one GPU-rendered app.
+No account. No subscription. No telemetry. No Electron. Forked from [OxideTerm](https://github.com/AnalyseDeCircuit/oxideterm) (GPL-3.0).
 
 [![Latest release](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
 [![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)

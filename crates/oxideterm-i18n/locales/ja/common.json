@@ -64,7 +64,7 @@
     "application_close_failed": "{{path}} 内のファイルの使用状態を確認または解除できませんでした。システムトレイから {{app}} を終了し、このフォルダーを使用する他のアプリも閉じてから「再試行」を押してください。「キャンセル」ではファイルを置き換えずにインストールを中止します。"
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "シェルランチャー"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "リモート接続、ターミナル、運用を一つのネイティブワークスペースに",
       "new_connection": "新規接続",
       "new_connection_hint": "リモート接続を作成して保存します",

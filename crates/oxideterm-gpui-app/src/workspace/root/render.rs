@@ -193,7 +193,7 @@ impl WorkspaceApp {
         let title = self
             .active_tab(cx)
             .map(|tab| self.tab_display_title(tab))
-            .unwrap_or_else(|| "OxideTerm".to_string());
+            .unwrap_or_else(|| "OxideLab".to_string());
         // Keep Entity borrows out of window rendering callbacks.
         let active_tab_projection = self
             .active_tab(cx)

@@ -64,7 +64,7 @@
     "application_close_failed": "無法釋放或確認 {{path}} 中的檔案使用狀態。請從系統匣結束 {{app}}，並關閉正在使用此目錄的其他程式，再按「重試」。按「取消」停止安裝，不取代檔案。"
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "Shell 啟動器"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "連線、終端與遠端維運，一處完成",
       "new_connection": "新增連線",
       "new_connection_hint": "建立並儲存新的遠端連線",

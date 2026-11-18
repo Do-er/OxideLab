@@ -1114,7 +1114,7 @@ impl WorkspaceApp {
         let tab_title = self
             .tab_by_id(drag.tab_id, cx)
             .map(|tab| self.tab_display_title(tab))
-            .unwrap_or_else(|| "OxideTerm".to_string());
+            .unwrap_or_else(|| "OxideLab".to_string());
         let theme = self.tokens.ui;
         let accent = theme.accent;
         let geometry = tab_window_handoff_rect(
@@ -1196,7 +1196,7 @@ impl WorkspaceApp {
         let tab_title = self
             .tab_by_id(drag.tab_id, cx)
             .map(|tab| self.tab_display_title(tab))
-            .unwrap_or_else(|| "OxideTerm".to_string());
+            .unwrap_or_else(|| "OxideLab".to_string());
         let theme = self.tokens.ui;
         let accent = theme.accent;
         let viewport = window.viewport_size();
@@ -1533,7 +1533,7 @@ impl WorkspaceApp {
                 self.i18n.t("settings_view.general.app_lock_window_title"),
             ));
             return self.render_detached_tab_message(
-                "OxideTerm",
+                "OxideLab",
                 "settings_view.general.app_lock_detached_description",
                 cx,
             );
@@ -1547,7 +1547,7 @@ impl WorkspaceApp {
                 tab.root_pane.clone(),
             )
         }) else {
-            return self.render_detached_tab_message("OxideTerm", "tabbar.detached_tab_closed", cx);
+            return self.render_detached_tab_message("OxideLab", "tabbar.detached_tab_closed", cx);
         };
         window.set_window_title(&SharedString::from(title.clone()));
 

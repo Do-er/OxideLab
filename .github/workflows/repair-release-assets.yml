@@ -62,7 +62,7 @@ jobs:
         with:
           run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
-          pattern: OxideTerm-*
+          pattern: OxideLab-*
           path: dist-release
           merge-multiple: true
 
@@ -71,7 +71,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ ! -d dist-release ]]; then
-            echo "::error::No OxideTerm-* artifacts found in run ${{ inputs.run_id }}" >&2
+            echo "::error::No OxideLab-* artifacts found in run ${{ inputs.run_id }}" >&2
             exit 1
           fi
           mapfile -t assets < <(find dist-release -maxdepth 1 -type f \( \

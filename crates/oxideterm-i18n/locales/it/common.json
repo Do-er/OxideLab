@@ -64,7 +64,7 @@
     "application_close_failed": "Impossibile liberare i file in {{path}} o verificarne l’utilizzo. Uscire da {{app}} nell’area di notifica e chiudere le altre applicazioni che usano questa cartella, quindi fare clic su Riprova. Annulla interrompe l’installazione senza sostituire file."
   },
   "app": {
-    "name": "OxideTerm",
+    "name": "OxideLab",
     "shellLauncher": "Launcher shell"
   },
   "window_controls": {
@@ -94,7 +94,7 @@
   },
   "layout": {
     "empty": {
-      "title": "OxideTerm",
+      "title": "OxideLab",
       "subtitle": "Connessioni remote, terminali e operazioni in un unico spazio di lavoro nativo",
       "new_connection": "Nuova Connessione",
       "new_connection_hint": "Crea e salva una connessione remota",
