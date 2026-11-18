@@ -98,6 +98,7 @@
       "switch_tree": "트리 보기",
       "switch_focus": "포커스 보기",
       "new_connection": "새 연결",
+      "clear_inactive_sessions": "비활성 세션 정리",
       "lock_app": "OxideTerm 잠그기",
       "setup_app_lock": "애플리케이션 잠금 설정",
       "collapse": "접기"

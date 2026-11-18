@@ -181,8 +181,8 @@ impl WorkspaceApp {
                                         .child(self.render_session_search_button(cx))
                                         .child(self.render_session_sort_button(cx))
                                         .child(self.render_sidebar_action(
-                                            LucideIcon::Plus,
-                                            SidebarActionKind::NewConnection,
+                                            LucideIcon::Trash2,
+                                            SidebarActionKind::ClearInactiveSessions,
                                             cx,
                                         ))
                                 },
@@ -469,8 +469,16 @@ impl WorkspaceApp {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let theme = self.tokens.ui;
-        let label = match action {
-            SidebarActionKind::NewConnection => self.i18n.t("sidebar.tooltips.new_connection"),
+        let (label, disabled) = match action {
+            SidebarActionKind::ClearInactiveSessions => (
+                self.i18n.t("sidebar.tooltips.clear_inactive_sessions"),
+                !self.has_inactive_sessions(cx),
+            ),
+        };
+        let icon_color = if disabled {
+            rgb(theme.text_muted)
+        } else {
+            rgb(theme.text)
         };
 
         // Tauri sidebar header actions are icon buttons with title tooltips.
@@ -479,18 +487,21 @@ impl WorkspaceApp {
             .child(self.workspace_tooltip_icon_button(
                 icon,
                 self.tokens.metrics.sidebar_action_icon_size,
-                rgb(theme.text),
-                IconButtonOptions::opaque_toolbar(
-                    self.tokens.metrics.sidebar_action_size,
-                    ButtonRadius::Md,
-                ),
+                icon_color,
+                IconButtonOptions {
+                    disabled,
+                    ..IconButtonOptions::opaque_toolbar(
+                        self.tokens.metrics.sidebar_action_size,
+                        ButtonRadius::Md,
+                    )
+                },
                 label,
                 "sidebar-action",
                 false,
                 cx.listener(move |this, _event, window, cx| {
                     match action {
-                        SidebarActionKind::NewConnection => {
-                            this.open_new_connection_form(window, cx)
+                        SidebarActionKind::ClearInactiveSessions => {
+                            this.clear_inactive_sessions(window, cx)
                         }
                     }
                     cx.stop_propagation();
@@ -1025,7 +1036,7 @@ pub(in crate::workspace) fn notification_sidebar_row_signatures(
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(in crate::workspace) enum SidebarActionKind {
-    NewConnection,
+    ClearInactiveSessions,
 }
 
 #[cfg(test)]

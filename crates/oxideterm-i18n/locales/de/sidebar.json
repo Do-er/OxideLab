@@ -98,6 +98,7 @@
       "switch_tree": "Baumansicht",
       "switch_focus": "Fokusansicht",
       "new_connection": "Neue Verbindung",
+      "clear_inactive_sessions": "Inaktive Sitzungen bereinigen",
       "lock_app": "OxideTerm sperren",
       "setup_app_lock": "Anwendungssperre einrichten",
       "collapse": "Einklappen"

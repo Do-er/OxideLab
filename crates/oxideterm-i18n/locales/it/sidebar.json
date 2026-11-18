@@ -98,6 +98,7 @@
       "switch_tree": "Vista ad albero",
       "switch_focus": "Vista focus",
       "new_connection": "Nuova connessione",
+      "clear_inactive_sessions": "Pulisci sessioni inattive",
       "lock_app": "Blocca OxideTerm",
       "setup_app_lock": "Configura blocco applicazione",
       "collapse": "Comprimi"

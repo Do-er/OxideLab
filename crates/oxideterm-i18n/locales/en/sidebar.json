@@ -98,6 +98,7 @@
       "switch_tree": "Switch to Tree View",
       "switch_focus": "Switch to Focus View",
       "new_connection": "New Connection",
+      "clear_inactive_sessions": "Clear Inactive Sessions",
       "lock_app": "Lock OxideTerm",
       "setup_app_lock": "Set Up Application Lock",
       "collapse": "Collapse"

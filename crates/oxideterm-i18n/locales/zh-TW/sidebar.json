@@ -98,6 +98,7 @@
       "switch_tree": "切換到樹形視圖",
       "switch_focus": "切換到聚焦視圖",
       "new_connection": "新建連線",
+      "clear_inactive_sessions": "清理非使用中工作階段",
       "lock_app": "鎖定 OxideTerm",
       "setup_app_lock": "設定應用程式鎖定",
       "collapse": "收起"

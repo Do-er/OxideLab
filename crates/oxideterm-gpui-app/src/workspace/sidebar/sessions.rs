@@ -535,6 +535,87 @@ impl WorkspaceApp {
         )
     }
 
+    pub(in crate::workspace) fn has_inactive_sessions(&self, cx: &App) -> bool {
+        let (ssh_roots, standalone_ids) = self.inactive_session_targets(cx);
+        !ssh_roots.is_empty() || !standalone_ids.is_empty()
+    }
+
+    pub(in crate::workspace) fn clear_inactive_sessions(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let (ssh_roots, standalone_ids) = self.inactive_session_targets(cx);
+        for node_id in ssh_roots {
+            self.remove_inactive_session_tree_node(&node_id, window, cx);
+        }
+        for connection_id in standalone_ids {
+            self.remove_standalone_connection(&connection_id, window, cx);
+        }
+    }
+
+    fn inactive_session_targets(&self, cx: &App) -> (Vec<NodeId>, Vec<String>) {
+        let tree_nodes = self.node_router.flatten_tree();
+        let parent_by_id = tree_nodes
+            .iter()
+            .filter_map(|node| {
+                node.parent_id
+                    .as_ref()
+                    .map(|parent_id| (NodeId::new(node.id.clone()), NodeId::new(parent_id.clone())))
+            })
+            .collect::<HashMap<_, _>>();
+
+        let mut protected = HashSet::<NodeId>::new();
+        for flat_node in &tree_nodes {
+            let node_id = NodeId::new(flat_node.id.clone());
+            let is_active = self.ssh_nodes.get(&node_id).is_some_and(|node| {
+                matches!(
+                    active_session_readiness(&node.readiness),
+                    ActiveSessionReadiness::Ready | ActiveSessionReadiness::Connecting
+                )
+            }) || self.has_active_reconnect_job(&node_id, cx);
+            if is_active {
+                let mut cursor = Some(node_id);
+                while let Some(id) = cursor {
+                    if !protected.insert(id.clone()) {
+                        break;
+                    }
+                    cursor = parent_by_id.get(&id).cloned();
+                }
+            }
+        }
+
+        let ssh_roots = tree_nodes
+            .iter()
+            .filter_map(|flat_node| {
+                let node_id = NodeId::new(flat_node.id.clone());
+                if protected.contains(&node_id) || !self.ssh_nodes.contains_key(&node_id) {
+                    return None;
+                }
+                let parent_protected = parent_by_id
+                    .get(&node_id)
+                    .is_none_or(|parent_id| protected.contains(parent_id));
+                parent_protected.then_some(node_id)
+            })
+            .collect();
+
+        let standalone_ids = self
+            .standalone_connections
+            .records()
+            .iter()
+            .filter_map(|record| {
+                let row = self.standalone_active_session_sidebar_row(record, cx);
+                matches!(
+                    row.node_view.status(),
+                    ActiveSessionStatus::Error | ActiveSessionStatus::Idle
+                )
+                .then(|| record.id.clone())
+            })
+            .collect();
+
+        (ssh_roots, standalone_ids)
+    }
+
     pub(in crate::workspace) fn render_active_sessions_sidebar_content(
         &mut self,
         cx: &mut Context<Self>,
