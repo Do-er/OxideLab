@@ -3,6 +3,80 @@
 Stable releases are listed newest first. The release workflow uses each versioned
 section as the detailed changelog attached to the corresponding GitHub Release.
 
+## 3.0.2
+
+### 中文
+
+OxideTerm 3.0.2 是社区定制分支（Do-er 维护）在 3.0.1 之后的更新：同步上游主线在终端语义着色、Kitty 文件传输会话隔离、悬浮滚动条与搜索高亮、字形排版、AI 错误处理及首次引导精简方面的改进，并补充本分支的快捷命令克隆与时间戳滚轴修复。
+
+#### 🔄 上游更新
+
+##### ⌨️ 终端与渲染
+
+- 换行与滚动保留语义着色：跨软换行和回滚窗口复用逻辑行上下文，滚动时不再丢失语法/语义高亮（PR [AnalyseDeCircuit/oxideterm#809](https://github.com/AnalyseDeCircuit/oxideterm/pull/809)）。
+- 终端字形渲染与排版优化：改进终端字形绘制与排版设置，支持字距与行高微调及独立 IDE 行高解析。
+- 悬浮滚动条与搜索高亮保持：终端滚动条改为悬浮样式且仅在滑块命中区域响应拖拽与指针事件，滚动与缩略图隐藏期间保持搜索高亮与滚动条位置标记（PR [AnalyseDeCircuit/oxideterm#802](https://github.com/AnalyseDeCircuit/oxideterm/pull/802)）。
+- 启动与全屏视觉修复：初始化 SSH 会话首帧即使用目标调色板，并在 macOS 上过滤与图层尺寸不匹配的 display-link drawable，避免终端与全屏启动闪烁（PR [AnalyseDeCircuit/oxideterm#801](https://github.com/AnalyseDeCircuit/oxideterm/pull/801)）。
+
+##### 🔒 安全与协议
+
+- Kitty 文件传输权限按会话隔离：将 Kitty 文件传输授权限定在当前活动会话，并在会话退出或重启时撤销授权，防止跨会话复用权限（PR [AnalyseDeCircuit/oxideterm#803](https://github.com/AnalyseDeCircuit/oxideterm/pull/803)）。
+- SSH 连接显示名规范化：新建与粘贴连接名称时将制表符规范化为空格，避免单行标签或节点标题排版异常。
+- 插件宿主预发布版本兼容：插件兼容性校验支持匹配兼容的预发布宿主版本。
+
+##### 🤖 AI 与界面
+
+- AI 工具上下文与安全错误提示：保留各服务商流式响应中的工具调用上下文，并对接口错误做脱敏与安全展示。
+- 首次启动引导精简：收窄首次引导弹窗尺寸，移除冗余折叠项与提示文本，保留更紧凑的引导流程。
+
+#### 🧩 自有更新
+
+- 快捷命令支持克隆操作，编辑与发送命令时保留尾部空格，并在输入时自动清除终端选区。
+- 保持启用时间戳时的横向布局逻辑：按实际内容宽度计算横向可滚动上限，避免开启时间戳后多出不必要的横向滑轨。
+
+#### 👥 贡献者
+
+感谢参与本次更新的上游贡献者（链接指向上游仓库）：
+
+- @BilityLeu：换行/滚动语义着色保持、终端悬浮滚动条与搜索高亮、终端与全屏启动闪烁修复（[AnalyseDeCircuit/oxideterm#801](https://github.com/AnalyseDeCircuit/oxideterm/pull/801)、[AnalyseDeCircuit/oxideterm#802](https://github.com/AnalyseDeCircuit/oxideterm/pull/802)、[AnalyseDeCircuit/oxideterm#809](https://github.com/AnalyseDeCircuit/oxideterm/pull/809)）。
+- @m00nLi：会话退出或重启时撤销 Kitty 文件传输授权（[AnalyseDeCircuit/oxideterm#803](https://github.com/AnalyseDeCircuit/oxideterm/pull/803)）。
+
+### English
+
+OxideTerm 3.0.2 is the next release of the Do-er-maintained community fork after 3.0.1: it syncs upstream improvements across terminal semantic coloring, Kitty file-transfer session isolation, overlay scrollbars with persistent search highlights, glyph typography, AI safe error reporting, and streamlined onboarding, alongside fork-specific quick-command and timestamp-scrollbar fixes.
+
+#### 🔄 Upstream changes
+
+##### ⌨️ Terminal and rendering
+
+- Preserved semantic coloring across wraps and scrolling: logical line context is reused across soft wraps and scrollback windows so semantic highlights stay intact while scrolling (PR [AnalyseDeCircuit/oxideterm#809](https://github.com/AnalyseDeCircuit/oxideterm/pull/809)).
+- Refined glyph rendering and typography: improved terminal glyph drawing and typography controls, including character spacing, line height bounds, and resolved IDE line height.
+- Overlay scrollbars and persistent search highlights: switched terminal scrollbars to overlay rendering with thumb-only hit testing, and preserved search highlights and scrollbar overview markers while scrolling or hiding the thumb (PR [AnalyseDeCircuit/oxideterm#802](https://github.com/AnalyseDeCircuit/oxideterm/pull/802)).
+- Startup and fullscreen visual fixes: initialized SSH sessions with the requested palette before publishing the first frame, and rejected mismatched display-link drawables on macOS to prevent startup and fullscreen glitches (PR [AnalyseDeCircuit/oxideterm#801](https://github.com/AnalyseDeCircuit/oxideterm/pull/801)).
+
+##### 🔒 Security and protocols
+
+- Session-scoped Kitty file-transfer authority: scoped Kitty file-transfer approvals to the active session and revoked transfer authority when a session exits or restarts (PR [AnalyseDeCircuit/oxideterm#803](https://github.com/AnalyseDeCircuit/oxideterm/pull/803)).
+- Normalized tabs in SSH connection display names: replaced tabs with spaces when pasting or formatting connection names so single-line tabs and node titles render cleanly.
+- Prerelease host compatibility for plugins: accepted compatible prerelease host versions during plugin compatibility checks.
+
+##### 🤖 AI and UI
+
+- Preserved AI provider tool context and safe errors: retained tool-call context across streaming provider responses and surfaced sanitized error messages.
+- Streamlined first-run onboarding: tightened modal dimensions and removed redundant disclosure and hint chrome for a cleaner first-run experience.
+
+#### 🧩 Fork-specific changes
+
+- Added a clone action to quick commands, preserved trailing spaces in command templates, and cleared terminal selection on input.
+- Restored the horizontal scroll-limit calculation when terminal timestamps are enabled so the timestamp gutter no longer triggers an extra horizontal scrollbar.
+
+#### 👥 Contributors
+
+Thank you to the upstream contributors whose work is included in this release (links point to the upstream repository):
+
+- @BilityLeu: semantic coloring across wraps and scrolling, overlay scrollbars with persistent search highlights, and terminal/fullscreen startup visual fixes ([AnalyseDeCircuit/oxideterm#801](https://github.com/AnalyseDeCircuit/oxideterm/pull/801), [AnalyseDeCircuit/oxideterm#802](https://github.com/AnalyseDeCircuit/oxideterm/pull/802), [AnalyseDeCircuit/oxideterm#809](https://github.com/AnalyseDeCircuit/oxideterm/pull/809)).
+- @m00nLi: revoking Kitty file-transfer authority on session exit ([AnalyseDeCircuit/oxideterm#803](https://github.com/AnalyseDeCircuit/oxideterm/pull/803)).
+
 ## 3.0.1
 
 ### 中文
