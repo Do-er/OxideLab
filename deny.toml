@@ -31,15 +31,15 @@ ignore = [
     # Historic advisory still referenced by some crates
     { id = "RUSTSEC-2017-0008", reason = "historic unmaintained notice; no active CVE" },
     # rsa crate timing side-channel (Marvin Attack) — no patch available upstream;
-    # OxideTerm uses RSA only for client-side SSH key authentication (signing),
+    # OxideLab uses RSA only for client-side SSH key authentication (signing),
     # not RSA decryption, limiting practical exploitability.
     { id = "RUSTSEC-2023-0071", reason = "rsa crate Marvin Attack; client-side SSH auth signing only, no RSA decryption exposure" },
     # rand 0.8.5 unsound with custom logger + thread_rng reseed — transitive dep
     # from russh, tungstenite, num-bigint, phf_generator; no patch for 0.8.x.
-    # OxideTerm has no custom logger impl and uses OsRng directly; not exploitable.
-    { id = "RUSTSEC-2026-0097", reason = "rand 0.8 unsound via custom logger; transitive dep, no custom logger in OxideTerm, not exploitable" },
+    # OxideLab has no custom logger impl and uses OsRng directly; not exploitable.
+    { id = "RUSTSEC-2026-0097", reason = "rand 0.8 unsound via custom logger; transitive dep, no custom logger in OxideLab, not exploitable" },
     # quick-xml is used only by xcb and wayland-scanner build-time code generators
-    # to parse trusted protocol definitions; OxideTerm does not ship these parsers.
+    # to parse trusted protocol definitions; OxideLab does not ship these parsers.
     { id = "RUSTSEC-2026-0194", reason = "quick-xml is build-only in xcb and wayland-scanner; trusted protocol XML only, no runtime parser exposure" },
     { id = "RUSTSEC-2026-0195", reason = "quick-xml is build-only in xcb and wayland-scanner; trusted protocol XML only, no runtime parser exposure" },
 ]

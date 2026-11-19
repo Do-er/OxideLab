@@ -25,7 +25,7 @@ No account. No subscription. No telemetry. No Electron. Forked from [OxideTerm](
 
 ## Quick start
 
-1. **Install OxideTerm.** Grab a package from the [latest release](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); platform notes are in [Install](#install) below.
+1. **Install OxideLab.** Grab a package from the [latest release](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); platform notes are in [Install](#install) below.
 2. **Add a server.** Open the Session Manager and create an SSH connection, or import hosts from your `~/.ssh/config`.
 3. **Connect.** Open a terminal. Host keys are checked against `~/.ssh/known_hosts`.
 4. **Use the rest of the workspace.** Open SFTP, port forwarding, or the built-in editor on the same node. By default they share one SSH connection.
@@ -53,7 +53,7 @@ For a guided tour, see the [documentation](https://oxideterm.app).
 
 ---
 
-## Why OxideTerm
+## Why OxideLab
 
 - **Free and local-first.** No account, no subscription, no telemetry. Your connections and operational data stay under your control.
 - **One workspace per server.** Terminal, SFTP, forwarding, RDP/VNC, editor, monitoring, and AI attach to the same node instead of behaving like disconnected utilities.
@@ -73,7 +73,7 @@ For a guided tour, see the [documentation](https://oxideterm.app).
 | macOS | 318.7 MB | 81.3 MB | About 74% |
 | Windows | 182.4 MB | 23.5 MB | About 87% |
 
-The old version's total includes OxideTerm and its associated WebView processes. The native version no longer needs those browser processes.
+The old version's total includes OxideLab and its associated WebView processes. The native version no longer needs those browser processes.
 
 ![Idle memory comparison with system process screenshots: Tauri 1.x versus native 2.0](docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -93,7 +93,7 @@ The old version's total includes OxideTerm and its associated WebView processes.
 <summary><b>Watch OxideSens open a terminal from a plain-language request</b></summary>
 
 <a href="docs/media/ai-terminal-demo.mp4">
-  <img src="docs/media/ai-terminal-demo.gif" alt="OxideSens opening a terminal inside OxideTerm" width="720">
+  <img src="docs/media/ai-terminal-demo.gif" alt="OxideSens opening a terminal inside OxideLab" width="720">
 </a>
 
 </details>
@@ -115,7 +115,7 @@ OxideSens is an optional assistant that can inspect your live sessions and perfo
 
 ## Plugins
 
-OxideTerm supports three plugin paths:
+OxideLab supports three plugin paths:
 
 | Type | How it runs | Boundary |
 |---|---|---|
@@ -142,7 +142,7 @@ Legacy Tauri (1.x) ESM plugins may be listed but are not executed by the native 
 | **Plugins** | See [Plugins](#plugins) |
 | **Telemetry** | None |
 
-**Lawful use.** OxideTerm is licensed under GPL-3.0-only without additional restrictions. Access only systems, networks, and devices you own or are explicitly authorized to access, and comply with applicable law. Do not use OxideTerm for unauthorized access, service disruption, or bypassing access controls.
+**Lawful use.** OxideLab is licensed under GPL-3.0-only without additional restrictions. Access only systems, networks, and devices you own or are explicitly authorized to access, and comply with applicable law. Do not use OxideLab for unauthorized access, service disruption, or bypassing access controls.
 
 ---
 
@@ -152,9 +152,9 @@ We would rather you know before installing:
 
 - Desktop only (macOS, Windows, Linux). There is no mobile app.
 - The project moves quickly, with frequent releases. See the [changelog](.github/release-notes/stable-changelog.md) and [open issues](https://github.com/AnalyseDeCircuit/oxideterm/issues).
-- Auditing and session recording are opt-in, and only reflect what OxideTerm itself can observe.
+- Auditing and session recording are opt-in, and only reflect what OxideLab itself can observe.
 - Process plugins are not sandboxed by the OS.
-- If the renderer fails on your machine, try the compatibility profile: `OXIDETERM_RENDER_PROFILE=compatibility`.
+- If the renderer fails on your machine, try the compatibility profile: `OXIDELAB_RENDER_PROFILE=compatibility`.
 
 ---
 
@@ -170,7 +170,7 @@ We would rather you know before installing:
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -179,7 +179,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-With Nix: `nix build .#oxideterm`, `nix run .#oxideterm`, or `nix develop`.
+With Nix: `nix build .#oxidelab`, `nix run .#oxidelab`, or `nix develop`.
 
 CLI artifacts land in `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm`.
 
@@ -188,7 +188,7 @@ CLI artifacts land in `crates/oxideterm-gpui-app/resources/cli-bin/<target-tripl
 <details>
 <summary><b>Command-line interface</b></summary>
 
-The headless `oxideterm` CLI works without launching the app, which is useful for automation, CI, and diagnostics. It covers settings, connections, forwards, plugins, quick commands, secrets, portable bundles, diagnostics, reports, batch plans, backups, and cloud sync.
+The headless `oxidelab` CLI works without launching the app, which is useful for automation, CI, and diagnostics. It covers settings, connections, forwards, plugins, quick commands, secrets, portable bundles, diagnostics, reports, batch plans, backups, and cloud sync.
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -226,7 +226,7 @@ The UI and the terminal/SSH backend share one Rust process; optional remote agen
 └─────────────────────────────────────────────────┘
 ```
 
-| Aspect | Bundled-browser approach | OxideTerm |
+| Aspect | Bundled-browser approach | OxideLab |
 |---|---|---|
 | Rendering | Browser engine and web layout | GPUI on a GPU surface |
 | Terminal data flow | WebSocket → JS event loop → xterm.js | Rust input → `TerminalState` → GPUI render |
@@ -286,7 +286,7 @@ Verify your download with the `sha256sums.txt` asset on the release page. Portab
 If Gatekeeper blocks the app, remove the quarantine flag:
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -297,13 +297,13 @@ If SmartScreen shows a warning, choose **More info → Run anyway**.
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -323,15 +323,15 @@ Bug reports are most useful with a redacted diagnostic bundle:
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-Reproducible bugs and regressions are prioritized. Feature requests are reviewed for scope, safety, and fit with OxideTerm's remote-server workspace direction. If OxideTerm helps your work, a GitHub star, a reproducible bug report, a translation fix, or a plugin all help keep it moving.
+Reproducible bugs and regressions are prioritized. Feature requests are reviewed for scope, safety, and fit with OxideLab's remote-server workspace direction. If OxideLab helps your work, a GitHub star, a reproducible bug report, a translation fix, or a plugin all help keep it moving.
 
 ### Contributors
 
-Thanks to everyone who helps make OxideTerm better.
+Thanks to everyone who helps make OxideLab better.
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideTerm contributors">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab contributors">
   </a>
 </p>
 

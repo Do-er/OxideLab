@@ -1,5 +1,6 @@
-OxideTerm
+OxideLab
 Copyright (c) 2026 OxideTerm contributors.
+Copyright (c) 2026 OxideLab contributors.
 
 This project includes code, assets, or protocol implementations from the
 following projects:
@@ -12,17 +13,17 @@ Generated dependency notices are maintained separately:
 Regenerate them with:
 
 - python3 scripts/release/generate_third_party_notices.py --cwd . --output THIRD_PARTY_NOTICES.md --title "Third-Party Notices (Native / Rust Workspace)" --exclude-prefix oxideterm-
-- python3 scripts/release/generate_third_party_notices.py --cwd agent --output THIRD_PARTY_NOTICES.md --title "Third-Party Notices (OxideTerm Agent)" --exclude-name oxideterm-agent
+- python3 scripts/release/generate_third_party_notices.py --cwd agent --output THIRD_PARTY_NOTICES.md --title "Third-Party Notices (OxideLab Agent)" --exclude-name oxidelab-agent
 
 Bundled background artwork
 Copyright (c) 2026 OxideTerm contributors.
 Licensed under the Creative Commons Attribution 4.0 International license
 (CC BY 4.0). The license applies to the artwork's copyright and similar rights;
-it does not grant trademark rights in the OxideTerm name or project marks.
+it does not grant trademark rights in the OxideLab name or project marks.
 The bundled Oxide Ambient, Oxide Nocturne, and Oxide Verdant backgrounds are
 project artwork rather than third-party assets. Oxide Nocturne and Oxide
 Verdant were generated for the project with OpenAI image generation and then
-selected, edited, and encoded by OxideTerm contributors. Detailed provenance
+selected, edited, and encoded by OxideLab contributors. Detailed provenance
 and file hashes are recorded in
 crates/oxideterm-gpui-app/resources/backgrounds/LICENSE.md and shipped as
 BACKGROUND-ASSETS-LICENSE.md.
@@ -33,7 +34,7 @@ Licensed under the Apache License, Version 2.0.
 Used through the alacritty_terminal crate for terminal emulation, PTY state,
 and terminal protocol behavior.
 The native local graphics PTY loop adapts Alacritty's event-loop structure
-under the same Apache-2.0 OR MIT terms, with OxideTerm-specific graphics
+under the same Apache-2.0 OR MIT terms, with OxideLab-specific graphics
 protocol interception added before ANSI parsing.
 
 Lucide
@@ -58,7 +59,7 @@ Based on Longbridge's gpui-pre 0.3.7 packages, built from
 https://github.com/zed-industries/zed at commit
 1a28cff4b409169bac058bca40dfbfeb7621d19b, retaining selected GPUI-CE capabilities
 from https://github.com/gpui-ce/gpui-ce at commit
-9949f8b2d27bb1d6dbc1efe90be039634cf1fb6b. OxideTerm modifications are
+9949f8b2d27bb1d6dbc1efe90be039634cf1fb6b. OxideLab modifications are
 recorded in crates/gpui-ce/gpui/OXIDETERM_PATCHES.md.
 
 IBM Plex Sans and Lilex

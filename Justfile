@@ -8,7 +8,7 @@ default:
 fmt:
     cargo fmt --all -- --check
 
-# Run OxideTerm with optional Cargo arguments.
+# Run OxideLab with optional Cargo arguments.
 run *args:
     cargo run {{ args }}
 
@@ -28,7 +28,7 @@ build-cli target="":
 build-agent:
     bash scripts/build/build-agent.sh
 
-# Run the terminal throughput benchmark in the active OxideTerm terminal.
+# Run the terminal throughput benchmark in the active OxideLab terminal.
 benchmark:
     sh benchmark/benchmark.sh
 
