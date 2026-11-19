@@ -45,25 +45,31 @@ fn object_mut<'a>(value: &'a mut Value, key: &str) -> Option<&'a mut Map<String,
     value.get_mut(key).and_then(Value::as_object_mut)
 }
 
-fn normalize_sftp_speed_limit_key(settings: &mut Value, raw: &Value) {
-    let Some(sftp) = object_mut(settings, "sftp") else {
+fn normalize_legacy_key(
+    settings: &mut Value,
+    raw: &Value,
+    section: &str,
+    legacy_key: &str,
+    canonical_key: &str,
+) {
+    let Some(obj) = object_mut(settings, section) else {
         return;
     };
-    let Some(value) = sftp.remove("speedLimitKbps") else {
+    let Some(value) = obj.remove(legacy_key) else {
         return;
     };
 
     if raw
-        .get("sftp")
-        .and_then(|settings| settings.get("speedLimitKBps"))
+        .get(section)
+        .and_then(|section_raw| section_raw.get(canonical_key))
         .is_some()
     {
         return;
     }
 
-    // Keep the Tauri spelling canonical while still accepting older native
-    // files that used serde's plain camelCase acronym handling.
-    sftp.insert("speedLimitKBps".to_string(), value);
+    // Migrate legacy field names to the canonical spelling before serde
+    // deserializes structs whose `alias` attributes would reject duplicates.
+    obj.insert(canonical_key.to_string(), value);
 }
 
 fn now_ms() -> i64 {
@@ -715,7 +721,8 @@ pub fn sanitize_settings_value(raw: Value) -> Result<SanitizedSettings> {
     if let Some(object) = settings.as_object_mut() {
         object.insert("version".to_string(), json!(SETTINGS_SCHEMA_VERSION));
     }
-    normalize_sftp_speed_limit_key(&mut settings, &raw);
+    normalize_legacy_key(&mut settings, &raw, "sftp", "speedLimitKbps", "speedLimitKBps");
+    normalize_legacy_key(&mut settings, &raw, "general", "update_channel", "updateChannel");
     migrate_ai_providers(&mut settings, &mut migration_warnings);
     remove_ai_provider_default_models(&mut settings);
     migrate_ai_tool_use_settings(&mut settings, &raw);
@@ -1249,6 +1256,18 @@ mod tests {
                 "/general/updateChannel",
                 serde_json::to_value(UpdateChannel::default()).unwrap(),
                 Some("general.updateChannel"),
+            ),
+            (
+                json!({"general": {"update_channel": "beta"}}),
+                "/general/updateChannel",
+                json!("beta"),
+                None,
+            ),
+            (
+                json!({"general": {"update_channel": "beta", "updateChannel": "stable"}}),
+                "/general/updateChannel",
+                json!("stable"),
+                None,
             ),
             (
                 json!({"terminal": {"backgroundOpacity": 1.0}}),
