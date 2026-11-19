@@ -4,7 +4,7 @@
 set -eu
 
 benchmark_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-fixture_size_mib=${OXIDETERM_BENCHMARK_SIZE_MIB:-16}
+fixture_size_mib=${OXIDELAB_BENCHMARK_SIZE_MIB:-16}
 workload=${1:-all}
 
 usage() {
@@ -30,13 +30,13 @@ esac
 
 case "$fixture_size_mib" in
     *[!0-9]*|'')
-        printf '%s\n' 'OXIDETERM_BENCHMARK_SIZE_MIB must be a positive integer.' >&2
+        printf '%s\n' 'OXIDELAB_BENCHMARK_SIZE_MIB must be a positive integer.' >&2
         exit 2
         ;;
 esac
 
 if [ "$fixture_size_mib" -eq 0 ]; then
-    printf '%s\n' 'OXIDETERM_BENCHMARK_SIZE_MIB must be greater than zero.' >&2
+    printf '%s\n' 'OXIDELAB_BENCHMARK_SIZE_MIB must be greater than zero.' >&2
     exit 2
 fi
 
@@ -75,6 +75,6 @@ result = {
 }
 
 # Keep the result on stderr so stdout remains the terminal benchmark payload.
-print("OXIDETERM_BENCHMARK_RESULT " + json.dumps(result, sort_keys=True), file=sys.stderr)
+print("OXIDELAB_BENCHMARK_RESULT " + json.dumps(result, sort_keys=True), file=sys.stderr)
 raise SystemExit(completed.returncode)
 PYTHON

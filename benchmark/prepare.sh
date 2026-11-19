@@ -4,19 +4,19 @@
 set -eu
 
 benchmark_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-fixture_size_mib=${OXIDETERM_BENCHMARK_SIZE_MIB:-16}
-fixture_data_root=${OXIDETERM_BENCHMARK_DATA_DIR:-"$benchmark_root/.data"}
+fixture_size_mib=${OXIDELAB_BENCHMARK_SIZE_MIB:-16}
+fixture_data_root=${OXIDELAB_BENCHMARK_DATA_DIR:-"$benchmark_root/.data"}
 fixture_directory="$fixture_data_root/$fixture_size_mib-mib"
 
 case "$fixture_size_mib" in
     *[!0-9]*|'')
-        printf '%s\n' 'OXIDETERM_BENCHMARK_SIZE_MIB must be a positive integer.' >&2
+        printf '%s\n' 'OXIDELAB_BENCHMARK_SIZE_MIB must be a positive integer.' >&2
         exit 2
         ;;
 esac
 
 if [ "$fixture_size_mib" -eq 0 ]; then
-    printf '%s\n' 'OXIDETERM_BENCHMARK_SIZE_MIB must be greater than zero.' >&2
+    printf '%s\n' 'OXIDELAB_BENCHMARK_SIZE_MIB must be greater than zero.' >&2
     exit 2
 fi
 
@@ -34,7 +34,7 @@ write_fixture() {
 }
 
 escape_character=$(printf '\033')
-write_fixture plain 'OxideTerm benchmark plain text 0123456789 abcdefghijklmnopqrstuvwxyz'
-write_fixture ansi "${escape_character}[1;38;2;72;183;255;48;2;18;24;38mOxideTerm ANSI style workload${escape_character}[0m"
-write_fixture unicode 'OxideTerm Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀 café naïve'
-write_fixture long-csi "${escape_character}[1;2;3;4;5;7;8;9;22;23;24;25;27;28;29;38;2;72;183;255;48;2;18;24;38mOxideTerm long CSI workload${escape_character}[0m"
+write_fixture plain 'OxideLab benchmark plain text 0123456789 abcdefghijklmnopqrstuvwxyz'
+write_fixture ansi "${escape_character}[1;38;2;72;183;255;48;2;18;24;38mOxideLab ANSI style workload${escape_character}[0m"
+write_fixture unicode 'OxideLab Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀 café naïve'
+write_fixture long-csi "${escape_character}[1;2;3;4;5;7;8;9;22;23;24;25;27;28;29;38;2;72;183;255;48;2;18;24;38mOxideLab long CSI workload${escape_character}[0m"

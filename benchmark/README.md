@@ -2,22 +2,22 @@
 
 This directory contains reproducible terminal-output workloads for manual and external-harness testing. It deliberately separates fixture generation from payload emission, so fixture construction does not affect the measured terminal path.
 
-The scripts are original OxideTerm scripts. Their workload categories are informed by the public terminal benchmark ecosystem, but no external project source is copied here.
+The scripts are original OxideLab scripts. Their workload categories are informed by the public terminal benchmark ecosystem, but no external project source is copied here.
 
 ## Run the complete benchmark
 
-Open an OxideTerm terminal pane in the repository and run one command:
+Open an OxideLab terminal pane in the repository and run one command:
 
 ```sh
 ./benchmark/benchmark.sh
 ```
 
-It automatically prepares missing fixtures, performs one warm-up and three measured runs for every workload, prints a median summary, and saves raw JSONL samples, a machine-readable `summary.json`, and a human-readable `summary.md` under `benchmark/results/`. Both summaries record the running OxideTerm version and the UTC run time.
+It automatically prepares missing fixtures, performs one warm-up and three measured runs for every workload, prints a median summary, and saves raw JSONL samples, a machine-readable `summary.json`, and a human-readable `summary.md` under `benchmark/results/`. Both summaries record the running OxideLab version and the UTC run time.
 
 Example summary:
 
 ```text
-OxideTerm terminal benchmark summary
+OxideLab terminal benchmark summary
 Version: 2.0.23 | Run time: 2026-08-21 13:10:42 UTC
 Fixture: 16 MiB | warm-ups: 1 | measured runs: 3
 workload        median ms     median MiB/s
@@ -36,9 +36,9 @@ The Markdown report includes the version, readable UTC time, run configuration, 
 Change fixture size or repetition counts through environment variables:
 
 ```sh
-OXIDETERM_BENCHMARK_SIZE_MIB=64 \
-OXIDETERM_BENCHMARK_WARMUPS=3 \
-OXIDETERM_BENCHMARK_RUNS=5 \
+OXIDELAB_BENCHMARK_SIZE_MIB=64 \
+OXIDELAB_BENCHMARK_WARMUPS=3 \
+OXIDELAB_BENCHMARK_RUNS=5 \
 ./benchmark/benchmark.sh
 ```
 
@@ -52,16 +52,16 @@ The summary measures process-to-PTY throughput, not completed rendering or input
 
 [vtebench](https://github.com/alacritty/vtebench) is the recommended cross-terminal PTY-throughput harness. Its built-in executable workloads cover dense and light cells, Unicode, cursor motion, synchronized output, and multiple scrolling regions.
 
-Run it inside a focused OxideTerm terminal pane, then repeat the same command in each comparison terminal with matching window size, font, scrollback limit, theme, power state, and no competing workload:
+Run it inside a focused OxideLab terminal pane, then repeat the same command in each comparison terminal with matching window size, font, scrollback limit, theme, power state, and no competing workload:
 
 ```sh
 git clone https://github.com/alacritty/vtebench.git
 cd vtebench
-cargo run --release -- --dat oxideterm.dat
+cargo run --release -- --dat oxidelab.dat
 ```
 
 Do three warm-up runs and retain the median of five measured runs. Keep vtebench results separate from the in-app input-latency results: vtebench measures PTY read throughput, not general terminal responsiveness.
 
 ## Fixture storage
 
-Fixtures are written to `benchmark/.data/` by default and ignored by Git. Set `OXIDETERM_BENCHMARK_DATA_DIR` to place them elsewhere, for example on a RAM disk or a shared benchmarking volume.
+Fixtures are written to `benchmark/.data/` by default and ignored by Git. Set `OXIDELAB_BENCHMARK_DATA_DIR` to place them elsewhere, for example on a RAM disk or a shared benchmarking volume.

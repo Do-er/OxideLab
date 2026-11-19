@@ -4,8 +4,8 @@
 set -eu
 
 benchmark_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-fixture_size_mib=${OXIDETERM_BENCHMARK_SIZE_MIB:-16}
-fixture_data_root=${OXIDETERM_BENCHMARK_DATA_DIR:-"$benchmark_root/.data"}
+fixture_size_mib=${OXIDELAB_BENCHMARK_SIZE_MIB:-16}
+fixture_data_root=${OXIDELAB_BENCHMARK_DATA_DIR:-"$benchmark_root/.data"}
 fixture_directory="$fixture_data_root/$fixture_size_mib-mib"
 workload=${1:-all}
 

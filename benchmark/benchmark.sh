@@ -4,10 +4,10 @@
 set -eu
 
 benchmark_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-fixture_size_mib=${OXIDETERM_BENCHMARK_SIZE_MIB:-16}
-warmup_runs=${OXIDETERM_BENCHMARK_WARMUPS:-1}
-measured_runs=${OXIDETERM_BENCHMARK_RUNS:-3}
-results_root=${OXIDETERM_BENCHMARK_RESULTS_DIR:-"$benchmark_root/results"}
+fixture_size_mib=${OXIDELAB_BENCHMARK_SIZE_MIB:-16}
+warmup_runs=${OXIDELAB_BENCHMARK_WARMUPS:-1}
+measured_runs=${OXIDELAB_BENCHMARK_RUNS:-3}
+results_root=${OXIDELAB_BENCHMARK_RESULTS_DIR:-"$benchmark_root/results"}
 workloads='plain ansi unicode long-csi'
 
 require_nonnegative_integer() {
@@ -21,9 +21,9 @@ require_nonnegative_integer() {
     esac
 }
 
-require_nonnegative_integer OXIDETERM_BENCHMARK_SIZE_MIB "$fixture_size_mib"
-require_nonnegative_integer OXIDETERM_BENCHMARK_WARMUPS "$warmup_runs"
-require_nonnegative_integer OXIDETERM_BENCHMARK_RUNS "$measured_runs"
+require_nonnegative_integer OXIDELAB_BENCHMARK_SIZE_MIB "$fixture_size_mib"
+require_nonnegative_integer OXIDELAB_BENCHMARK_WARMUPS "$warmup_runs"
+require_nonnegative_integer OXIDELAB_BENCHMARK_RUNS "$measured_runs"
 
 if [ "$fixture_size_mib" -eq 0 ] || [ "$measured_runs" -eq 0 ]; then
     printf '%s\n' 'Fixture size and measured run count must be greater than zero.' >&2
@@ -68,7 +68,7 @@ while [ "$measured_iteration" -le "$measured_runs" ]; do
     for workload in $workloads; do
         printf 'Measured run %s/%s: %s\n' "$measured_iteration" "$measured_runs" "$workload" >&2
         if result_line=$("$benchmark_root/measure.sh" "$workload" 2>&1 1>&3); then
-            result_prefix='OXIDETERM_BENCHMARK_RESULT '
+            result_prefix='OXIDELAB_BENCHMARK_RESULT '
             case "$result_line" in
                 "$result_prefix"*)
                     printf '%s\n' "${result_line#"$result_prefix"}" >> "$raw_result_path"
@@ -150,9 +150,9 @@ Path(json_summary_path).write_text(
 )
 
 markdown_lines = [
-    "# OxideTerm terminal benchmark summary",
+    "# OxideLab terminal benchmark summary",
     "",
-    f"- **OxideTerm version:** `{oxideterm_version}`",
+    f"- **OxideLab version:** `{oxideterm_version}`",
     f"- **Run time:** {started_at_display}",
     f"- **Run ID:** `{benchmark_run_id}`",
     f"- **Fixture:** {fixture_size_mib} MiB",
@@ -181,7 +181,7 @@ markdown_lines.extend(
 )
 Path(markdown_summary_path).write_text("\n".join(markdown_lines), encoding="utf-8")
 
-print("\nOxideTerm terminal benchmark summary")
+print("\nOxideLab terminal benchmark summary")
 print(f"Version: {oxideterm_version} | Run time: {started_at_display}")
 print(f"Fixture: {fixture_size_mib} MiB | warm-ups: {warmup_runs} | measured runs: {measured_runs}")
 print(f"{'workload':<12} {'median ms':>12} {'median MiB/s':>16}")
