@@ -162,8 +162,8 @@ fn link_styling_respects_explicit_links_application_colors_and_hover() {
     }
     suggestion.lines[0].active_input = true;
     suggestion.lines[0].refresh_signature();
-    let mut prompt = selection_snapshot("~/Documents/OxideTerm");
-    for cell in &mut prompt.lines[0].cells_mut()[..21] {
+    let mut prompt = selection_snapshot("~/Documents/OxideLab");
+    for cell in &mut prompt.lines[0].cells_mut()[..20] {
         cell.bg = TerminalColor::rgb(0x61, 0xaf, 0xef);
         cell.fg = TerminalColor::rgb(0xff, 0xff, 0xff);
     }
@@ -208,7 +208,7 @@ fn link_styling_respects_explicit_links_application_colors_and_hover() {
             "painted prompt",
             prompt,
             false,
-            "~/Documents/OxideTerm",
+            "~/Documents/OxideLab",
             Some(0xffffff),
             false,
         ),

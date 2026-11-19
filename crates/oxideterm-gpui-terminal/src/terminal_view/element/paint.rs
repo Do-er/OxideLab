@@ -838,7 +838,7 @@ fn paint_cell_drawing_run(
                 .borrow_mut()
                 .get_or_insert_with((ch, width, height, stroke), || {
                     std::sync::Arc::new(CachedCellDrawing {
-                        name: format!("oxideterm-cell-{:x}-{width}-{height}-{stroke}", ch as u32)
+                        name: format!("oxidelab-cell-{:x}-{width}-{height}-{stroke}", ch as u32)
                             .into(),
                         svg: cell_drawing_svg(ch, width, height, stroke),
                     })

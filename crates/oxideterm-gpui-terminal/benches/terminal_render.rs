@@ -326,7 +326,7 @@ fn terminal_corpus_from(first_line: usize, lines: usize) -> Vec<u8> {
     for line in first_line..first_line + lines {
         corpus.extend_from_slice(
             format!(
-                "\x1b[38;5;{}moxideterm render benchmark line {line} cargo check\x1b[0m\r\n",
+                "\x1b[38;5;{}moxidelab render benchmark line {line} cargo check\x1b[0m\r\n",
                 line % 256
             )
             .as_bytes(),

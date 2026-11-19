@@ -145,7 +145,7 @@ pub type SharedTerminalSession = Arc<Mutex<TerminalSession>>;
 pub type TerminalInputInterceptor =
     Arc<dyn Fn(&[u8]) -> TerminalInputInterceptorResult + Send + Sync>;
 pub type TerminalInputBroadcaster = Rc<dyn Fn(TerminalBroadcastInputKind, &[u8], &mut App)>;
-const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDETERM_PRIVILEGE_DEBUG";
+const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDELAB_PRIVILEGE_DEBUG";
 const TERMINAL_ANIMATION_INTERVAL: Duration = Duration::from_millis(16);
 const SMOOTH_SCROLL_ANIMATION_DURATION: Duration = Duration::from_millis(125);
 const DRAIN_BOOST_POLL_INTERVAL: Duration = Duration::from_millis(8);
@@ -1367,7 +1367,7 @@ impl TerminalPane {
             free_type_drag: None,
             last_mouse_report_point: None,
             mouse_paste_button: None,
-            title: SharedString::from("OxideTerm"),
+            title: SharedString::from("OxideLab"),
             cwd: None,
             cwd_source: None,
             pending_cwd: None,
@@ -4191,7 +4191,7 @@ impl TerminalPane {
                 TerminalEventEffect::notify()
             }
             TerminalEvent::TitleReset => {
-                self.title = SharedString::from("OxideTerm");
+                self.title = SharedString::from("OxideLab");
                 TerminalEventEffect::notify()
             }
             TerminalEvent::Bell => {
@@ -5666,7 +5666,7 @@ mod tests {
 
     #[test]
     fn missing_serial_port_is_reported_before_pane_construction() {
-        const MISSING_SERIAL_PORT_PATH: &str = "oxideterm-test-missing-serial-port";
+        const MISSING_SERIAL_PORT_PATH: &str = "oxidelab-test-missing-serial-port";
         let config = SerialSessionConfig {
             port_path: MISSING_SERIAL_PORT_PATH.to_string(),
             baud_rate: 115_200,

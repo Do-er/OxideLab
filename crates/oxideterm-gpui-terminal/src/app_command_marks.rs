@@ -1140,7 +1140,7 @@ fn input_tracker_handles_submission_editing_state_and_reset_sequences() {
             ),
             (
                 "cd ..",
-                Some("/home/lipsc/OxideTerm"),
+                Some("/home/lipsc/OxideLab"),
                 Some("/home/lipsc"),
             ),
             ("cd", Some("/home/lipsc"), None),

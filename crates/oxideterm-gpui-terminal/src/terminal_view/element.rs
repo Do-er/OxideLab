@@ -3287,7 +3287,7 @@ mod cache_tests {
         input.cursor_shape = TerminalCursorShape::Hidden;
         let mut view = element(input);
         let mut cache = TerminalLayoutCache::default();
-        let first = view.layout_for_rows(0..1, Some(&mut cache));
+        let first = view.layout_for_rows(0..1, None, Some(&mut cache));
         let original = &first.cached_rows[0].layout.text_runs;
         assert_eq!(
             original
@@ -3299,7 +3299,7 @@ mod cache_tests {
 
         view.snapshot.lines[0].cells_mut()[9].ch = 's';
         view.snapshot.lines[0].refresh_signature();
-        let edited = view.layout_for_rows(0..1, Some(&mut cache));
+        let edited = view.layout_for_rows(0..1, None, Some(&mut cache));
         let runs = &edited.cached_rows[0].layout.text_runs;
         assert_eq!(
             runs.iter()
@@ -3315,7 +3315,7 @@ mod cache_tests {
             head: TerminalGridPoint { line: 0, col: 3 },
             mode: TerminalSelectionMode::Simple,
         });
-        let selected = view.layout_for_rows(0..1, Some(&mut cache));
+        let selected = view.layout_for_rows(0..1, None, Some(&mut cache));
         let selected_row = &selected.cached_rows[0].layout;
         assert_eq!(
             selected_row
@@ -3336,7 +3336,7 @@ mod cache_tests {
 
         view.snapshot.lines[0].cells_mut()[0].fg = TerminalColor::rgb(255, 0, 0);
         view.snapshot.lines[0].refresh_signature();
-        let recolored = view.layout_for_rows(0..1, Some(&mut cache));
+        let recolored = view.layout_for_rows(0..1, None, Some(&mut cache));
         assert_eq!(
             recolored.cached_rows[0].layout.text_runs[0].style.color,
             gpui::rgb(0xff0000).into()
@@ -3355,7 +3355,7 @@ mod cache_tests {
                 3 => view.metrics.font.weight = gpui::FontWeight::BOLD,
                 _ => view.metrics.font.family = "Consolas".into(),
             }
-            let resized = view.layout_for_rows(0..1, Some(&mut cache));
+            let resized = view.layout_for_rows(0..1, None, Some(&mut cache));
             let before = previous.cached_rows[0].layout.text_runs.last().unwrap();
             let after = resized.cached_rows[0].layout.text_runs.last().unwrap();
             assert_eq!(after.text.as_ref(), "bets");
@@ -3448,15 +3448,15 @@ mod cache_tests {
             ..Default::default()
         }]);
         let mut cache = TerminalLayoutCache::default();
-        let first = view.layout_for_rows(0..2, Some(&mut cache));
-        let warm = view.layout_for_rows(0..2, Some(&mut cache));
+        let first = view.layout_for_rows(0..2, None, Some(&mut cache));
+        let warm = view.layout_for_rows(0..2, None, Some(&mut cache));
         assert!(Arc::ptr_eq(
             &first.cached_rows[0].layout,
             &warm.cached_rows[0].layout
         ));
         view.snapshot.lines[1].cells_mut()[6].ch = 'X';
         view.snapshot.lines[1].refresh_signature();
-        let changed = view.layout_for_rows(0..2, Some(&mut cache));
+        let changed = view.layout_for_rows(0..2, None, Some(&mut cache));
         assert!(Arc::ptr_eq(
             &warm.cached_rows[0].layout,
             &changed.cached_rows[0].layout
@@ -3480,7 +3480,7 @@ mod cache_tests {
             let mut rules = view.highlight_rules.to_vec();
             rules[0].enabled = enabled;
             view = view.highlight_rules(rules);
-            let layout = view.layout_for_rows(0..2, Some(&mut cache));
+            let layout = view.layout_for_rows(0..2, None, Some(&mut cache));
             for row in &layout.cached_rows {
                 let first_run = &row.layout.text_runs[0];
                 assert_eq!(first_run.text, "ERROR");
@@ -3502,8 +3502,8 @@ mod cache_tests {
         let row = row_with_text_and_cursor(0, "cached", 5);
         let stable = element(snapshot(0, vec![row.clone()]));
         let mut cache = TerminalLayoutCache::default();
-        let first = stable.layout_for_rows(0..1, Some(&mut cache));
-        let second = stable.layout_for_rows(0..1, Some(&mut cache));
+        let first = stable.layout_for_rows(0..1, None, Some(&mut cache));
+        let second = stable.layout_for_rows(0..1, None, Some(&mut cache));
         let first_cache = &first.cached_rows[0].layout.text_runs[0].cache;
         let second_cache = &second.cached_rows[0].layout.text_runs[0].cache;
         assert!(Arc::ptr_eq(first_cache, second_cache));
@@ -3513,7 +3513,7 @@ mod cache_tests {
         cells[0].fg = TerminalColor::rgb(0xff, 0x00, 0x00);
         changed_row.refresh_signature();
         let changed = element(snapshot(0, vec![changed_row]));
-        let changed_layout = changed.layout_for_rows(0..1, Some(&mut cache));
+        let changed_layout = changed.layout_for_rows(0..1, None, Some(&mut cache));
         let changed_cache = &changed_layout.cached_rows[0].layout.text_runs[0].cache;
         assert!(!Arc::ptr_eq(first_cache, changed_cache));
 
@@ -3526,7 +3526,7 @@ mod cache_tests {
             retired.upgrade().is_none(),
             "hidden rows must release retained glyph data"
         );
-        let rebuilt = stable.layout_for_rows(0..1, Some(&mut cache));
+        let rebuilt = stable.layout_for_rows(0..1, None, Some(&mut cache));
         assert_eq!(
             rebuilt.cached_rows[0]
                 .layout
@@ -3552,8 +3552,8 @@ mod cache_tests {
         });
         let mut cache = TerminalLayoutCache::default();
         for layout in [
-            view.layout_for_rows(0..1, None),
-            view.layout_for_rows(0..1, Some(&mut cache)),
+            view.layout_for_rows(0..1, None, None),
+            view.layout_for_rows(0..1, None, Some(&mut cache)),
         ] {
             assert_eq!(
                 layout.glyph_edge_exclusions(1, 5, false),
@@ -3592,7 +3592,7 @@ mod cache_tests {
         ] {
             tokens.terminal.selection_background = color;
             selected.theme = TerminalUiTheme::from_tokens(tokens);
-            let layout = selected.layout_for_rows(0..1, Some(&mut cache));
+            let layout = selected.layout_for_rows(0..1, None, Some(&mut cache));
             let rects = &layout.cached_rows[0].layout.selections;
             assert_eq!(
                 rects
@@ -3613,7 +3613,7 @@ mod cache_tests {
                 head: TerminalGridPoint { line: 0, col: end },
                 mode: TerminalSelectionMode::Simple,
             });
-            let layout = selected.layout_for_rows(0..1, Some(&mut cache));
+            let layout = selected.layout_for_rows(0..1, None, Some(&mut cache));
             assert_eq!(
                 layout.cached_rows[0]
                     .layout
@@ -3655,7 +3655,7 @@ mod cache_tests {
             let mut cache = TerminalLayoutCache::default();
             for transparent in [false, true, false, true] {
                 view.transparent_background = transparent;
-                let layout = view.layout_for_rows(0..1, Some(&mut cache));
+                let layout = view.layout_for_rows(0..1, None, Some(&mut cache));
                 let row = &layout.cached_rows[0].layout;
                 assert_eq!(
                     row.backgrounds
@@ -3690,7 +3690,7 @@ mod cache_tests {
             view.snapshot.lines[0].cells_mut()[0].cursor = true;
             view.snapshot.lines[0].refresh_signature();
             view.snapshot.cursor_col = 0;
-            let layout = view.layout_for_rows(0..1, Some(&mut cache));
+            let layout = view.layout_for_rows(0..1, None, Some(&mut cache));
             let row = &layout.cached_rows[0].layout;
             assert!(
                 row.backgrounds

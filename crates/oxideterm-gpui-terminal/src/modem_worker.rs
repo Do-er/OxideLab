@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::fs::File;
@@ -368,7 +368,7 @@ impl DownloadBatch {
     ) -> Result<(TransactionalDownloadWriter, String), ModemTransferError> {
         let requested_name = safe_download_file_name(remote_name)?;
         let temporary_file = tempfile::Builder::new()
-            .prefix(".oxideterm-modem-")
+            .prefix(".oxidelab-modem-")
             .suffix(".part")
             .tempfile_in(root)?;
         Ok((

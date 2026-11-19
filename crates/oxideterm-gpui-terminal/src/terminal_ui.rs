@@ -710,7 +710,7 @@ impl Default for TerminalTrzszLabels {
             completed_title: "Transfer completed".to_string(),
             completed_description: "The trzsz transfer completed successfully.".to_string(),
             failed_title: "Transfer failed".to_string(),
-            failed_description: "OxideTerm could not complete this trzsz transfer.".to_string(),
+            failed_description: "OxideLab could not complete this trzsz transfer.".to_string(),
             connection_lost_title: "Transfer interrupted by connection loss".to_string(),
             connection_lost_description:
                 "The SSH connection changed while the trzsz transfer was running. Reconnect and start the transfer again."
@@ -721,15 +721,15 @@ impl Default for TerminalTrzszLabels {
                     .to_string(),
             version_mismatch_title: "trzsz protocol mismatch".to_string(),
             version_mismatch_description:
-                "The remote trzsz runtime is not compatible with this OxideTerm build."
+                "The remote trzsz runtime is not compatible with this OxideLab build."
                     .to_string(),
             path_invalid_title: "Download path rejected".to_string(),
             path_invalid_description:
-                "OxideTerm blocked this trzsz transfer because the selected path is invalid or outside the allowed download root."
+                "OxideLab blocked this trzsz transfer because the selected path is invalid or outside the allowed download root."
                     .to_string(),
             symlink_not_supported_title: "Symlink transfer is not supported".to_string(),
             symlink_not_supported_description:
-                "The current OxideTerm trzsz bridge does not write symbolic links.".to_string(),
+                "The current OxideLab trzsz bridge does not write symbolic links.".to_string(),
             conflict_detected_title: "File conflict detected".to_string(),
             conflict_detected_description:
                 "A file or folder with the same name already exists at the destination.".to_string(),
@@ -775,7 +775,7 @@ impl Default for TerminalKittyFileTransmissionLabels {
             allowed_title: "Kitty file access allowed for this session".to_string(),
             allowed_description: "Local image resources are allowed until this session closes or reconnects. Retry the transfer.".to_string(),
             failed_title: "Could not enable Kitty file access".to_string(),
-            failed_description: "OxideTerm could not authorize local resources for this session.".to_string(),
+            failed_description: "OxideLab could not authorize local resources for this session.".to_string(),
         }
     }
 }

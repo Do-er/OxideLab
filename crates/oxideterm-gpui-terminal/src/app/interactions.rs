@@ -34,8 +34,8 @@ const TERMINAL_FREE_TYPE_DRAG_THRESHOLD_PX: f32 = 5.0;
 // Precision-scroll panes accumulate toward a whole row pair before stepping the font size,
 // so a two-finger gesture cannot flood the settings store with single-point changes.
 const TERMINAL_FONT_ZOOM_ROWS_PER_STEP: f32 = 2.0;
-const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDETERM_PRIVILEGE_DEBUG";
-const FREE_TYPE_DEBUG_ENV: &str = "OXIDETERM_FREE_TYPE_DEBUG";
+const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDELAB_PRIVILEGE_DEBUG";
+const FREE_TYPE_DEBUG_ENV: &str = "OXIDELAB_FREE_TYPE_DEBUG";
 
 fn log_privilege_prompt_terminal(args: std::fmt::Arguments<'_>) {
     if env::var_os(PRIVILEGE_PROMPT_DEBUG_ENV).is_some() {
@@ -4195,6 +4195,7 @@ mod tests {
         });
     }
 
+    #[gpui::test]
     fn search_highlights_survive_scroll_event_drain(cx: &mut TestAppContext) {
         let (_, cx) = cx.add_window_view(|_, _| TerminalScrollTestRoot);
         let pane = cx.update(|window, cx| {
@@ -5323,11 +5324,11 @@ mod tests {
             .expect("system clock after Unix epoch")
             .as_nanos();
         let fixture_dir = std::env::temp_dir().join(format!(
-            "oxideterm-free-type-vim-{}-{unique}",
+            "oxidelab-free-type-vim-{}-{unique}",
             std::process::id()
         ));
         std::fs::create_dir_all(&fixture_dir).expect("create Vim fixture directory");
-        let integration_path = fixture_dir.join("oxideterm-free-type.vim");
+        let integration_path = fixture_dir.join("oxidelab-free-type.vim");
         let document_path = fixture_dir.join("document.txt");
         std::fs::write(&integration_path, VIM_FREE_TYPE_INTEGRATION_SOURCE)
             .expect("write bundled Vim integration");
