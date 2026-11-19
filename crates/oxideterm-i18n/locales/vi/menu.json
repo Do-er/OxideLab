@@ -1,12 +1,12 @@
 {
   "menu": {
-    "app": "OxideTerm",
+    "app": "OxideLab",
     "services": "Dịch vụ",
     "new_terminal": "Terminal mới",
     "close_tab": "Đóng tab",
     "show_main_window": "Hiện cửa sổ chính",
     "hide_main_window": "Ẩn cửa sổ chính",
-    "quit": "Thoát OxideTerm",
+    "quit": "Thoát OxideLab",
     "confirm_quit": "Tất cả phiên terminal và kết nối đang hoạt động sẽ bị đóng.",
     "unlock_to_finish_quit": "Mở khóa để lưu hoặc hủy các thay đổi trước khi thoát.",
     "edit": "Chỉnh sửa",

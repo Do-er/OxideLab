@@ -99,7 +99,7 @@
       "switch_focus": "Vue focus",
       "new_connection": "Nouvelle connexion",
       "clear_inactive_sessions": "Nettoyer les sessions inactives",
-      "lock_app": "Verrouiller OxideTerm",
+      "lock_app": "Verrouiller OxideLab",
       "setup_app_lock": "Configurer le verrouillage",
       "collapse": "Réduire"
     },

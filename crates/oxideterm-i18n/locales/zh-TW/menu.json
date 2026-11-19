@@ -1,12 +1,12 @@
 {
   "menu": {
-    "app": "OxideTerm",
+    "app": "OxideLab",
     "services": "服務",
     "new_terminal": "新終端機",
     "close_tab": "關閉分頁",
     "show_main_window": "顯示主視窗",
     "hide_main_window": "隱藏主視窗",
-    "quit": "退出 OxideTerm",
+    "quit": "退出 OxideLab",
     "confirm_quit": "所有使用中的終端工作階段和連線都將關閉",
     "unlock_to_finish_quit": "解鎖後，請儲存或捨棄尚未儲存的變更，再結束程式。",
     "edit": "編輯",

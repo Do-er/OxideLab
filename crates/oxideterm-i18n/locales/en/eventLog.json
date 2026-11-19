@@ -369,7 +369,7 @@
       "group": "Group",
       "group_assignment": "Group assignment",
       "ftp_profile": "FTP profile",
-      "oxide_file": "OxideTerm connection file",
+      "oxide_file": "OxideLab connection file",
       "saved_connections": "Saved connections",
       "serial_profiles": "Serial profiles",
       "telnet_profiles": "Telnet profiles",

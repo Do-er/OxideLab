@@ -369,7 +369,7 @@
       "group": "分组",
       "group_assignment": "分组归属",
       "ftp_profile": "FTP 配置",
-      "oxide_file": "OxideTerm 连接文件",
+      "oxide_file": "OxideLab 连接文件",
       "saved_connections": "已保存连接",
       "serial_profiles": "串口配置",
       "telnet_profiles": "Telnet 配置",

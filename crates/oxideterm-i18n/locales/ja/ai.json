@@ -108,7 +108,7 @@
       "clear_all_confirm": "すべての会話を削除してもよろしいですか？",
       "load_failed_title": "チャット履歴を読み込めません",
       "load_failed_generic": "OxideSens はローカルデータベースからチャット履歴を読み込めませんでした。",
-      "database_locked": "別の OxideTerm インスタンスがチャットデータベースを使用しています。別のインスタンスを閉じてから再試行してください。",
+      "database_locked": "別の OxideLab インスタンスがチャットデータベースを使用しています。別のインスタンスを閉じてから再試行してください。",
       "database_upgrade_required": "このチャットデータベースにはより新しい移行パスが必要なため、安全に開くことができませんでした。",
       "conversations": "会話",
       "archive_conversation": "会話をアーカイブ",

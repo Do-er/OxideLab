@@ -369,7 +369,7 @@
       "group": "그룹",
       "group_assignment": "그룹 할당",
       "ftp_profile": "FTP 프로필",
-      "oxide_file": "OxideTerm 연결 파일",
+      "oxide_file": "OxideLab 연결 파일",
       "saved_connections": "저장된 연결",
       "serial_profiles": "직렬 포트 프로필",
       "telnet_profiles": "Telnet 프로필",

@@ -1,12 +1,12 @@
 {
   "menu": {
-    "app": "OxideTerm",
+    "app": "OxideLab",
     "services": "Services",
     "new_terminal": "New Terminal",
     "close_tab": "Close Tab",
     "show_main_window": "Show Main Window",
     "hide_main_window": "Hide Main Window",
-    "quit": "Quit OxideTerm",
+    "quit": "Quit OxideLab",
     "confirm_quit": "All active terminal sessions and connections will be closed.",
     "unlock_to_finish_quit": "Unlock to save or discard your changes before quitting.",
     "edit": "Edit",

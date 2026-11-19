@@ -1,12 +1,12 @@
 {
   "menu": {
-    "app": "OxideTerm",
+    "app": "OxideLab",
     "services": "Servizi",
     "new_terminal": "Nuovo terminale",
     "close_tab": "Chiudi scheda",
     "show_main_window": "Mostra finestra principale",
     "hide_main_window": "Nascondi finestra principale",
-    "quit": "Esci da OxideTerm",
+    "quit": "Esci da OxideLab",
     "confirm_quit": "Tutte le sessioni del terminale e le connessioni attive verranno chiuse.",
     "unlock_to_finish_quit": "Sblocca l’app per salvare o scartare le modifiche prima di uscire.",
     "edit": "Modifica",

@@ -108,7 +108,7 @@
       "clear_all_confirm": "Êtes-vous sûr de vouloir supprimer toutes les conversations ?",
       "load_failed_title": "Impossible de charger l'historique du chat",
       "load_failed_generic": "OxideSens n'a pas pu charger l'historique du chat depuis la base de données locale.",
-      "database_locked": "Une autre instance d'OxideTerm utilise la base de données du chat. Fermez l'autre instance, puis réessayez.",
+      "database_locked": "Une autre instance d'OxideLab utilise la base de données du chat. Fermez l'autre instance, puis réessayez.",
       "database_upgrade_required": "Cette base de données de chat nécessite un chemin de migration plus récent et n'a pas pu être ouverte en toute sécurité.",
       "conversations": "Conversations",
       "archive_conversation": "Archiver la conversation",

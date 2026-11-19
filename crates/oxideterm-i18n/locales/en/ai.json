@@ -108,7 +108,7 @@
       "clear_all_confirm": "Are you sure you want to delete all conversations?",
       "load_failed_title": "Unable to load chat history",
       "load_failed_generic": "OxideSens could not load chat history from the local database.",
-      "database_locked": "Another OxideTerm instance is using the chat database. Close the other instance, then retry.",
+      "database_locked": "Another OxideLab instance is using the chat database. Close the other instance, then retry.",
       "database_upgrade_required": "This chat database requires a newer migration path and could not be opened safely.",
       "conversations": "Conversations",
       "archive_conversation": "Archive conversation",
