@@ -1,19 +1,19 @@
 # Nix Packaging and Maintenance Guide
 
-This directory contains the Nix packaging and NixOS module definitions for OxideTerm:
+This directory contains the Nix packaging and NixOS module definitions for OxideLab:
 
 - `package.nix`: Package derivation definition using `pkgs.rustPlatform.buildRustPackage`.
-- `module.nix`: NixOS module definition (`programs.oxideterm`).
+- `module.nix`: NixOS module definition (`programs.oxidelab`).
 - `../flake.nix`: Nix Flake exposing default packages, dev shells, overlays, NixOS modules, and checks.
 
 ## Common Commands
 
 ```sh
-# Build the default OxideTerm package
-nix build .#oxideterm -L --show-trace
+# Build the default OxideLab package
+nix build .#oxidelab -L --show-trace
 
-# Run OxideTerm directly from the flake
-nix run .#oxideterm
+# Run OxideLab directly from the flake
+nix run .#oxidelab
 
 # Check all flake outputs and packages
 nix flake check -L
@@ -45,14 +45,14 @@ Whenever modifying, bumping, or adding a Git dependency in `Cargo.toml`:
 1. Update `Cargo.toml` and generate the updated `Cargo.lock` (`cargo check` or `cargo update -p <crate>`).
 2. Run the local Nix build to detect any missing or changed hashes:
    ```sh
-   nix build .#oxideterm -L --show-trace
+   nix build .#oxidelab -L --show-trace
    ```
 3. If Nix reports a hash mismatch:
    - Verify that the locked Git commit in `Cargo.lock` matches the expected upstream revision.
    - Update the matching crate entry in `nix/package.nix` under `cargoLock.outputHashes` using the `got:` hash from the Nix error output.
 4. Run the full build and flake checks to ensure clean completion:
    ```sh
-   nix build .#oxideterm -L --show-trace
+   nix build .#oxidelab -L --show-trace
    nix flake check -L
    ```
 

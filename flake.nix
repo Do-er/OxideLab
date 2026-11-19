@@ -1,5 +1,5 @@
 {
-  description = "OxideTerm packages for Nix";
+  description = "OxideLab packages for Nix";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -22,25 +22,25 @@
           pkgs = pkgsFor system;
         in
         {
-          oxideterm = pkgs.callPackage ./nix/package.nix { };
+          oxidelab = pkgs.callPackage ./nix/package.nix { };
         }
       );
 
       packages = forAllSystems (
         system:
         let
-          package = self.legacyPackages.${system}.oxideterm;
+          package = self.legacyPackages.${system}.oxidelab;
         in
         {
           default = package;
-          oxideterm = package;
+          oxidelab = package;
         }
       );
 
       apps = forAllSystems (
         system:
         let
-          package = self.packages.${system}.oxideterm;
+          package = self.packages.${system}.oxidelab;
         in
         {
           default = {
@@ -49,7 +49,7 @@
           };
           cli = {
             type = "app";
-            program = "${package}/bin/oxideterm";
+            program = "${package}/bin/oxidelab";
           };
         }
       );
@@ -88,7 +88,7 @@
         in
         {
           default = pkgs.mkShell {
-            name = "oxideterm-dev-shell";
+            name = "oxidelab-dev-shell";
             packages =
               with pkgs;
               [
@@ -116,25 +116,25 @@
       );
 
       overlays.default = final: _prev: {
-        oxideterm = final.callPackage ./nix/package.nix { };
+        oxidelab = final.callPackage ./nix/package.nix { };
       };
 
-      nixosModules.oxideterm =
+      nixosModules.oxidelab =
         { lib, pkgs, ... }:
         let
           system = pkgs.stdenv.hostPlatform.system;
           package =
-            self.packages.${system}.oxideterm
-              or (throw "OxideTerm NixOS module does not support system '${system}'");
+            self.packages.${system}.oxidelab
+              or (throw "OxideLab NixOS module does not support system '${system}'");
         in
         {
           imports = [ ./nix/module.nix ];
-          programs.oxideterm.package = lib.mkDefault package;
+          programs.oxidelab.package = lib.mkDefault package;
         };
-      nixosModules.default = self.nixosModules.oxideterm;
+      nixosModules.default = self.nixosModules.oxidelab;
 
       checks = forAllSystems (system: {
-        oxideterm = self.packages.${system}.oxideterm;
+        oxidelab = self.packages.${system}.oxidelab;
       });
     };
 }

@@ -6,12 +6,12 @@
 }:
 
 let
-  cfg = config.programs.oxideterm;
+  cfg = config.programs.oxidelab;
 in
 {
-  options.programs.oxideterm = {
-    enable = lib.mkEnableOption "OxideTerm";
-    package = lib.mkPackageOption pkgs "oxideterm" { };
+  options.programs.oxidelab = {
+    enable = lib.mkEnableOption "OxideLab";
+    package = lib.mkPackageOption pkgs "oxidelab" { };
   };
 
   config = lib.mkIf cfg.enable {

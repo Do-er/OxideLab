@@ -36,7 +36,7 @@
 }:
 
 assert lib.assertMsg stdenv.hostPlatform.isLinux
-  "OxideTerm's Nix package is supported only on Linux";
+  "OxideLab's Nix package is supported only on Linux";
 
 let
   target = stdenv.hostPlatform.rust.rustcTarget;
@@ -107,7 +107,7 @@ let
   ];
 in
 rustPlatform.buildRustPackage {
-  pname = "oxideterm";
+  pname = "oxidelab";
   version = (builtins.fromTOML (builtins.readFile ../Cargo.toml)).workspace.package.version;
   src = ../.;
 
@@ -119,7 +119,7 @@ rustPlatform.buildRustPackage {
     #
     # When updating or adding Git dependencies in Cargo.toml / Cargo.lock:
     # 1. Update Cargo.toml and Cargo.lock first.
-    # 2. Run `nix build .#oxideterm -L --show-trace`.
+    # 2. Run `nix build .#oxidelab -L --show-trace`.
     # 3. If a hash mismatch occurs, check the locked Git revision and update
     #    the matching entry below with the `got:` sha256 output.
     # 4. Run `nix flake check -L` to ensure package checks pass.
@@ -175,33 +175,33 @@ rustPlatform.buildRustPackage {
     install -Dm644 README.md "$out/share/doc/oxideterm/README.md"
 
     install -Dm644 crates/oxideterm-gpui-app/resources/icons/32x32.png \
-      "$out/share/icons/hicolor/32x32/apps/oxideterm.png"
+      "$out/share/icons/hicolor/32x32/apps/oxidelab.png"
     install -Dm644 crates/oxideterm-gpui-app/resources/icons/64x64.png \
-      "$out/share/icons/hicolor/64x64/apps/oxideterm.png"
+      "$out/share/icons/hicolor/64x64/apps/oxidelab.png"
     install -Dm644 crates/oxideterm-gpui-app/resources/icons/128x128.png \
-      "$out/share/icons/hicolor/128x128/apps/oxideterm.png"
+      "$out/share/icons/hicolor/128x128/apps/oxidelab.png"
     install -Dm644 crates/oxideterm-gpui-app/resources/icons/128x128@2x.png \
-      "$out/share/icons/hicolor/256x256/apps/oxideterm.png"
+      "$out/share/icons/hicolor/256x256/apps/oxidelab.png"
 
-    wrapProgram "$out/bin/oxideterm" \
+    wrapProgram "$out/bin/oxidelab" \
       --run ${lib.escapeShellArg sslCertSetup} \
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeLibs}"
 
     wrapProgram "$out/bin/oxideterm-native" \
-      --set OXIDETERM_CLI_BIN "$out/bin/oxideterm" \
+      --set OXIDELAB_CLI_BIN "$out/bin/oxidelab" \
       --run ${lib.escapeShellArg sslCertSetup} \
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeLibs}" \
       --prefix GST_PLUGIN_SYSTEM_PATH_1_0 : "${lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gstPlugins}"
 
-    ln -s "$out/bin/oxideterm" "$resource_root/cli-bin/$target_triple/oxideterm"
+    ln -s "$out/bin/oxidelab" "$resource_root/cli-bin/$target_triple/oxidelab"
   '';
 
   desktopItems = [
     (makeDesktopItem {
-      name = "oxideterm";
+      name = "oxidelab";
       exec = "oxideterm-native %U";
-      icon = "oxideterm";
-      desktopName = "OxideTerm";
+      icon = "oxidelab";
+      desktopName = "OxideLab";
       comment = "AI-native workspace for local shells and remote machines";
       categories = [
         "Development"
@@ -215,7 +215,7 @@ rustPlatform.buildRustPackage {
         "x-scheme-handler/rdp"
         "x-scheme-handler/vnc"
       ];
-      startupWMClass = "OxideTerm";
+      startupWMClass = "OxideLab";
     })
   ];
 
