@@ -673,7 +673,16 @@ impl Render for TerminalPane {
                                 .right_0()
                                 .bottom_0()
                                 .w(px(SCROLLBAR_WIDTH))
-                                .cursor(gpui::CursorStyle::Arrow),
+                                // This invisible track shadows the root cursor across the
+                                // whole strip, so mirror the thumb states here or the
+                                // track's arrow would win while hovering or dragging it.
+                                .cursor(if self.scrollbar_drag.is_some() {
+                                    gpui::CursorStyle::ClosedHand
+                                } else if self.scrollbar_hovered {
+                                    gpui::CursorStyle::OpenHand
+                                } else {
+                                    gpui::CursorStyle::Arrow
+                                }),
                         )
                     })
                     .when(
@@ -688,7 +697,13 @@ impl Render for TerminalPane {
                                     .right(px(SCROLLBAR_WIDTH))
                                     .bottom_0()
                                     .h(px(SCROLLBAR_WIDTH))
-                                    .cursor(gpui::CursorStyle::Arrow),
+                                    // Same shadowing as the vertical track: keep the
+                                    // drag hand visible while the thumb is grabbed.
+                                    .cursor(if self.horizontal_scrollbar_drag.is_some() {
+                                        gpui::CursorStyle::ClosedHand
+                                    } else {
+                                        gpui::CursorStyle::Arrow
+                                    }),
                             )
                         },
                     ),

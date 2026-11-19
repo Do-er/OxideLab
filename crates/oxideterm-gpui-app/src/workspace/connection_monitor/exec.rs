@@ -441,7 +441,9 @@ mod tests {
             )
             .await
         });
-        let pid: u32 = tokio::time::timeout(Duration::from_secs(10), async {
+        // Two nested PowerShell startups can exceed 10s while the full suite
+        // saturates the CPU, so align the startup wait with the capture budget.
+        let pid: u32 = tokio::time::timeout(Duration::from_secs(30), async {
             loop {
                 if let Ok(pid) = std::fs::read_to_string(&pid_file)
                     && let Ok(pid) = pid.trim().parse()

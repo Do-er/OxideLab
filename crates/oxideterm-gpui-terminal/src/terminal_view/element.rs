@@ -2617,8 +2617,11 @@ impl Element for TerminalElement {
                 });
             }
         }
+        // Window-level styles outrank every hitbox cursor, so an active drag
+        // must pin the closed hand here; the pane's own cursors only resolve
+        // while its hitboxes stay hovered.
         if self.scrollbar_dragging {
-            window.set_window_cursor_style(CursorStyle::Arrow);
+            window.set_window_cursor_style(CursorStyle::ClosedHand);
         } else if self.hovered_link.is_some() {
             window.set_window_cursor_style(CursorStyle::PointingHand);
         }

@@ -104,9 +104,10 @@ fn completion_path(shell: CompletionShell) -> CliResult<PathBuf> {
 }
 
 fn home_dir() -> Option<PathBuf> {
-    std::env::var_os("HOME")
-        .map(PathBuf::from)
-        .filter(|path| !path.as_os_str().is_empty())
+    // Prefer the platform profile directory (USERPROFILE on Windows): a raw
+    // HOME lookup misses regular Windows sessions and can be overridden by
+    // MSYS/GitBash environments, matching ssh_paths::local_home_dir.
+    dirs::home_dir().filter(|path| !path.as_os_str().is_empty())
 }
 
 impl From<CompletionShell> for Shell {

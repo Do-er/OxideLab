@@ -16,6 +16,7 @@ oxideterm-audit = { path = "../oxideterm-audit" }
 chrono.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
+dirs.workspace = true
 fs2.workspace = true
 oxideterm-ai = { path = "../oxideterm-ai" }
 oxideterm-cloud-sync = { path = "../oxideterm-cloud-sync", default-features = false }

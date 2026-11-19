@@ -4238,7 +4238,10 @@ mod tests {
             pane.feed_recording_output(b"\rhit!", cx);
         });
         cx.run_until_parked();
-        cx.executor().advance_clock(TERMINAL_SEARCH_DEBOUNCE);
+        // Content-driven refreshes run on the streaming debounce because the
+        // output just updated last_terminal_activity; only query changes use
+        // the urgent debounce.
+        cx.executor().advance_clock(TERMINAL_SEARCH_STREAMING_DEBOUNCE);
         cx.run_until_parked();
         pane.read_with(cx, |pane, _| {
             assert_eq!(

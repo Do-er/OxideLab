@@ -1389,7 +1389,12 @@ mod row_tests {
                         label.bottom()
                     };
                     assert_eq!(control.left(), label.left());
-                    assert_eq!((control.top().0 - copy_bottom.0) / scale, 24.0);
+                    // The wrapped control is separated from the copy by the
+                    // row's configured gap token, not a hardcoded value.
+                    assert_eq!(
+                        (control.top().0 - copy_bottom.0) / scale,
+                        tokens.metrics.settings_row_gap
+                    );
                 } else {
                     assert_eq!(control.right().0 / scale, width);
                     assert!(control.left() >= label.right());

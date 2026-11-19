@@ -317,14 +317,17 @@ mod tests {
             hydrated.license_url.as_deref(),
             Some("https://example.com/LICENSE")
         );
-        let old_host = NativePluginRegistry::select_registry_release(&hydrated).unwrap();
-        assert_eq!(old_host.license.as_deref(), Some("MIT"));
+        let selected = NativePluginRegistry::select_registry_release(&hydrated).unwrap();
+        assert_eq!(selected.license.as_deref(), Some("MIT"));
         assert_eq!(
             (
-                old_host.version.as_str(),
-                old_host.packages[0].download_url.as_str()
+                selected.version.as_str(),
+                selected.packages[0].download_url.as_str()
             ),
-            ("1.0.0", "https://example.com/1.zip")
+            // The host build requires >=3.0.0, so the 1.0.0 release is demoted
+            // by its "<3.0.0" compatibility correction and the highest
+            // compatible release is 2.0.0.
+            ("2.0.0", "https://example.com/2.zip")
         );
         for case in [
             "checksum",
@@ -434,9 +437,13 @@ mod tests {
             .set_plugin_enabled("com.example.demo", true)
             .unwrap();
         let config = fs::read(native_plugin_config_path(&settings)).unwrap();
+        // A bounded range that still admits the compiled host version, so the
+        // fixture does not silently depend on the workspace major version.
+        let host = semver::Version::parse(env!("CARGO_PKG_VERSION")).unwrap();
+        let matching_range = format!(">={}.0.0, <{}.0.0", host.major, host.major + 1);
         for (range, state) in [
             (">=999.0.0", NativePluginState::Error),
-            (">=2.0.0, <3.0.0", NativePluginState::ReadyManifestOnly),
+            (matching_range.as_str(), NativePluginState::ReadyManifestOnly),
         ] {
             let mut entry = history();
             entry.releases[0].compatibility_corrections[0]
