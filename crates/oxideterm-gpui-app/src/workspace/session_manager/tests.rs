@@ -674,6 +674,7 @@ pub(super) fn edit_properties_restores_proxy_metadata_and_can_remove_the_chain()
     let mut saved_connection = saved_connection_fixture(SavedAuth::Agent);
     saved_connection.proxy_chain = vec![SavedProxyHop {
         totp_credential_id: None,
+        account_credential_id: None,
         host: "jump.example.com".to_string(),
         port: 2222,
         username: "ops".to_string(),
@@ -955,6 +956,7 @@ pub(super) fn proxy_hop_two_factor_is_saved_as_keyboard_interactive() {
     form.proxy_hops
         .push(crate::workspace::new_connection::NewConnectionProxyHop {
             totp_credential_id: None,
+            account_credential_id: None,
             empty_password: false,
             saved_connection_id: String::new(),
             persisted_proxy_hop_index: None,
@@ -1077,7 +1079,7 @@ fn standalone_sftp_empty_password_roundtrip_keeps_both_endpoints_independent() {
 #[gpui::test]
 fn single_console_profile_delete_retires_its_history_scope(cx: &mut TestAppContext) {
     let Some(fixture_dir) =
-        isolated_workspace_fixture(cx, "OXIDETERM_SESSION_DELETE_SINGLE_TEST_DIR")
+        isolated_workspace_fixture(cx, "OXIDELAB_SESSION_DELETE_SINGLE_TEST_DIR")
     else {
         return;
     };
@@ -1110,7 +1112,7 @@ fn single_console_profile_delete_retires_its_history_scope(cx: &mut TestAppConte
 #[gpui::test]
 fn batch_console_profile_delete_retires_its_history_scope(cx: &mut TestAppContext) {
     let Some(fixture_dir) =
-        isolated_workspace_fixture(cx, "OXIDETERM_SESSION_DELETE_BATCH_TEST_DIR")
+        isolated_workspace_fixture(cx, "OXIDELAB_SESSION_DELETE_BATCH_TEST_DIR")
     else {
         return;
     };
@@ -1147,7 +1149,7 @@ fn batch_console_profile_delete_retires_its_history_scope(cx: &mut TestAppContex
 
 #[gpui::test]
 fn selected_tunnels_share_host_auth_and_leave_manager_active(cx: &mut TestAppContext) {
-    let Some(dir) = isolated_workspace_fixture(cx, "OXIDETERM_TUNNEL_BATCH_TEST_DIR") else {
+    let Some(dir) = isolated_workspace_fixture(cx, "OXIDELAB_TUNNEL_BATCH_TEST_DIR") else {
         return;
     };
     cx.executor().allow_parking();
@@ -1265,7 +1267,7 @@ fn selected_tunnels_share_host_auth_and_leave_manager_active(cx: &mut TestAppCon
 
 #[gpui::test]
 fn ide_access_prompt_defers_tab_creation_until_selection(cx: &mut TestAppContext) {
-    let Some(fixture_dir) = isolated_workspace_fixture(cx, "OXIDETERM_IDE_ACCESS_PROMPT_TEST_DIR")
+    let Some(fixture_dir) = isolated_workspace_fixture(cx, "OXIDELAB_IDE_ACCESS_PROMPT_TEST_DIR")
     else {
         return;
     };

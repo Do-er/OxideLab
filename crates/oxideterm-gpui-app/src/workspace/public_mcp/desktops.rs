@@ -43,7 +43,7 @@ impl PublicMcpDesktopWindowEffect {
         };
         if let Some(request) = request {
             request.finish(ToolEnvelope::failed(
-                "A live OxideTerm window is required for remote desktop sessions",
+                "A live OxideLab window is required for remote desktop sessions",
             ));
         }
     }

@@ -110,7 +110,7 @@ const REMOTE_DESKTOP_DELIVERY_BUDGET: delivery::DeliveryBudget =
     delivery::DeliveryBudget::new(64, Duration::from_millis(4));
 const REMOTE_DESKTOP_FRAME_READY_DRAIN_LIMIT: usize = 32;
 const REMOTE_DESKTOP_FRAME_READY_DRAIN_BUDGET: Duration = Duration::from_millis(6);
-const REMOTE_DESKTOP_DIAGNOSTICS_ENV: &str = "OXIDETERM_REMOTE_DESKTOP_DIAGNOSTICS";
+const REMOTE_DESKTOP_DIAGNOSTICS_ENV: &str = "OXIDELAB_REMOTE_DESKTOP_DIAGNOSTICS";
 const REMOTE_DESKTOP_AUTOMATIC_RECONNECT_DELAYS: [Duration; 4] = [
     Duration::from_secs(1),
     Duration::from_secs(2),
@@ -1052,7 +1052,7 @@ mod tests {
                 profile,
                 provider,
                 Some(RemoteDesktopSecret::from("release-test-secret")),
-                std::env::temp_dir().join("oxideterm-release-test-certificates.json"),
+                std::env::temp_dir().join("oxidelab-release-test-certificates.json"),
                 RemoteDesktopFrameDeliverySlot::new(),
                 window.into(),
             );
@@ -1100,7 +1100,7 @@ mod tests {
                 profile,
                 provider,
                 None,
-                std::env::temp_dir().join("oxideterm-handoff-test-certificates.json"),
+                std::env::temp_dir().join("oxidelab-handoff-test-certificates.json"),
                 RemoteDesktopFrameDeliverySlot::new(),
                 first_window.into(),
             );

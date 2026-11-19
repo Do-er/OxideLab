@@ -1744,7 +1744,7 @@ mod tests {
     #[gpui::test]
     fn plugin_requirement_notices_route_install_and_enable_actions(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_CONNECTION_PLUGIN_NOTICE_TEST_DIR";
+        let fixture_key = "OXIDELAB_CONNECTION_PLUGIN_NOTICE_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Portable storage keeps this real-workspace regression away from user plugins.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();
@@ -1872,7 +1872,7 @@ mod tests {
         cx: &mut TestAppContext,
     ) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_PALETTE_FAILURE_TEST_DIR";
+        let fixture_key = "OXIDELAB_PALETTE_FAILURE_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // The real workspace uses process-wide storage discovery. A separate
             // portable process isolates it without changing the user's home or stores.

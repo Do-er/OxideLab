@@ -264,7 +264,7 @@ impl Render for PluginFilePreview {
         if self.source.as_ref().is_some_and(|source| {
             matches!(
                 source.mime_type(),
-                "application/pkix-cert" | "application/x-oxideterm-binary"
+                "application/pkix-cert" | "application/x-oxidelab-binary"
             )
         }) {
             return self.render_inspection(cx);
@@ -435,7 +435,7 @@ async fn render_page(
 ) -> Result<RenderedPage, &'static str> {
     let inspection = matches!(
         source.mime_type(),
-        "application/pkix-cert" | "application/x-oxideterm-binary"
+        "application/pkix-cert" | "application/x-oxidelab-binary"
     );
     let certificate = source.mime_type() == "application/pkix-cert";
     let database = source.mime_type() != "application/pdf";

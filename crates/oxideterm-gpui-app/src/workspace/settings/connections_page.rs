@@ -3358,7 +3358,7 @@ mod settings_connection_entity_tests {
     #[gpui::test]
     fn managed_key_long_paste_keeps_import_visible(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_KEY_LAYOUT_TEST_DIR";
+        let fixture_key = "OXIDELAB_KEY_LAYOUT_TEST_DIR";
         if std::env::var_os(fixture_key).is_none() {
             // Isolate settings and key storage from the maintainer's profile.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

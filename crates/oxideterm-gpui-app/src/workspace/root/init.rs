@@ -49,7 +49,7 @@ impl WorkspaceApp {
         let audit = audit::AuditState::new(settings_store.path().with_file_name("audit.sqlite3"));
         let settings = settings_store.settings().clone();
         let i18n = I18n::new(locale_from_settings(settings.general.language));
-        // Shell history is already the user's persistence boundary; OxideTerm keeps only a
+        // Shell history is already the user's persistence boundary; OxideLab keeps only a
         // process-owned index and never copies the document into credential storage.
         let local_terminal_command_history =
             SharedTerminalCommandHistory::from_commands(load_local_shell_history_commands());
@@ -176,7 +176,7 @@ impl WorkspaceApp {
         let forwarding_runtime = Arc::new(
             tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
-                .thread_name("oxideterm-forwarding")
+                .thread_name("oxidelab-forwarding")
                 // Most workspace backend jobs are async IO; keep idle thread
                 // stacks bounded. Features that need CPU-heavy parallelism
                 // should use a dedicated pool instead of expanding this

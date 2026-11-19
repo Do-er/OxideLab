@@ -905,7 +905,7 @@ impl WorkspaceApp {
                 div()
                     .font_family("monospace")
                     .text_color(rgb(self.tokens.ui.text))
-                    .child("~/.oxideterm/shell-integration/"),
+                    .child("~/.oxidelab/shell-integration/"),
             )
             .into_any_element()
     }
@@ -1184,8 +1184,8 @@ mod tests {
                     RemoteShellIntegrationStatus {
                         shell: RemoteShellKind::Zsh,
                         state,
-                        integration_directory: "/home/user/.oxideterm/shell-integration".into(),
-                        integration_file: "/home/user/.oxideterm/shell-integration/zsh.zsh".into(),
+                        integration_directory: "/home/user/.oxidelab/shell-integration".into(),
+                        integration_file: "/home/user/.oxidelab/shell-integration/zsh.zsh".into(),
                         startup_files: vec!["/home/user/.zshrc".into()],
                     },
                     None,
@@ -1230,8 +1230,8 @@ mod tests {
         let status = |state| RemoteShellIntegrationStatus {
             shell: RemoteShellKind::Bash,
             state,
-            integration_directory: "/home/fixture/.oxideterm/shell-integration".into(),
-            integration_file: "/home/fixture/.oxideterm/shell-integration/bash.sh".into(),
+            integration_directory: "/home/fixture/.oxidelab/shell-integration".into(),
+            integration_file: "/home/fixture/.oxidelab/shell-integration/bash.sh".into(),
             startup_files: vec!["/home/fixture/.bashrc".into()],
         };
         for previous in [State::NeedsUpdate, State::NeedsRepair] {
@@ -1357,7 +1357,7 @@ mod tests {
             ),
             (
                 RemoteShellIntegrationError::UnsupportedShell,
-                "当前远端 Shell 不支持 OxideTerm 集成，无法启用目录跟踪。",
+                "当前远端 Shell 不支持 OxideLab 集成，无法启用目录跟踪。",
                 TerminalNoticeVariant::Default,
             ),
             (

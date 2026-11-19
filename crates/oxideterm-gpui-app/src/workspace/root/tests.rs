@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn failed_session_tree_replace_preserves_previous_snapshot() {
         let tempdir =
-            std::env::temp_dir().join(format!("oxideterm-session-tree-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("oxidelab-session-tree-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&tempdir).unwrap();
         let path = tempdir.join("session_tree.json");
         let previous = NodeTreePersistenceSnapshot {

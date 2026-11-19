@@ -205,14 +205,14 @@ mod tests {
             {
                 let expected = if language == Language::En {
                     [
-                        "Hide OxideTerm",
+                        "Hide OxideLab",
                         "Hide Other Apps",
                         "Minimize Window",
                         "Minimize All Windows",
                     ]
                 } else {
                     [
-                        "隐藏 OxideTerm",
+                        "隐藏 OxideLab",
                         "隐藏其他应用",
                         "最小化当前窗口",
                         "最小化所有窗口",

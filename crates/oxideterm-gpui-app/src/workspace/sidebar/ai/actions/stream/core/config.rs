@@ -72,7 +72,7 @@ impl WorkspaceApp {
 
         let now_ms = ai_memory_now_ms();
         let user_id = whoami::username();
-        // OxideTerm currently has one application workspace. Keep its stable
+        // OxideLab currently has one application workspace. Keep its stable
         // identity explicit so it can be migrated if multi-workspace support arrives.
         let workspace_id = oxideterm_settings::AI_APPLICATION_WORKSPACE_MEMORY_SCOPE_ID;
         let project_id = self

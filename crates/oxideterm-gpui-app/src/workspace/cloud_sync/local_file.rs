@@ -71,7 +71,7 @@ impl WorkspaceApp {
             cx.prompt_for_new_path(
                 &directory,
                 Some(&format!(
-                    "oxideterm-{}.oxide",
+                    "oxidelab-{}.oxide",
                     Utc::now().format("%Y%m%d-%H%M%S")
                 )),
             )

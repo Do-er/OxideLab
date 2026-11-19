@@ -2676,7 +2676,7 @@ mod tests {
                     provider,
                     None,
                     std::env::temp_dir().join(format!(
-                        "oxideterm-initial-layout-{}-test-certificates.json",
+                        "oxidelab-initial-layout-{}-test-certificates.json",
                         protocol.provider_id()
                     )),
                     RemoteDesktopFrameDeliverySlot::new(),
@@ -2862,7 +2862,7 @@ mod tests {
                     provider,
                     None,
                     std::env::temp_dir().join(format!(
-                        "oxideterm-hidden-control-{}-test-certificates.json",
+                        "oxidelab-hidden-control-{}-test-certificates.json",
                         protocol.provider_id()
                     )),
                     RemoteDesktopFrameDeliverySlot::new(),
@@ -3024,7 +3024,7 @@ mod tests {
                 profile,
                 provider,
                 None,
-                std::env::temp_dir().join("oxideterm-reconnect-test-certificates.json"),
+                std::env::temp_dir().join("oxidelab-reconnect-test-certificates.json"),
                 RemoteDesktopFrameDeliverySlot::new(),
                 window.into(),
             );
@@ -3114,7 +3114,7 @@ mod tests {
                     provider,
                     None,
                     std::env::temp_dir().join(format!(
-                        "oxideterm-hidden-frame-{}-test-certificates.json",
+                        "oxidelab-hidden-frame-{}-test-certificates.json",
                         protocol.provider_id()
                     )),
                     frame_slot.clone(),
@@ -3327,7 +3327,7 @@ mod tests {
                 profile,
                 provider,
                 Some(RemoteDesktopSecret::from("shutdown-test-secret")),
-                std::env::temp_dir().join("oxideterm-shutdown-test-certificates.json"),
+                std::env::temp_dir().join("oxidelab-shutdown-test-certificates.json"),
                 RemoteDesktopFrameDeliverySlot::new(),
                 window.into(),
             );

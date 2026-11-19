@@ -2281,7 +2281,7 @@ mod terminal_open_tests {
     #[gpui::test]
     fn authentication_prompt_pauses_connecting_animation_until_dismissed(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_AUTH_ANIMATION_TEST_DIR";
+        let fixture_key = "OXIDELAB_AUTH_ANIMATION_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Workspace storage is process-wide; a portable child keeps user data untouched.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

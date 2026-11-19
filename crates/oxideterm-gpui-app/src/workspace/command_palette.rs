@@ -3225,7 +3225,7 @@ mod panel_layout_tests {
     #[gpui::test]
     fn saved_rdp_open_and_ssh_config_search_use_existing_palette_flows(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_PALETTE_TEST_DIR";
+        let fixture_key = "OXIDELAB_PALETTE_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Workspace storage is process-wide; keep the fixture out of the user's profile.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

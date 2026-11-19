@@ -100,7 +100,7 @@ impl PublicMcpNodeWindowEffect {
     pub(in crate::workspace) fn finish_without_window(self) {
         let Self::Disconnect(request) = self;
         request.finish(ToolEnvelope::failed(
-            "A live OxideTerm window is required to disconnect a node",
+            "A live OxideLab window is required to disconnect a node",
         ));
     }
 }
@@ -1332,7 +1332,7 @@ impl WorkspaceApp {
                 return;
             }
             if self.app_lock.locked {
-                request.finish(ToolEnvelope::failed("The OxideTerm workspace is locked"));
+                request.finish(ToolEnvelope::failed("The OxideLab workspace is locked"));
                 return;
             }
             match &request.call {
@@ -2982,7 +2982,7 @@ fn public_command_error(error: SshTransportError) -> String {
         SshTransportError::HostKeyUnknown { .. }
         | SshTransportError::HostKeyChanged { .. }
         | SshTransportError::HostKeyCheckFailed(_) => {
-            "SSH host key verification requires attention in OxideTerm".to_owned()
+            "SSH host key verification requires attention in OxideLab".to_owned()
         }
         SshTransportError::AlgorithmNegotiationFailed { .. } => {
             "SSH algorithm negotiation failed".to_owned()

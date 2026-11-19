@@ -2774,6 +2774,7 @@ mod tests {
         profile.locale = Some("en_US.UTF-8".to_string());
         profile.proxy_chain.push(SavedProxyHop {
             totp_credential_id: None,
+            account_credential_id: None,
             host: "jump.example.com".to_string(),
             port: 2200,
             username: "jump".to_string(),
@@ -3019,6 +3020,7 @@ mod tests {
     fn jump_hop_uses_saved_connection_metadata_without_secrets() {
         let connection = ConnectionInfo {
             totp_credential_id: None,
+            account_credential_id: None,
             empty_password: false,
             id: "conn-1".to_string(),
             name: "Bastion".to_string(),

@@ -407,8 +407,8 @@ impl WorkspaceApp {
         let mut query = self.audit.query.clone();
         query.before_sequence = None;
         let name = match format {
-            oxideterm_audit::AuditExportFormat::Json => "oxideterm-audit.json",
-            oxideterm_audit::AuditExportFormat::Csv => "oxideterm-audit.csv",
+            oxideterm_audit::AuditExportFormat::Json => "oxidelab-audit.json",
+            oxideterm_audit::AuditExportFormat::Csv => "oxidelab-audit.csv",
         };
         let prompt = if include_details {
             let sample = Zeroizing::new(

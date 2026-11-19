@@ -895,7 +895,7 @@ impl WorkspaceApp {
                                 SelectableTextRole::PlainDocument,
                                 "file-preview-font-sample",
                                 "zh",
-                                "中文字体预览：家里的主机 OxideTerm 终端文件管理器",
+                                "中文字体预览：家里的主机 OxideLab 终端文件管理器",
                                 theme.text,
                                 cx,
                             )),
@@ -2009,7 +2009,7 @@ mod tests {
     #[gpui::test]
     fn local_code_preview_shows_language_notice_and_keeps_files_read_only(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_LOCAL_PREVIEW_TEST_DIR";
+        let fixture_key = "OXIDELAB_LOCAL_PREVIEW_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Isolate real workspace storage discovery from the user's settings and credentials.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

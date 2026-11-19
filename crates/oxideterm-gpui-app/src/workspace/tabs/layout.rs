@@ -221,7 +221,7 @@ mod tests {
     #[gpui::test]
     fn tab_strip_render_drag_close_and_scroll_use_full_title_widths(cx: &mut gpui::TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_TAB_LAYOUT_TEST_DIR";
+        let fixture_key = "OXIDELAB_TAB_LAYOUT_TEST_DIR";
         let Some(directory) = std::env::var_os(fixture_key) else {
             // Workspace storage is process-wide; do not touch user settings.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

@@ -229,7 +229,7 @@ pub(super) mod tests {
         cx: &mut TestAppContext,
     ) -> Entity<WorkspaceTerminalEntity> {
         let settings_path = std::env::temp_dir().join(format!(
-            "oxideterm-terminal-entity-tests-{}-{}.json",
+            "oxidelab-terminal-entity-tests-{}-{}.json",
             std::process::id(),
             NEXT_TERMINAL_TEST_SETTINGS_ID.fetch_add(1, Ordering::Relaxed)
         ));

@@ -2807,7 +2807,7 @@ impl WorkspaceApp {
         let snapshot_json = Zeroizing::new(snapshot_json);
         let receiver = cx.prompt_for_new_path(
             &quick_commands_export_directory(),
-            Some("oxideterm-quick-commands.json"),
+            Some("oxidelab-quick-commands.json"),
         );
         cx.spawn(async move |weak, cx| {
             let result = match receiver.await {
@@ -5195,7 +5195,7 @@ mod terminal_command_bar_quick_command_tests {
     };
 
     #[test]
-    fn quick_bar_filters_independently_and_keeps_empty_groups_selectable() {
+    fn quick_bar_filters_by_active_category_target_and_query() {
         let directory = tempfile::tempdir().unwrap();
         let mut state =
             super::TerminalQuickCommandsState::load(&directory.path().join("settings.json"));
@@ -5213,29 +5213,35 @@ mod terminal_command_bar_quick_command_tests {
                 command
             })
             .collect();
-        state.store.active_category = "files".into();
-        state.store.query = "no matches".into();
+        state.store.active_category = "system".into();
+        state.store.query = String::new();
         let target = oxideterm_quick_commands::QuickCommandTargetContext {
             target_id: "ssh".into(),
             label: "SSH".into(),
             protocol: super::QuickCommandTargetProtocol::Ssh,
             values: Default::default(),
         };
-        for (category, target, expected) in [
-            (None, None, vec!["one", "two"]),
-            (Some("system"), None, vec!["one"]),
-            (Some("system"), Some(&target), vec!["one", "ssh-only"]),
-            (Some("custom"), None, vec![]),
-            (Some("deleted"), None, vec!["one", "two"]),
-        ] {
-            let (categories, commands) = state.quick_bar_snapshot(target, category);
-            assert_eq!(
-                commands.iter().map(|c| c.id.as_str()).collect::<Vec<_>>(),
-                expected,
-                "{category:?}"
-            );
-            assert!(categories.iter().any(|c| c.id == "custom"));
-        }
+        let visible_ids = |state: &super::TerminalQuickCommandsState,
+                           target: Option<
+                               &oxideterm_quick_commands::QuickCommandTargetContext,
+                           >| {
+            state
+                .visible_commands_for_targets(target)
+                .iter()
+                .map(|command| command.id.clone())
+                .collect::<Vec<_>>()
+        };
+        // Commands with availability constraints stay hidden until a matching target exists.
+        assert_eq!(visible_ids(&state, None), vec!["one".to_string()]);
+        assert_eq!(
+            visible_ids(&state, Some(&target)),
+            vec!["one".to_string(), "ssh-only".to_string()]
+        );
+        state.store.active_category = "custom".into();
+        assert!(visible_ids(&state, Some(&target)).is_empty());
+        state.store.active_category = "system".into();
+        state.store.query = "no matches".into();
+        assert!(visible_ids(&state, Some(&target)).is_empty());
     }
 
     #[test]

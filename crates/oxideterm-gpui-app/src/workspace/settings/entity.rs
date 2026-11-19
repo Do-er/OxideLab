@@ -2082,7 +2082,7 @@ impl SettingsWorkspaceEntity {
             };
             let result = runtime
                 .spawn_blocking(move || {
-                    let path = directory.join("oxideterm-keybindings.json");
+                    let path = directory.join("oxidelab-keybindings.json");
                     serde_json::to_string_pretty(&overrides)
                         .map_err(|_| ())
                         .and_then(|json| std::fs::write(path, json).map_err(|_| ()))

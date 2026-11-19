@@ -201,7 +201,7 @@ mod terminal_search_tests {
         cx: &mut gpui::TestAppContext,
     ) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_SEARCH_INPUT_TEST_DIR";
+        let fixture_key = "OXIDELAB_SEARCH_INPUT_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Workspace storage is process-wide; isolate it in a portable child.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();
@@ -416,7 +416,7 @@ mod knowledge_dialog_key_tests {
     #[gpui::test]
     fn knowledge_document_title_enter_creates_document(cx: &mut gpui::TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_KNOWLEDGE_DIALOG_TEST_DIR";
+        let fixture_key = "OXIDELAB_KNOWLEDGE_DIALOG_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // WorkspaceApp owns background tasks and process-wide settings. Run the
             // UI interaction in a portable child so this test cannot poison the
@@ -3247,7 +3247,7 @@ impl WorkspaceApp {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|duration| duration.as_millis())
             .unwrap_or_default();
-        let suggested = format!("oxideterm-{session_label}-{timestamp}.cast");
+        let suggested = format!("oxidelab-{session_label}-{timestamp}.cast");
         let receiver = cx.prompt_for_new_path(&directory, Some(&suggested));
         let mut audit = oxideterm_audit::AuditOperation::in_request(
             audit_context.as_ref(),

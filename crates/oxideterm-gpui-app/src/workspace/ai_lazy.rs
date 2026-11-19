@@ -46,7 +46,7 @@ fn open_rag_store_or_fallback(data_dir: &PathBuf) -> Arc<oxideterm_ai::RagStore>
         Err(error) => {
             eprintln!("failed to load AI RAG store: {error}");
             let fallback_dir = std::env::temp_dir().join(format!(
-                "oxideterm-rag-unavailable-{}",
+                "oxidelab-rag-unavailable-{}",
                 uuid::Uuid::new_v4()
             ));
             // The fallback keeps AI and Knowledge UI usable when the configured

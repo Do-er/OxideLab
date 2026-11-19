@@ -514,6 +514,7 @@ mod tests {
     fn saved_connection_snapshot_omits_secret_refs_paths_and_commands() {
         let connection = ConnectionInfo {
             totp_credential_id: None,
+            account_credential_id: None,
             empty_password: false,
             id: "saved-1".to_string(),
             name: "Production".to_string(),
@@ -532,6 +533,7 @@ mod tests {
             gssapi_delegate_credentials: false,
             proxy_chain: vec![ProxyHopInfo {
                 totp_credential_id: None,
+                account_credential_id: None,
                 empty_password: false,
                 host: "jump.example.test".to_string(),
                 port: 22,

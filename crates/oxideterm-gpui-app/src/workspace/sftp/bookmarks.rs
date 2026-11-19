@@ -20,7 +20,7 @@ pub(in crate::workspace) struct SftpPathBookmark {
 }
 
 pub(in crate::workspace::sftp) const SFTP_PATH_BOOKMARKS_FILENAME: &str =
-    "oxideterm-sftp-path-bookmarks.json";
+    "oxidelab-sftp-path-bookmarks.json";
 
 pub(in crate::workspace::sftp) fn sftp_path_bookmarks_path(
     settings_path: &std::path::Path,
@@ -229,7 +229,7 @@ mod tests {
     #[test]
     fn bookmarks_roundtrip_with_expected_json_shape() {
         let directory = std::env::temp_dir().join(format!(
-            "oxideterm-sftp-bookmarks-{}-{}",
+            "oxidelab-sftp-bookmarks-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

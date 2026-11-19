@@ -202,7 +202,7 @@ pub(crate) fn install_runtime_app_icon(variant: AppIconVariant) {
     let bytes = app_icon_variant_png(variant);
     let data = unsafe { NSData::dataWithBytes_length(bytes.as_ptr().cast(), bytes.len()) };
     let Some(image) = NSImage::initWithData(NSImage::alloc(), &data) else {
-        eprintln!("failed to decode bundled OxideTerm application icon");
+        eprintln!("failed to decode bundled OxideLab application icon");
         return;
     };
 

@@ -721,7 +721,7 @@ impl WorkspaceApp {
             && slash_command.is_none()
             && explicit_skill.is_none()
         {
-            // Agent-advertised ACP commands are protocol input, not OxideTerm
+            // Agent-advertised ACP commands are protocol input, not OxideLab
             // system prompts. Preserve the slash prefix for the agent.
             content
         } else {

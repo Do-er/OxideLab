@@ -2,7 +2,7 @@ use super::*;
 
 use sha2::{Digest, Sha256};
 
-pub(in crate::workspace) const CLI_COMPANION_COMMAND_NAME: &str = "oxideterm";
+pub(in crate::workspace) const CLI_COMPANION_COMMAND_NAME: &str = "oxidelab";
 pub(in crate::workspace) const LEGACY_CLI_COMPANION_COMMAND_NAME: &str = "oxt";
 pub(in crate::workspace) const CLI_COMPANION_RESOURCE_DIR: &str = "cli-bin";
 
@@ -242,7 +242,7 @@ fn cli_companion_migrate_at_paths(
     // a failed bundle operation never leaves the user without either CLI.
     install_cli_at_path(bundle_path, install_path)?;
     if !installed_cli_matches_bundle(install_path, bundle_path)? {
-        return Err("installed CLI does not match the bundled OxideTerm CLI".to_string());
+        return Err("installed CLI does not match the bundled OxideLab CLI".to_string());
     }
     remove_managed_cli(legacy_path)
 }
@@ -299,7 +299,7 @@ pub(in crate::workspace) fn file_sha256(path: &std::path::Path) -> Result<[u8; 3
 }
 
 pub(in crate::workspace) fn find_bundled_cli() -> Option<std::path::PathBuf> {
-    if let Some(path) = std::env::var_os("OXIDETERM_CLI_BIN").map(std::path::PathBuf::from) {
+    if let Some(path) = std::env::var_os("OXIDELAB_CLI_BIN").map(std::path::PathBuf::from) {
         if path.exists() {
             return Some(path);
         }
@@ -392,7 +392,7 @@ fn cli_install_path_for_command(command_name: &str) -> std::path::PathBuf {
         let binary_name = format!("{command_name}.exe");
         if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
             return std::path::PathBuf::from(local_app_data)
-                .join("OxideTerm")
+                .join("OxideLab")
                 .join("bin")
                 .join(binary_name);
         }
@@ -430,11 +430,11 @@ mod cli_companion_tests {
     use gpui::{AppContext, TestAppContext};
 
     #[cfg(unix)]
-    use super::remove_managed_cli;
+    use super::{cli_path_present, remove_managed_cli};
     use super::{
         CLI_COMPANION_COMMAND_NAME, CliCompanionOperation, LEGACY_CLI_COMPANION_COMMAND_NAME,
         SettingsWorkspaceEntity, cli_companion_migrate_at_paths, cli_install_path,
-        cli_path_present, installed_cli_matches_bundle, legacy_cli_install_path,
+        installed_cli_matches_bundle, legacy_cli_install_path,
     };
 
     pub(in crate::workspace) fn temp_test_dir(name: &str) -> std::path::PathBuf {
@@ -443,7 +443,7 @@ mod cli_companion_tests {
             .unwrap()
             .as_nanos();
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-cli-companion-{name}-{}-{nanos}",
+            "oxidelab-cli-companion-{name}-{}-{nanos}",
             std::process::id()
         ));
         std::fs::create_dir_all(&path).unwrap();
@@ -471,7 +471,7 @@ mod cli_companion_tests {
         let temp_dir = temp_test_dir("broken-link");
         let bundled_path = temp_dir.join("bundled-oxideterm");
         let broken_target = temp_dir.join("missing-oxideterm");
-        let install_path = temp_dir.join("oxideterm");
+        let install_path = temp_dir.join("oxidelab");
 
         std::fs::write(&bundled_path, b"bundled-cli-binary").unwrap();
         std::os::unix::fs::symlink(&broken_target, &install_path).unwrap();
@@ -526,7 +526,7 @@ mod cli_companion_tests {
     pub(in crate::workspace) fn cli_migration_installs_new_command_before_removing_legacy() {
         let temp_dir = temp_test_dir("migrate-success");
         let bundle_path = temp_dir.join("bundled-oxideterm");
-        let install_path = temp_dir.join("bin/oxideterm");
+        let install_path = temp_dir.join("bin/oxidelab");
         let legacy_path = temp_dir.join("bin/oxt");
         std::fs::write(&bundle_path, b"new-cli").unwrap();
         std::fs::create_dir_all(legacy_path.parent().unwrap()).unwrap();
@@ -545,7 +545,7 @@ mod cli_companion_tests {
         let temp_dir = temp_test_dir("migrate-failure");
         let bundle_path = temp_dir.join("bundled-oxideterm");
         let blocked_parent = temp_dir.join("blocked");
-        let install_path = blocked_parent.join("oxideterm");
+        let install_path = blocked_parent.join("oxidelab");
         let legacy_path = temp_dir.join("oxt");
         std::fs::write(&bundle_path, b"new-cli").unwrap();
         std::fs::write(&blocked_parent, b"not-a-directory").unwrap();

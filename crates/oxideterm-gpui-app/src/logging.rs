@@ -114,7 +114,7 @@ pub(crate) fn init_file_logging(
         .with_context(|| format!("failed to create log directory at {}", log_dir.display()))?;
     if let Err(error) = remove_legacy_daily_logs(&log_dir) {
         // A stale file cleanup failure must not disable current-session logs.
-        eprintln!("failed to remove legacy OxideTerm daily logs: {error}");
+        eprintln!("failed to remove legacy OxideLab daily logs: {error}");
     }
 
     let log_path = log_dir.join(LOG_FILE_NAME);
@@ -137,7 +137,7 @@ pub(crate) fn init_file_logging(
     );
 
     // Tests or embedding hosts may already have installed a global subscriber.
-    // In that case OxideTerm should keep running and simply skip its file sink.
+    // In that case OxideLab should keep running and simply skip its file sink.
     if subscriber.with(filter).try_init().is_err() {
         return Ok(None);
     }
@@ -146,7 +146,7 @@ pub(crate) fn init_file_logging(
         log_path = %log_path.display(),
         max_log_file_bytes = MAX_LOG_FILE_BYTES,
         debug_logging = settings.diagnostics.debug_logging,
-        "OxideTerm native file logging initialized"
+        "OxideLab native file logging initialized"
     );
     Ok(Some(guard))
 }
@@ -196,7 +196,7 @@ mod tests {
     impl TestDirectory {
         fn new(test_name: &str) -> Self {
             let path = std::env::temp_dir().join(format!(
-                "oxideterm-logging-{test_name}-{}",
+                "oxidelab-logging-{test_name}-{}",
                 uuid::Uuid::new_v4()
             ));
             std::fs::create_dir_all(&path).expect("create test directory");

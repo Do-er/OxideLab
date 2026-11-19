@@ -45,7 +45,7 @@ impl WorkspaceApp {
                                     .line_height(px(28.0))
                                     .font_weight(gpui::FontWeight::SEMIBOLD)
                                     .text_color(rgb(self.tokens.ui.text_heading))
-                                    .child("OxideTerm"),
+                                    .child("OxideLab"),
                             )
                             .child(
                                 div()
@@ -464,13 +464,13 @@ impl WorkspaceApp {
         _wide: bool,
         _cx: &mut Context<Self>,
     ) -> AnyElement {
-        let mod_key = if cfg!(target_os = "macos") {
-            "⌘K"
-        } else {
-            "Ctrl+P"
-        };
+        // Badge mirrors the effective binding so it never shows a shortcut that cannot fire.
+        let palette_shortcut = crate::workspace::tabs::effective_shortcut_label(
+            "app.commandPalette",
+            &self.settings_store.settings().keybindings.overrides,
+        );
         let features = [
-            (LucideIcon::Terminal, "cmd_palette", Some(mod_key)),
+            (LucideIcon::Terminal, "cmd_palette", palette_shortcut.as_deref()),
             (LucideIcon::Activity, "host_tools", None),
             (LucideIcon::RefreshCw, "reconnect", None),
             (LucideIcon::Cloud, "cloud_sync", None),
@@ -709,7 +709,9 @@ impl WorkspaceApp {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let is_mac = cfg!(target_os = "macos");
-        let mod_key = if is_mac { "⌘" } else { "Ctrl" };
+        // Single-letter rows are concatenated with the modifier, so non-macOS
+        // needs the trailing separator to render "Ctrl+K" instead of "CtrlK".
+        let mod_key = if is_mac { "⌘" } else { "Ctrl+" };
         div()
             .min_w_0()
             .flex()

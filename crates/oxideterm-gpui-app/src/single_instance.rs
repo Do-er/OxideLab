@@ -267,7 +267,7 @@ fn start_primary(
     let notification = Arc::new(Notify::new());
     let listener_notification = notification.clone();
     thread::Builder::new()
-        .name("oxideterm-single-instance".to_string())
+        .name("oxidelab-single-instance".to_string())
         .spawn(move || {
             accept_forwarded_requests(listener, token, listener_tx, listener_notification);
         })
@@ -329,7 +329,7 @@ fn send_instance_request(
     connection_launch: Option<&NativeConnectionLaunch>,
 ) -> Result<()> {
     let mut stream = TcpStream::connect(("127.0.0.1", state.port))
-        .context("failed to connect to existing OxideTerm instance")?;
+        .context("failed to connect to existing OxideLab instance")?;
     let request = InstanceRequestWire {
         token: state.token.expose_secret(),
         connection_launch_file: connection_launch_path,
@@ -442,7 +442,7 @@ mod tests {
     #[test]
     fn local_terminal_launch_uses_the_primary_instance_and_native_event_path() {
         for already_running in [false, true] {
-            let data_dir = std::env::temp_dir().join(format!("oxideterm-local-launch-{}", Uuid::new_v4()));
+            let data_dir = std::env::temp_dir().join(format!("oxidelab-local-launch-{}", Uuid::new_v4()));
             fs::create_dir_all(&data_dir).unwrap();
             let paths = InstancePaths::for_data_dir(&data_dir, "test");
             let launch = NativeConnectionLaunch::Local(oxideterm_ssh_launch::LocalTerminalLaunch {
@@ -474,7 +474,7 @@ mod tests {
     #[test]
     fn cli_handoff_keeps_audit_parent_separate_from_launch() {
         let path =
-            std::env::temp_dir().join(format!("oxideterm-audit-handoff-{}.json", Uuid::new_v4()));
+            std::env::temp_dir().join(format!("oxidelab-audit-handoff-{}.json", Uuid::new_v4()));
         let parent_id = Uuid::new_v4().to_string();
         let handoff = NativeConnectionHandoff {
             launch: NativeConnectionLaunch::SavedConnection(
@@ -501,7 +501,7 @@ mod tests {
     #[test]
     fn forwards_second_launch_after_a_shared_receiver_holder_drops() {
         let data_dir =
-            std::env::temp_dir().join(format!("oxideterm-single-instance-test-{}", Uuid::new_v4()));
+            std::env::temp_dir().join(format!("oxidelab-single-instance-test-{}", Uuid::new_v4()));
         let paths = InstancePaths::for_data_dir(&data_dir, "test");
 
         let SingleInstanceOutcome::Primary {
@@ -533,7 +533,7 @@ mod tests {
     #[test]
     fn forwards_connection_uri_credentials_to_the_existing_instance() {
         let data_dir = std::env::temp_dir().join(format!(
-            "oxideterm-single-instance-uri-test-{}",
+            "oxidelab-single-instance-uri-test-{}",
             Uuid::new_v4()
         ));
         let paths = InstancePaths::for_data_dir(&data_dir, "test");
@@ -575,7 +575,7 @@ mod tests {
     fn cli_handoff_delivers_the_connection_and_removes_the_file() {
         for already_running in [false, true] {
             let data_dir =
-                std::env::temp_dir().join(format!("oxideterm-cli-handoff-{}", Uuid::new_v4()));
+                std::env::temp_dir().join(format!("oxidelab-cli-handoff-{}", Uuid::new_v4()));
             fs::create_dir_all(&data_dir).unwrap();
             let paths = InstancePaths::for_data_dir(&data_dir, "test");
             let request_path = data_dir.join("launch.json");
@@ -636,7 +636,7 @@ mod tests {
 
     #[test]
     fn installed_channels_and_development_use_distinct_instance_paths() {
-        let data_dir = Path::new("/tmp/oxideterm-instance-scopes");
+        let data_dir = Path::new("/tmp/oxidelab-instance-scopes");
         let development = InstancePaths::for_data_dir(data_dir, "development");
         let beta = InstancePaths::for_data_dir(data_dir, "beta");
         let stable = InstancePaths::for_data_dir(data_dir, "stable");

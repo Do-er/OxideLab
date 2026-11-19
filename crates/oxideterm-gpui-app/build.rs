@@ -14,7 +14,7 @@ fn main() {
     // Start Menu shortcuts, and installers do not fall back to a blank icon.
     embed_resource::compile("resources/windows/app.rc", embed_resource::NONE)
         .manifest_optional()
-        .expect("failed to embed OxideTerm Windows application resources");
+        .expect("failed to embed OxideLab Windows application resources");
 }
 
 fn compress_maple_fonts() {

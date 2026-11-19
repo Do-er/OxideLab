@@ -1652,17 +1652,17 @@ mod tests {
         let mut events = cx.events(&entity);
 
         entity.update(cx, |host_tools, cx| {
-            host_tools.copy_host_package_name("oxideterm-package".to_string(), cx);
+            host_tools.copy_host_package_name("oxidelab-package".to_string(), cx);
         });
 
         assert_eq!(
             cx.read_from_clipboard().and_then(|item| item.text()),
-            Some("oxideterm-package".to_string())
+            Some("oxidelab-package".to_string())
         );
         assert_eq!(
             events.try_recv().unwrap(),
             HostToolsEvent::ShowNotice(HostToolsNotice::PackageNameCopied {
-                package_name: "oxideterm-package".to_string(),
+                package_name: "oxidelab-package".to_string(),
             })
         );
     }

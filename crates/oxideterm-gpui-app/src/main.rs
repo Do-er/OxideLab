@@ -1,6 +1,6 @@
 // The native GPUI app is a Windows GUI process. Without this subsystem flag,
 // Windows launches a console host for the installed app and closing that
-// console also terminates OxideTerm.
+// console also terminates OxideLab.
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
 mod app_icon;
@@ -105,7 +105,7 @@ fn main() {
     // Match Tauri's startup ordering: portable detection and instance handling
     // happen before any settings or connection stores choose their data path.
     if let Err(error) = oxideterm_portable_runtime::initialize_portable_runtime() {
-        eprintln!("failed to initialize OxideTerm portable runtime: {error}");
+        eprintln!("failed to initialize OxideLab portable runtime: {error}");
         std::process::exit(1);
     }
     let single_instance = single_instance::acquire_or_forward(
@@ -113,7 +113,7 @@ fn main() {
         native_launch_args.connection_launch,
     )
     .unwrap_or_else(|error| {
-        eprintln!("failed to initialize OxideTerm single-instance guard: {error}");
+        eprintln!("failed to initialize OxideLab single-instance guard: {error}");
         std::process::exit(1);
     });
     let single_instance::SingleInstanceOutcome::Primary {
@@ -125,7 +125,7 @@ fn main() {
         return;
     };
     if let Err(error) = oxideterm_portable_runtime::acquire_portable_instance_lock() {
-        eprintln!("failed to initialize OxideTerm portable runtime: {error}");
+        eprintln!("failed to initialize OxideLab portable runtime: {error}");
         std::process::exit(1);
     }
     if matches!(
@@ -181,7 +181,7 @@ fn main() {
     ) {
         Ok(guard) => guard,
         Err(error) => {
-            eprintln!("failed to initialize OxideTerm file logging: {error:#}");
+            eprintln!("failed to initialize OxideLab file logging: {error:#}");
             None
         }
     };
@@ -244,9 +244,9 @@ fn main() {
                 .unwrap_or_default(),
         ) {
             eprintln!(
-                "OxideTerm could not reopen a native GPUI window: {error:#}\n\
+                "OxideLab could not reopen a native GPUI window: {error:#}\n\
                  Try updating GPU drivers, disabling incompatible graphics layers, \
-                 or relaunching with OXIDETERM_RENDER_PROFILE=compatibility."
+                 or relaunching with OXIDELAB_RENDER_PROFILE=compatibility."
             );
         }
     });
@@ -289,10 +289,10 @@ fn main() {
             Ok(workspace_opened) => workspace_opened,
             Err(err) => {
                 eprintln!(
-                    "OxideTerm could not open a native GPUI window: {err:#}\n\
+                    "OxideLab could not open a native GPUI window: {err:#}\n\
                      GPUI 0.2.2 does not expose a CPU renderer fallback. \
                      Try updating GPU drivers, disabling incompatible graphics layers, \
-                     or relaunching with OXIDETERM_RENDER_PROFILE=compatibility."
+                     or relaunching with OXIDELAB_RENDER_PROFILE=compatibility."
                 );
                 cx.quit();
                 return;
@@ -347,7 +347,7 @@ fn open_main_workspace_window(
                 Ok(rx) => rx,
                 Err(error) => {
                     eprintln!(
-                        "failed to install OxideTerm desktop presence integration: {error:#}"
+                        "failed to install OxideLab desktop presence integration: {error:#}"
                     );
                     None
                 }
@@ -357,10 +357,10 @@ fn open_main_workspace_window(
                 WorkspaceApp::new(window, cx, desktop_presence_rx, single_instance_rx)
                     .unwrap_or_else(|err| {
                         panic!(
-                            "failed to initialize OxideTerm workspace: {err:#}\n\
-                     OxideTerm native uses GPUI's GPU-backed renderer. \
+                            "failed to initialize OxideLab workspace: {err:#}\n\
+                     OxideLab native uses GPUI's GPU-backed renderer. \
                      To retry with lightweight visual effects, launch with \
-                     OXIDETERM_RENDER_PROFILE=compatibility."
+                     OXIDELAB_RENDER_PROFILE=compatibility."
                         )
                     })
             });

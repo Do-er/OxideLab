@@ -1699,7 +1699,7 @@ mod tests {
         for (failure, description) in [
             (
                 X11ForwardingFailure::LocalDisplayUnavailable,
-                "No valid local display address was found. Start a local X server and configure DISPLAY before starting OxideTerm.",
+                "No valid local display address was found. Start a local X server and configure DISPLAY before starting OxideLab.",
             ),
             (
                 X11ForwardingFailure::ServerRejected,

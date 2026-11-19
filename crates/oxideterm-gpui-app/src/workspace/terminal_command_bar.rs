@@ -34,7 +34,7 @@ const TERMINAL_COMMAND_TOOLBAR_HEIGHT: f32 = 32.0;
 pub(in crate::workspace) const TERMINAL_SYNC_HEADER_HEIGHT: f32 = 26.0;
 pub(in crate::workspace) const TERMINAL_COMPOSER_COMPACT_HEIGHT: f32 =
     oxideterm_gpui_ui::WORKSPACE_STATUS_BAR_HEIGHT;
-const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDETERM_PRIVILEGE_DEBUG";
+const PRIVILEGE_PROMPT_DEBUG_ENV: &str = "OXIDELAB_PRIVILEGE_DEBUG";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct MatchedPrivilegeCredential {

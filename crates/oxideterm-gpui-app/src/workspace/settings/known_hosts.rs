@@ -364,7 +364,7 @@ mod tests {
     #[gpui::test]
     fn known_hosts_search_and_confirmed_delete_use_the_selected_endpoint(cx: &mut TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_KNOWN_HOSTS_UI_TEST_DIR";
+        let fixture_key = "OXIDELAB_KNOWN_HOSTS_UI_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();
             let child = directory.path().join(executable.file_name().unwrap());

@@ -208,7 +208,7 @@ mod tests {
         cx: &mut TestAppContext,
     ) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_HISTORY_QUIT_TEST_DIR";
+        let fixture_key = "OXIDELAB_HISTORY_QUIT_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Workspace storage is process-wide; isolate it from the user's installation.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();
@@ -302,7 +302,7 @@ mod tests {
         });
         let task = cx.update(|_, cx| cx.global_mut::<HistoryQuit>().task.take().unwrap());
         cx.foreground_executor().block_test(task);
-        workspace.update(cx, |workspace, _| {
+        workspace.update(cx, |workspace, cx| {
             assert!(workspace.ai_entity.read(cx).history.quitting);
             workspace.ai_entity.update(cx, |ai, _| {
                 ai.history.quitting = false;

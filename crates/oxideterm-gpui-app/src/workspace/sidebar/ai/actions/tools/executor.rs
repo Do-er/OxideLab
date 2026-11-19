@@ -1221,7 +1221,7 @@ impl AiOrchestratorRuntimeSnapshot {
                     .and_then(serde_json::Value::as_u64)
                     .unwrap_or(0)
             ),
-            "health" => "Read OxideTerm health state.".to_string(),
+            "health" => "Read OxideLab health state.".to_string(),
             _ => unreachable!("scope was validated above"),
         };
         let result = self

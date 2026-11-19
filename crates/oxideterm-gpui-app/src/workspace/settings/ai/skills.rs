@@ -257,7 +257,7 @@ impl WorkspaceApp {
         let checked = record.enabled;
         let origin = match record.origin {
             SkillOrigin::AgentStandard => ".agents",
-            SkillOrigin::OxideTerm => "OxideTerm",
+            SkillOrigin::OxideLab => "OxideLab",
             SkillOrigin::ClaudeCompatible => ".claude",
             SkillOrigin::CopilotCompatible => ".github",
             SkillOrigin::OpenCodeCompatible => ".opencode",

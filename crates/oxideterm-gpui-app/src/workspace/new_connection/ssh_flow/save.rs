@@ -3567,6 +3567,7 @@ mod saved_connection_open_tests {
     fn password_proxy_hop(auth: SavedAuth) -> SavedProxyHop {
         SavedProxyHop {
             totp_credential_id: None,
+            account_credential_id: None,
             host: "jump.example.com".to_string(),
             port: 22,
             username: "ops".to_string(),
@@ -3685,7 +3686,7 @@ mod saved_connection_open_tests {
     #[test]
     fn stale_saved_connection_id_is_detected_before_opening() {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-stale-saved-connection-{}.json",
+            "oxidelab-stale-saved-connection-{}.json",
             uuid::Uuid::new_v4()
         ));
         let store = ConnectionStore::load(path).expect("empty connection store");

@@ -128,7 +128,7 @@ pub(super) fn test_host_api_snapshot_with_terminal() -> NativePluginHostApiSnaps
 
 pub(super) fn test_host_api_snapshot_with_declared_api_commands() -> NativePluginHostApiSnapshot {
     let temp_dir = std::env::temp_dir().join(format!(
-        "oxideterm-plugin-lifecycle-api-{}",
+        "oxidelab-plugin-lifecycle-api-{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -164,7 +164,7 @@ pub(super) fn test_host_api_snapshot_with_declared_api_commands() -> NativePlugi
 
 pub(super) fn test_connection_store(name: &str) -> oxideterm_connections::ConnectionStore {
     let path = std::env::temp_dir().join(format!(
-        "oxideterm-plugin-lifecycle-{name}-{}.json",
+        "oxidelab-plugin-lifecycle-{name}-{}.json",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -180,6 +180,7 @@ pub(super) fn test_connection_store_with_agent_connection(
     store
         .upsert(oxideterm_connections::SaveConnectionRequest {
             totp_credential_id: None,
+            account_credential_id: None,
             id: Some("conn-1".to_string()),
             name: "Home".to_string(),
             group: None,

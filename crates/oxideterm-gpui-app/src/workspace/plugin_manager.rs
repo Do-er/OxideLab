@@ -3575,7 +3575,7 @@ impl WorkspaceApp {
                     .when_some(required_version, |details, version| {
                         details.child(self.render_native_plugin_detail_row(
                             self.i18n.t("plugin.detail_requires"),
-                            format!("OxideTerm {version}"),
+                            format!("OxideLab {version}"),
                         ))
                     }),
             )
@@ -4243,9 +4243,20 @@ mod tests {
         std::fs::write(&license, "Packaged license").unwrap();
         let resolved =
             native_plugin_package_document_url(&root, &["LICENSE", "LICENSE.txt"]).unwrap();
+        let canonical = license.canonicalize().unwrap();
+        // Windows canonicalize returns a \\?\-prefixed verbatim path, while a file
+        // URL round-trips to the plain form, so compare against the plain path.
+        #[cfg(windows)]
+        let canonical = std::path::PathBuf::from(
+            canonical
+                .to_string_lossy()
+                .strip_prefix(r"\\?\")
+                .map(str::to_owned)
+                .unwrap_or_else(|| canonical.to_string_lossy().into_owned()),
+        );
         assert_eq!(
             url::Url::parse(&resolved).unwrap().to_file_path().unwrap(),
-            license.canonicalize().unwrap()
+            canonical
         );
         assert_eq!(native_plugin_package_document_url(&root, &["NOTICE"]), None);
         #[cfg(unix)]
@@ -4270,7 +4281,7 @@ mod tests {
     #[gpui::test]
     fn plugin_manager_fields_receive_platform_text(cx: &mut gpui::TestAppContext) {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_PLUGIN_INPUT_TEST_DIR";
+        let fixture_key = "OXIDELAB_PLUGIN_INPUT_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Workspace startup must not discover the user's settings or installed plugins.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

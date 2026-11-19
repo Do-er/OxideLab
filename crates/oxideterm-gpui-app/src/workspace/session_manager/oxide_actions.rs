@@ -1778,7 +1778,7 @@ impl WorkspaceApp {
             .map(|home| home.join("Downloads"))
             .unwrap_or_else(|| PathBuf::from("."));
         let suggested = format!(
-            "oxideterm-export-{}.oxide",
+            "oxidelab-export-{}.oxide",
             Utc::now().format("%Y%m%d-%H%M%S")
         );
         let receiver = cx.prompt_for_new_path(&directory, Some(&suggested));

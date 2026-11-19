@@ -12,8 +12,8 @@ use std::{
 use anyhow::{Context, Result, anyhow};
 
 const PRE_2_0_SOURCE_VERSION: &str = "pre-2.0.0";
-const SNAPSHOT_MARKER_CONTENT: &[u8] = b"OxideTerm migration snapshot complete\n";
-const NOTICE_MARKER_CONTENT: &[u8] = b"OxideTerm 2.0 migration notice acknowledged\n";
+const SNAPSHOT_MARKER_CONTENT: &[u8] = b"OxideLab migration snapshot complete\n";
+const NOTICE_MARKER_CONTENT: &[u8] = b"OxideLab 2.0 migration notice acknowledged\n";
 const MAX_TEMP_PATH_ATTEMPTS: usize = 128;
 static TEMP_PATH_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -82,7 +82,7 @@ fn ensure_versioned_snapshot(
     }
     if !data_dir.is_dir() {
         return Err(anyhow!(
-            "OxideTerm data path is not a directory: {}",
+            "OxideLab data path is not a directory: {}",
             data_dir.display()
         ));
     }
@@ -148,11 +148,11 @@ impl SnapshotPaths {
         let parent = data_dir
             .parent()
             .filter(|parent| !parent.as_os_str().is_empty())
-            .ok_or_else(|| anyhow!("OxideTerm data directory has no parent"))?;
+            .ok_or_else(|| anyhow!("OxideLab data directory has no parent"))?;
         let data_name = data_dir
             .file_name()
             .filter(|name| !name.is_empty())
-            .ok_or_else(|| anyhow!("OxideTerm data directory has no name"))?;
+            .ok_or_else(|| anyhow!("OxideLab data directory has no name"))?;
         let safe_version = safe_path_component(source_version)?;
 
         let mut snapshot_name = OsString::from(data_name);
@@ -451,7 +451,7 @@ mod tests {
                 .unwrap()
                 .as_nanos();
             let path = std::env::temp_dir().join(format!(
-                "oxideterm-migration-snapshot-{name}-{}-{nonce}",
+                "oxidelab-migration-snapshot-{name}-{}-{nonce}",
                 std::process::id()
             ));
             fs::create_dir_all(&path).unwrap();

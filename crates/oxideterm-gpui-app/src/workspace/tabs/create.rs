@@ -2359,7 +2359,7 @@ mod create_tests {
             NodeReadiness::Ready,
         );
         let store_path = std::env::temp_dir().join(format!(
-            "oxideterm-saved-reuse-{}.json",
+            "oxidelab-saved-reuse-{}.json",
             uuid::Uuid::new_v4()
         ));
         let store = oxideterm_connections::ConnectionStore::load_read_only(store_path)
@@ -2387,6 +2387,7 @@ mod create_tests {
             .proxy_chain
             .push(oxideterm_connections::SavedProxyHop {
                 totp_credential_id: None,
+                account_credential_id: None,
                 host: "jump.example.com".to_string(),
                 port: 22,
                 username: "ops".to_string(),

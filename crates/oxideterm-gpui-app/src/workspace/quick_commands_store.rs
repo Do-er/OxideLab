@@ -478,7 +478,7 @@ mod quick_command_tests {
 
     fn temp_settings_path(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("oxideterm-quick-commands-{name}-{}", now_ms()));
+            std::env::temp_dir().join(format!("oxidelab-quick-commands-{name}-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         dir.join("settings.json")
     }
@@ -498,6 +498,7 @@ mod quick_command_tests {
             host_patterns: Some(vec!["prod-*".into()]),
             match_field: Some(oxideterm_quick_commands::QuickCommandMatchField::ConnectionName),
             confirmation: None,
+            line_delay_ms: None,
         });
 
         let reloaded = QuickCommandsState::load(&settings_path);
@@ -562,6 +563,7 @@ mod quick_command_tests {
             host_patterns: None,
             match_field: None,
             confirmation: None,
+            line_delay_ms: None,
         });
         let mut expected_commands = state.commands.clone();
         for command in &mut expected_commands {

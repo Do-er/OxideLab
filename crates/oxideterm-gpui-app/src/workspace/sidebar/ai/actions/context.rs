@@ -58,7 +58,7 @@ impl WorkspaceApp {
         let mut parts = Vec::new();
         parts.push("## Environment".to_string());
         parts.push(format!(
-            "- OxideTerm host OS (local application only): {}",
+            "- OxideLab host OS (local application only): {}",
             ai_local_os_label()
         ));
         if let Some(tab) = self.active_content_tab(cx) {

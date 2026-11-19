@@ -1,9 +1,9 @@
 use super::*;
 
-pub(in crate::workspace) const HELP_GITHUB_URL: &str = "https://github.com/Do-er/oxideterm";
+pub(in crate::workspace) const HELP_GITHUB_URL: &str = "https://github.com/Do-er/OxideLab";
 // Keep the in-app legal link aligned with the repository-level multilingual notice.
 pub(in crate::workspace) const HELP_LEGAL_URL: &str =
-    "https://github.com/Do-er/oxideterm/blob/main/LEGAL.md";
+    "https://github.com/Do-er/OxideLab/blob/main/LEGAL.md";
 pub(in crate::workspace) const HELP_LEGAL_MARKDOWN: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../LEGAL.md"));
 const HELP_THIRD_PARTY_MARKDOWN: &str = include_str!(concat!(
@@ -217,7 +217,7 @@ impl WorkspaceApp {
             "settings_view.help.copyright",
             &[
                 ("year", chrono::Local::now().format("%Y").to_string()),
-                ("author", "AnalyseDeCircuit".to_string()),
+                ("author", "AnalyseDeCircuit & Do-er".to_string()),
             ],
         );
 

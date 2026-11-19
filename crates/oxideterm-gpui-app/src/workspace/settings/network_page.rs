@@ -14,7 +14,7 @@ const SETTINGS_PUBLIC_MCP_ACTION_ICON_SIZE: f32 = 14.0;
 
 #[derive(serde::Serialize)]
 struct PublicMcpStdioEnvironment<'a> {
-    #[serde(rename = "OXIDETERM_MCP_TOKEN")]
+    #[serde(rename = "OXIDELAB_MCP_TOKEN")]
     credential: &'a str,
 }
 
@@ -2184,7 +2184,7 @@ mod tests {
 
         assert_eq!(value["command"], CLI_COMPANION_COMMAND_NAME);
         assert_eq!(value["args"], serde_json::json!(["mcp", "bridge"]));
-        assert_eq!(value["env"]["OXIDETERM_MCP_TOKEN"], credential);
+        assert_eq!(value["env"]["OXIDELAB_MCP_TOKEN"], credential);
     }
 
     #[gpui::test]

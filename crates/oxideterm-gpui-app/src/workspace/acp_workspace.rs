@@ -178,7 +178,7 @@ fn acp_exposed_tool_name(name: &str, index: usize) -> String {
     if !oxideterm_ai::is_mcp_tool_name(name) {
         return name.to_string();
     }
-    // OxideTerm's internal MCP routing name contains colons, while MCP-facing
+    // OxideLab's internal MCP routing name contains colons, while MCP-facing
     // tool names use the portable letters, digits, underscore, dash and dot set.
     let mut stem = String::with_capacity(name.len().min(ACP_PROXY_TOOL_STEM_MAX_CHARS));
     let mut previous_was_separator = false;

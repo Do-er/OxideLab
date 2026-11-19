@@ -668,7 +668,7 @@ impl WorkspaceApp {
             };
             let result = runtime
                 .spawn_blocking(move || {
-                    let path = directory.join(format!("{file_stem}.oxideterm-highlights.json"));
+                    let path = directory.join(format!("{file_stem}.oxidelab-highlights.json"));
                     std::fs::write(path, json).map_err(|error| error.to_string())
                 })
                 .await
@@ -857,7 +857,7 @@ impl WorkspaceApp {
             };
             let result = runtime
                 .spawn_blocking(move || {
-                    let path = directory.join(format!("{file_stem}.oxideterm-scheme.json"));
+                    let path = directory.join(format!("{file_stem}.oxidelab-scheme.json"));
                     std::fs::write(path, json).map_err(|error| error.to_string())
                 })
                 .await

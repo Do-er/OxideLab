@@ -6572,7 +6572,7 @@ pub(in crate::workspace) mod entity_tests {
     #[gpui::test]
     fn hidden_knowledge_page_still_receives_import_completion(cx: &mut TestAppContext) {
         let data_dir = std::env::temp_dir().join(format!(
-            "oxideterm-knowledge-entity-test-{}",
+            "oxidelab-knowledge-entity-test-{}",
             uuid::Uuid::new_v4()
         ));
         std::fs::create_dir_all(&data_dir).expect("create Knowledge test directory");

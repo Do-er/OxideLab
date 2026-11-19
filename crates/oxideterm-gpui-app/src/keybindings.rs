@@ -288,7 +288,7 @@ pub(crate) static ACTION_DEFINITIONS: LazyLock<Vec<ActionDefinition>> = LazyLock
             "app.commandPalette",
             ActionScope::Global,
             KeyCombo::cmd("k"),
-            KeyCombo::ctrl("p"),
+            KeyCombo::ctrl("k"),
         ),
         def(
             "app.zenMode",

@@ -951,7 +951,7 @@ mod sftp_helper_tests {
     #[test]
     fn local_listing_reads_the_directory_again() {
         let directory =
-            std::env::temp_dir().join(format!("oxideterm-sftp-refresh-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("oxidelab-sftp-refresh-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&directory).expect("temporary directory should be created");
         let path = directory.to_string_lossy();
 
@@ -973,16 +973,16 @@ mod sftp_helper_tests {
 
     #[test]
     fn local_navigation_preserves_windows_drive_roots() {
-        let segments = sftp_path_segments(r"D:\Projects\OxideTerm", false);
+        let segments = sftp_path_segments(r"D:\Projects\OxideLab", false);
 
         assert_eq!(
             segments
                 .iter()
                 .map(|segment| segment.full_path.as_str())
                 .collect::<Vec<_>>(),
-            [r"D:\", r"D:\Projects", r"D:\Projects\OxideTerm"]
+            [r"D:\", r"D:\Projects", r"D:\Projects\OxideLab"]
         );
-        assert_eq!(parent_path(r"D:\Projects\OxideTerm", false), r"D:\Projects");
+        assert_eq!(parent_path(r"D:\Projects\OxideLab", false), r"D:\Projects");
         assert_eq!(parent_path(r"D:\", false), r"D:\");
     }
 }
