@@ -1,4 +1,4 @@
-# OxideTerm Native 架构设计
+# OxideLab Native 架构设计
 
 > **版本**: Native 桌面架构
 > **实现依据**：当前 Rust/GPUI 工作区。版本见 [Cargo.toml](../../../Cargo.toml)，贡献流程见[开发指南](../../development/README.md)。
@@ -66,7 +66,7 @@ flowchart TB
 3. **节点优先的远端工作区** - 远端工作流以稳定 SSH 节点为锚点，不以临时终端面板为锚点。
 4. **默认共享连接** - 终端、SFTP、转发和 IDE 可以共享节点注册表连接；AI 与插件通过经过校验的能力句柄、快照或钩子使用节点能力，不成为物理连接消费者。
 5. **生命周期归属明确** - 保存配置、在线节点、终端会话、SFTP 会话、转发、编辑器缓冲区和标签页分别有不同所有者。
-6. **本地优先状态** - SSH、SFTP、本地终端、设置、插件和 AI 供应商配置不依赖 OxideTerm 云账号。
+6. **本地优先状态** - SSH、SFTP、本地终端、设置、插件和 AI 供应商配置不依赖 OxideLab 云账号。
 7. **凭据边界清晰** - 导航元数据、设置、AI 提示词、日志、支持包和插件标签不是凭据存储。
 8. **减少用户可见耦合** - 用户界面不应要求用户理解内部传输句柄。
 
@@ -178,8 +178,8 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    User["用户"] --> App["OxideTerm 桌面应用"]
-    User --> Cli["oxideterm CLI 伴侣工具"]
+    User["用户"] --> App["OxideLab 桌面应用"]
+    User --> Cli["oxidelab CLI 伴侣工具"]
 
     subgraph Local["本机"]
         App
@@ -1633,7 +1633,7 @@ flowchart TB
 
 实现参考：[acp_workspace](../../../crates/oxideterm-gpui-app/src/workspace/acp_workspace.rs), [core](../../../crates/oxideterm-gpui-app/src/workspace/sidebar/ai/actions/stream/core.rs).
 
-OxideSens 是理解工作区上下文的助手。它使用已配置供应商和本地应用上下文，不需要 OxideTerm 账号。
+OxideSens 是理解工作区上下文的助手。它使用已配置供应商和本地应用上下文，不需要 OxideLab 账号。
 
 Agent Skills 是用于可重复工作流的受限说明层。AI 运行时会发现 `SKILL.md` 目录，只在需要时加载完整说明和资源，并把已加载技能的内容哈希记录到对话元数据中。加载技能不会授予运行时权限；终端、文件、凭据、网络等动作仍必须经过现有能力和批准检查。
 
@@ -1817,7 +1817,7 @@ flowchart TB
 ```mermaid
 %%{init: {"layout": "dagre", "flowchart": {"nodeSpacing": 45, "rankSpacing": 75, "curve": "basis"}}}%%
 flowchart TB
-    Cli["oxideterm CLI<br/>已解析命令与结构化参数"]
+    Cli["oxidelab CLI<br/>已解析命令与结构化参数"]
     Manage["持久状态管理"]
     Plan["校验与试运行计划<br/>必要时确认"]
     Store["共享领域存储<br/>设置、配置、备份与同步"]
@@ -1845,7 +1845,7 @@ flowchart TB
 
 实现参考：[main](../../../crates/oxideterm-cli/src/main.rs), [public_mcp](../../../crates/oxideterm-gpui-app/src/workspace/public_mcp.rs).
 
-`oxideterm` CLI 伴侣工具与桌面应用共享配置和数据路径，但不是主要交互界面。
+`oxidelab` CLI 伴侣工具与桌面应用共享配置和数据路径，但不是主要交互界面。
 
 CLI 适合：
 

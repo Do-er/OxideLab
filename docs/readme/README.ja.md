@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideTerm：サーバー管理をひとつのワークスペースに" width="920">
+<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab：サーバー管理をひとつのワークスペースに" width="920">
 
-# ⚡ OxideTerm
+# ⚡ OxideLab
 
 **無料のネイティブ SSH クライアントとリモート運用ワークスペース。自分の API キーで使える AI アシスタントも搭載。**
 
@@ -27,7 +27,7 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 
 ## クイックスタート
 
-1. **OxideTerm をインストール。** [最新リリース](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)からパッケージをダウンロードしてください。プラットフォームごとの注意事項は、下の[インストール](#install)にあります。
+1. **OxideLab をインストール。** [最新リリース](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)からパッケージをダウンロードしてください。プラットフォームごとの注意事項は、下の[インストール](#install)にあります。
 2. **サーバーを追加。** セッションマネージャーで SSH 接続を作成するか、`~/.ssh/config` からホストをインポートします。
 3. **接続。** ターミナルを開きます。ホスト鍵は `~/.ssh/known_hosts` と照合されます。
 4. **ほかの機能も活用。** 同じノードで SFTP、ポート転送、内蔵エディターを開けます。既定では、これらの機能はひとつの SSH 接続を共有します。
@@ -55,7 +55,7 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 
 ---
 
-## OxideTerm を選ぶ理由
+## OxideLab を選ぶ理由
 
 - **無料で、ローカルを優先。** アカウント、サブスクリプション、テレメトリーは不要です。接続情報と運用データは自分で管理できます。
 - **サーバーごとにひとつのワークスペース。** ターミナル、SFTP、ポート転送、RDP/VNC、エディター、監視、AI が同じノードに接続し、ひとまとまりの作業環境として機能します。
@@ -75,7 +75,7 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 | macOS | 318.7 MB | 81.3 MB | 約 74% |
 | Windows | 182.4 MB | 23.5 MB | 約 87% |
 
-旧版の合計には、OxideTerm と関連する WebView プロセスが含まれます。ネイティブ版では、これらのブラウザープロセスは不要になりました。
+旧版の合計には、OxideLab と関連する WebView プロセスが含まれます。ネイティブ版では、これらのブラウザープロセスは不要になりました。
 
 ![システムのプロセス画面による待機時メモリー比較：Tauri 1.x とネイティブ 2.0](../../docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -95,7 +95,7 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 <summary><b>自然な言葉での依頼から OxideSens がターミナルを開く様子を見る</b></summary>
 
 <a href="../../docs/media/ai-terminal-demo.mp4">
-  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens が OxideTerm 内でターミナルを開く様子" width="720">
+  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens が OxideLab 内でターミナルを開く様子" width="720">
 </a>
 
 </details>
@@ -119,7 +119,7 @@ OxideSens は任意で有効化できるアシスタントです。実行中の�
 
 ## プラグイン
 
-OxideTerm は次の 3 種類のプラグインに対応します。
+OxideLab は次の 3 種類のプラグインに対応します。
 
 | 種類 | 実行方法 | 実行範囲と制約 |
 |---|---|---|
@@ -146,7 +146,7 @@ OxideTerm は次の 3 種類のプラグインに対応します。
 | **プラグイン** | [プラグイン](#plugins)を参照 |
 | **テレメトリー** | なし |
 
-**適法な利用。** OxideTerm は GPL-3.0-only ライセンスで提供され、追加の制限はありません。自分が所有する、または明示的にアクセスを許可されたシステム、ネットワーク、機器のみを利用し、適用される法律を遵守してください。不正アクセス、サービスの妨害、アクセス制御の回避には使用しないでください。
+**適法な利用。** OxideLab は GPL-3.0-only ライセンスで提供され、追加の制限はありません。自分が所有する、または明示的にアクセスを許可されたシステム、ネットワーク、機器のみを利用し、適用される法律を遵守してください。不正アクセス、サービスの妨害、アクセス制御の回避には使用しないでください。
 
 ---
 
@@ -156,9 +156,9 @@ OxideTerm は次の 3 種類のプラグインに対応します。
 
 - デスクトップ専用です（macOS、Windows、Linux）。モバイルアプリはありません。
 - 開発は速いペースで進んでおり、頻繁にリリースされます。[変更履歴](../../.github/release-notes/stable-changelog.md)と[未解決の課題](https://github.com/AnalyseDeCircuit/oxideterm/issues)をご覧ください。
-- 監査とセッション録画は任意で有効化する機能であり、OxideTerm 自身が観測できる範囲だけを記録します。
+- 監査とセッション録画は任意で有効化する機能であり、OxideLab 自身が観測できる範囲だけを記録します。
 - プロセスプラグインは OS のサンドボックスで隔離されません。
-- 描画に問題がある場合は、互換プロファイルを試してください：`OXIDETERM_RENDER_PROFILE=compatibility`。
+- 描画に問題がある場合は、互換プロファイルを試してください：`OXIDELAB_RENDER_PROFILE=compatibility`。
 
 ---
 
@@ -176,7 +176,7 @@ OxideTerm は次の 3 種類のプラグインに対応します。
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -185,7 +185,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-Nix を使う場合：`nix build .#oxideterm`、`nix run .#oxideterm`、または `nix develop`。
+Nix を使う場合：`nix build .#oxidelab`、`nix run .#oxidelab`、または `nix develop`。
 
 CLI の成果物は `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm` に出力されます。
 
@@ -194,7 +194,7 @@ CLI の成果物は `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>
 <details>
 <summary><b>コマンドラインインターフェース</b></summary>
 
-画面を持たない `oxideterm` CLI はアプリを起動せずに使えるため、自動化、CI、診断に便利です。設定、接続、ポート転送、プラグイン、クイックコマンド、秘密情報、持ち運び用バンドル、診断、レポート、一括実行の計画、バックアップ、クラウド同期に対応します。
+画面を持たない `oxidelab` CLI はアプリを起動せずに使えるため、自動化、CI、診断に便利です。設定、接続、ポート転送、プラグイン、クイックコマンド、秘密情報、持ち運び用バンドル、診断、レポート、一括実行の計画、バックアップ、クラウド同期に対応します。
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -232,7 +232,7 @@ UI とターミナル・SSH バックエンドはひとつの Rust プロセス�
 └─────────────────────────────────────────────────┘
 ```
 
-| 項目 | ブラウザー同梱方式 | OxideTerm |
+| 項目 | ブラウザー同梱方式 | OxideLab |
 |---|---|---|
 | 描画 | ブラウザーエンジンと Web レイアウト | GPU 上の GPUI 描画 |
 | ターミナルのデータ処理 | WebSocket → JS イベントループ → xterm.js | Rust 入力 → `TerminalState` → GPUI 描画 |
@@ -294,7 +294,7 @@ SFTP セッションには接続の世代情報が含まれます。再接続後
 Gatekeeper にブロックされた場合は、隔離属性を解除してください。
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -305,13 +305,13 @@ SmartScreen の警告が表示された場合は、**詳細情報 → 実行**�
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -331,15 +331,15 @@ Rust コード、ドキュメント、翻訳、プラグイン、テスト、不
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-再現可能な不具合とリグレッションを優先して対応します。機能の要望は、範囲、安全性、リモートサーバー用ワークスペースという OxideTerm の方向性との相性を検討します。OxideTerm が役に立ったら、GitHub のスター、再現可能な不具合報告、翻訳の修正、プラグインの提供などで開発を支援していただけます。
+再現可能な不具合とリグレッションを優先して対応します。機能の要望は、範囲、安全性、リモートサーバー用ワークスペースという OxideLab の方向性との相性を検討します。OxideLab が役に立ったら、GitHub のスター、再現可能な不具合報告、翻訳の修正、プラグインの提供などで開発を支援していただけます。
 
 ### 貢献者
 
-OxideTerm をより良くするために協力してくださる皆さんに感謝します。
+OxideLab をより良くするために協力してくださる皆さんに感謝します。
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideTerm の貢献者">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab の貢献者">
   </a>
 </p>
 

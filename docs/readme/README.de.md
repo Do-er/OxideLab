@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideTerm: Ihre Server, ein Arbeitsbereich" width="920">
+<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab: Ihre Server, ein Arbeitsbereich" width="920">
 
-# ⚡ OxideTerm
+# ⚡ OxideLab
 
 **Ein kostenloser, nativer SSH-Client und Arbeitsbereich für die Verwaltung von Remote-Systemen mit einem KI-Assistenten für Ihren eigenen API-Schlüssel.**
 
@@ -27,7 +27,7 @@ Kein Konto. Kein Abo. Keine Telemetrie. Kein Electron.
 
 ## Schnellstart
 
-1. **OxideTerm installieren.** Laden Sie ein Paket der [neuesten Version](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) herunter; Hinweise zu den Plattformen finden Sie unten unter [Installation](#install).
+1. **OxideLab installieren.** Laden Sie ein Paket der [neuesten Version](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) herunter; Hinweise zu den Plattformen finden Sie unten unter [Installation](#install).
 2. **Server hinzufügen.** Öffnen Sie den Sitzungsmanager und erstellen Sie eine SSH-Verbindung oder importieren Sie Hosts aus Ihrer `~/.ssh/config`.
 3. **Verbinden.** Öffnen Sie ein Terminal. Host-Schlüssel werden anhand von `~/.ssh/known_hosts` geprüft.
 4. **Die weiteren Werkzeuge nutzen.** Öffnen Sie SFTP, Portweiterleitung oder den integrierten Editor am selben Knoten. Standardmäßig teilen sie sich eine SSH-Verbindung.
@@ -55,7 +55,7 @@ Eine Einführung finden Sie in der [Dokumentation](https://oxideterm.app).
 
 ---
 
-## Warum OxideTerm
+## Warum OxideLab
 
 - **Kostenlos und auf lokale Nutzung ausgerichtet.** Kein Konto, kein Abo, keine Telemetrie. Ihre Verbindungen und Betriebsdaten bleiben unter Ihrer Kontrolle.
 - **Ein Arbeitsbereich pro Server.** Terminal, SFTP, Weiterleitungen, RDP/VNC, Editor, Überwachung und KI sind an denselben Knoten angebunden, statt als voneinander getrennte Werkzeuge zu arbeiten.
@@ -75,7 +75,7 @@ Eine Einführung finden Sie in der [Dokumentation](https://oxideterm.app).
 | macOS | 318.7 MB | 81.3 MB | Etwa 74% |
 | Windows | 182.4 MB | 23.5 MB | Etwa 87% |
 
-Der Gesamtwert der alten Version umfasst OxideTerm und die zugehörigen WebView-Prozesse. Die native Version benötigt diese Browserprozesse nicht mehr.
+Der Gesamtwert der alten Version umfasst OxideLab und die zugehörigen WebView-Prozesse. Die native Version benötigt diese Browserprozesse nicht mehr.
 
 ![Speichervergleich im Leerlauf mit Screenshots der Systemprozesse: Tauri 1.x und native Version 2.0](../../docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -95,7 +95,7 @@ Der Gesamtwert der alten Version umfasst OxideTerm und die zugehörigen WebView-
 <summary><b>So öffnet OxideSens ein Terminal auf eine Anfrage in natürlicher Sprache</b></summary>
 
 <a href="../../docs/media/ai-terminal-demo.mp4">
-  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens öffnet ein Terminal in OxideTerm" width="720">
+  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens öffnet ein Terminal in OxideLab" width="720">
 </a>
 
 </details>
@@ -119,7 +119,7 @@ OxideSens ist ein optionaler Assistent, der Ihre aktiven Sitzungen prüfen und A
 
 ## Plugins
 
-OxideTerm unterstützt drei Plugin-Varianten:
+OxideLab unterstützt drei Plugin-Varianten:
 
 | Typ | Ausführung | Grenzen |
 |---|---|---|
@@ -146,7 +146,7 @@ OxideTerm unterstützt drei Plugin-Varianten:
 | **Plugins** | Siehe [Plugins](#plugins) |
 | **Telemetrie** | Keine |
 
-**Rechtmäßige Nutzung.** OxideTerm steht unter GPL-3.0-only ohne zusätzliche Einschränkungen. Greifen Sie nur auf Systeme, Netzwerke und Geräte zu, die Ihnen gehören oder für die Sie eine ausdrückliche Zugriffsberechtigung besitzen, und beachten Sie geltendes Recht. Verwenden Sie OxideTerm nicht für unbefugte Zugriffe, Dienststörungen oder zur Umgehung von Zugriffskontrollen.
+**Rechtmäßige Nutzung.** OxideLab steht unter GPL-3.0-only ohne zusätzliche Einschränkungen. Greifen Sie nur auf Systeme, Netzwerke und Geräte zu, die Ihnen gehören oder für die Sie eine ausdrückliche Zugriffsberechtigung besitzen, und beachten Sie geltendes Recht. Verwenden Sie OxideLab nicht für unbefugte Zugriffe, Dienststörungen oder zur Umgehung von Zugriffskontrollen.
 
 ---
 
@@ -156,9 +156,9 @@ Das sollten Sie vor der Installation wissen:
 
 - Nur für Desktop-Systeme (macOS, Windows, Linux). Es gibt keine mobile App.
 - Das Projekt entwickelt sich schnell und veröffentlicht häufig neue Versionen. Siehe [Änderungsprotokoll](../../.github/release-notes/stable-changelog.md) und [offene Issues](https://github.com/AnalyseDeCircuit/oxideterm/issues).
-- Audit und Sitzungsaufzeichnung müssen ausdrücklich aktiviert werden und erfassen nur, was OxideTerm selbst beobachten kann.
+- Audit und Sitzungsaufzeichnung müssen ausdrücklich aktiviert werden und erfassen nur, was OxideLab selbst beobachten kann.
 - Prozess-Plugins laufen ohne Betriebssystem-Sandbox.
-- Falls der Renderer auf Ihrem Rechner nicht funktioniert, versuchen Sie das Kompatibilitätsprofil: `OXIDETERM_RENDER_PROFILE=compatibility`.
+- Falls der Renderer auf Ihrem Rechner nicht funktioniert, versuchen Sie das Kompatibilitätsprofil: `OXIDELAB_RENDER_PROFILE=compatibility`.
 
 ---
 
@@ -176,7 +176,7 @@ Das sollten Sie vor der Installation wissen:
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -185,7 +185,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-Mit Nix: `nix build .#oxideterm`, `nix run .#oxideterm` oder `nix develop`.
+Mit Nix: `nix build .#oxidelab`, `nix run .#oxidelab` oder `nix develop`.
 
 Die CLI-Build-Ergebnisse liegen unter `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm`.
 
@@ -194,7 +194,7 @@ Die CLI-Build-Ergebnisse liegen unter `crates/oxideterm-gpui-app/resources/cli-b
 <details>
 <summary><b>Befehlszeilenschnittstelle</b></summary>
 
-Die `oxideterm`-CLI ohne grafische Oberfläche funktioniert, ohne die App zu starten, und eignet sich für Automatisierung, CI und Diagnosen. Sie deckt Einstellungen, Verbindungen, Weiterleitungen, Plugins, Schnellbefehle, Geheimnisse, portable Pakete, Diagnosen, Berichte, Stapelpläne, Sicherungen und Cloud-Synchronisierung ab.
+Die `oxidelab`-CLI ohne grafische Oberfläche funktioniert, ohne die App zu starten, und eignet sich für Automatisierung, CI und Diagnosen. Sie deckt Einstellungen, Verbindungen, Weiterleitungen, Plugins, Schnellbefehle, Geheimnisse, portable Pakete, Diagnosen, Berichte, Stapelpläne, Sicherungen und Cloud-Synchronisierung ab.
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -232,7 +232,7 @@ Oberfläche und Terminal-/SSH-Backend teilen sich einen Rust-Prozess; optionale 
 └─────────────────────────────────────────────────┘
 ```
 
-| Aspekt | Ansatz mit mitgeliefertem Browser | OxideTerm |
+| Aspekt | Ansatz mit mitgeliefertem Browser | OxideLab |
 |---|---|---|
 | Rendering | Browser-Engine und Web-Layout | GPUI auf einer GPU-Fläche |
 | Terminal-Datenfluss | WebSocket → JS-Ereignisschleife → xterm.js | Rust-Eingabe → `TerminalState` → GPUI-Rendering |
@@ -294,7 +294,7 @@ Prüfen Sie Ihren Download anhand der Datei `sha256sums.txt` auf der Release-Sei
 Falls Gatekeeper die App blockiert, entfernen Sie das Quarantäneattribut:
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -305,13 +305,13 @@ Wenn SmartScreen eine Warnung anzeigt, wählen Sie **Weitere Informationen → T
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -331,15 +331,15 @@ Fehlerberichte sind besonders hilfreich, wenn sie ein Diagnosepaket mit maskiert
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-Reproduzierbare Fehler und Regressionen haben Vorrang. Funktionswünsche werden nach Umfang, Sicherheit und ihrer Eignung für OxideTerms Ausrichtung als Arbeitsbereich für Remote-Server bewertet. Wenn OxideTerm Ihre Arbeit unterstützt, helfen ein GitHub-Stern, ein reproduzierbarer Fehlerbericht, eine Übersetzungskorrektur oder ein Plugin dabei, das Projekt weiterzuentwickeln.
+Reproduzierbare Fehler und Regressionen haben Vorrang. Funktionswünsche werden nach Umfang, Sicherheit und ihrer Eignung für OxideLabs Ausrichtung als Arbeitsbereich für Remote-Server bewertet. Wenn OxideLab Ihre Arbeit unterstützt, helfen ein GitHub-Stern, ein reproduzierbarer Fehlerbericht, eine Übersetzungskorrektur oder ein Plugin dabei, das Projekt weiterzuentwickeln.
 
 ### Mitwirkende
 
-Vielen Dank an alle, die OxideTerm verbessern.
+Vielen Dank an alle, die OxideLab verbessern.
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Mitwirkende bei OxideTerm">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Mitwirkende bei OxideLab">
   </a>
 </p>
 

@@ -1,6 +1,6 @@
-# OxideTerm System Invariants
+# OxideLab System Invariants
 
-This document records rules that must stay true while OxideTerm evolves. These
+This document records rules that must stay true while OxideLab evolves. These
 are not optional style preferences. They are guardrails for preventing repeated
 regressions in focus, input routing, UI translation, theming, and terminal
 correctness.
@@ -28,7 +28,7 @@ correctness.
 
 ## Text Fields
 
-- GPUI forms must compose shared OxideTerm UI primitives for text input,
+- GPUI forms must compose shared OxideLab UI primitives for text input,
   checkbox, button, tabs, modal, and form-field layout. Feature pages must not
   hand-copy those controls inline.
 - Text fields must render an explicit caret when they are not backed by a native
@@ -108,7 +108,7 @@ correctness.
 - A raw pixel value is acceptable only for one-off geometry that cannot
   reasonably be themed, and the reason should be obvious from the local code.
 - When translating the Tauri UI, first identify the source token or Tailwind
-  class, then map it to an OxideTerm token. Do not eyeball values from a
+  class, then map it to an OxideLab token. Do not eyeball values from a
   screenshot when the source code is available.
 
 ## Tauri UI Translation
@@ -162,7 +162,7 @@ correctness.
   versions, duplicate fields, unsolicited clipboard payloads, stale
   heartbeats, and application mismatches must be ignored.
 - Vim, Neovim, and Emacs adapters may enable the application's own mouse
-  protocol, but OxideTerm must not remove the generic alternate-screen or
+  protocol, but OxideLab must not remove the generic alternate-screen or
   mouse-tracking guards. The application remains the owner of pointer input.
 - Free Type Mode command edits must be verified against real PTY-backed Bash,
   Zsh, and Fish line editors. Do not assume Readline, ZLE, Fish, Vi insertion
@@ -175,15 +175,15 @@ correctness.
 ## Native Render Policy
 
 - Native GPUI does not expose a product-level CPU renderer fallback in the
-  current GPUI version. OxideTerm must not present WebGL, Canvas, or CPU
+  current GPUI version. OxideLab must not present WebGL, Canvas, or CPU
   renderer choices as if they were real native renderers.
-- Renderer compatibility settings must be expressed as an OxideTerm render
+- Renderer compatibility settings must be expressed as an OxideLab render
   policy: quality, low-power, or compatibility. The policy may reduce expensive
   visual work, but it must not change terminal protocol semantics.
 - Software-emulated graphics may automatically enter compatibility mode. Unknown
   macOS/Windows GPU information must not be treated as failure; users can still
   choose low-power or compatibility manually.
-- Safe-mode environment overrides such as `OXIDETERM_RENDER_PROFILE` apply only
+- Safe-mode environment overrides such as `OXIDELAB_RENDER_PROFILE` apply only
   to the current process. They must not rewrite persisted user settings.
 - High-cost visuals must go through the effective render policy before use:
   native vibrancy, background images and blur, animations, terminal inline image
@@ -293,11 +293,11 @@ correctness.
 
 ## Source Boundaries
 
-- OxideTerm native code must not copy, mechanically translate, or closely mirror
+- OxideLab native code must not copy, mechanically translate, or closely mirror
   Zed GPL implementation code.
 - External terminal references are acceptable only as behavioral references:
   public protocols, user-visible behavior, and independently designed tests.
-- Source comments and identifiers should use OxideTerm terminology, not Zed
+- Source comments and identifiers should use OxideLab terminology, not Zed
   terminology, outside of local planning/audit documents.
 
 ## Verification Expectations

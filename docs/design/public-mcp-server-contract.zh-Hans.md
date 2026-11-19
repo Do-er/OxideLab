@@ -1,4 +1,4 @@
-# OxideTerm 公开 MCP 服务端工具契约
+# OxideLab 公开 MCP 服务端工具契约
 
 > 状态：实施契约；服务端按本文的阶段和兼容边界逐步交付。
 >
@@ -8,17 +8,17 @@
 
 ## 1. 决策、方向与边界
 
-OxideTerm 应当作为 **MCP 服务端**，让经过用户授权的 Codex、Claude Desktop、IDE Agent 或其他兼容客户端调用本机正在运行的 OxideTerm。客户端是调用者；OxideTerm 是资源、会话与操作的唯一所有者。
+OxideLab 应当作为 **MCP 服务端**，让经过用户授权的 Codex、Claude Desktop、IDE Agent 或其他兼容客户端调用本机正在运行的 OxideLab。客户端是调用者；OxideLab 是资源、会话与操作的唯一所有者。
 
 这项能力必须与仓库内已有的两条相反或更窄的路径严格分开：
 
 | 路径 | 当前职责 | 与本文的关系 |
 |---|---|---|
-| `oxideterm-ai` 的 `McpRegistry` | OxideTerm 的 AI 功能连接外部 MCP 服务 | 方向相反；不复用其连接、凭据或授权。 |
+| `oxideterm-ai` 的 `McpRegistry` | OxideLab 的 AI 功能连接外部 MCP 服务 | 方向相反；不复用其连接、凭据或授权。 |
 | `oxideterm-acp-host-tools` | 一个 ACP 会话临时拥有的回环 MCP 桥接 | 仅服务该 ACP 会话；不升级为公开服务端，也不共享其令牌。 |
-| 本文的 Public MCP | 外部客户端调用本机 OxideTerm 的受控产品能力 | 新增独立网关、授权账本、句柄转换和审计边界。 |
+| 本文的 Public MCP | 外部客户端调用本机 OxideLab 的受控产品能力 | 新增独立网关、授权账本、句柄转换和审计边界。 |
 
-设计参考了 Navop 已公开的能力范围：连接、活动会话、终端、文件、传输和工具组按需开放；但工具名、描述、分组、参数、协议、数据模型和实现边界均由 OxideTerm 独立制定，不能复制其实现或接口形态。
+设计参考了 Navop 已公开的能力范围：连接、活动会话、终端、文件、传输和工具组按需开放；但工具名、描述、分组、参数、协议、数据模型和实现边界均由 OxideLab 独立制定，不能复制其实现或接口形态。
 
 能力范围的外部参考是 [Navop 的 Public MCP 使用说明](https://docs.navop.dev/en-US/guide/public-mcp)；该参考只用于识别产品域，不构成本契约的接口或安全模型来源。
 
@@ -49,7 +49,7 @@ OxideTerm 应当作为 **MCP 服务端**，让经过用户授权的 Codex、Clau
 
 - 第一阶段不提供公网监听、局域网发现或远程控制中继。未来若需要远程入口，必须另立 TLS、设备身份、网络 ACL 和威胁建模设计，不能把本机令牌复用于网络服务。
 - 不把所有 Rust crate 的 public API 变成 MCP API。
-- 不替代 OxideTerm 的 GUI：需要人机验证、设备所有者认证或显示许可时，应用负责显示交互；MCP 只接收可验证的结果。
+- 不替代 OxideLab 的 GUI：需要人机验证、设备所有者认证或显示许可时，应用负责显示交互；MCP 只接收可验证的结果。
 - 不承诺虚假的跨协议能力。Mosh、Telnet、串口和本地终端只暴露它们实际拥有的终端能力；本地终端绝不成为可保存连接。
 
 ### 1.4 当前已落地的首个垂直切片
@@ -75,7 +75,7 @@ OxideTerm 应当作为 **MCP 服务端**，让经过用户授权的 Codex、Clau
 - SFTP 文件读取和修改分别授权。`files_open` 为规范化远端根目录登记独立 SFTP 消费者，后续列表、元数据、分段读取、比较、写入、移动和删除都重新校验规范化路径边界。正文只经客户端自己的有界 artifact 传递；重连时先取得当前连接的消费者再释放旧消费者，`files_close` 不断开共享 SSH 节点。
 - `transfers_start` 在同一授权根内启动真实后台 SFTP 单文件上传或下载，除传输数据组外，上传还要求远端文件写入组，下载还要求远端文件读取组。进度和取消复用应用的传输控制器。上传源与下载产物都只能是客户端私有 artifact，本机临时路径不会进入结果；客户端撤销、工具组关闭、文件会话关闭或物理节点断开会取消仍在运行的传输。当前 artifact 数据面上限为 64 MiB，尚未保留可跨请求重启的部分文件，因此 `resume=true` 会明确拒绝；上传失败或取消时会如实报告可能存在远端部分文件。
 - IDE 工作区读取和结构化编辑分别授权。`workspaces_mount` 必须从客户端已有的 `file_session_ref` 派生，并再次规范化项目根；它创建独立的 Node Agent/SFTP IDE owner，不借用可见编辑器标签页，也不暴露 NodeId、TabId 或 GPUI Entity。树、文本读取和搜索都有硬上限；编辑使用编辑器核心校验 UTF-8 字节区间，并将客户端先前观察到的 revision 映射回真实 `SavedFileVersion` 做冲突检测。多文件写入不是服务端原子事务，后续文件失败或任务在写入期间被取消时，会尝试用刚写入的版本回滚前项，并明确报告回滚是否完整，不虚构持久 `undo_ref`。关闭工作区、父文件会话、客户端授权或物理节点只释放该工作区自己的 IDE consumer。
-- `oxideterm mcp bridge` 已提供受管 stdio 入口：它只把逐行 JSON-RPC 转交给正在运行的回环 HTTP 服务，不拥有业务权限。端点默认从应用生成的非秘密 discovery record 取得；Bearer 凭据只从用户指定的环境变量读取，绝不接受命令行明文。bridge 拒绝非回环 URL、代理、重定向、超限消息和未认证响应；应用未运行时，保留的端口记录只用于下次优先复用，连接仍会明确失败。
+- `oxidelab mcp bridge` 已提供受管 stdio 入口：它只把逐行 JSON-RPC 转交给正在运行的回环 HTTP 服务，不拥有业务权限。端点默认从应用生成的非秘密 discovery record 取得；Bearer 凭据只从用户指定的环境变量读取，绝不接受命令行明文。bridge 拒绝非回环 URL、代理、重定向、超限消息和未认证响应；应用未运行时，保留的端口记录只用于下次优先复用，连接仍会明确失败。
 - 回环监听端口支持设备本地配置：`0` 保持自动选择，`1..=65535` 固定端口。应用新端口时必须先成功绑定并持久化 discovery record，再释放旧监听器；固定端口失败不得静默退回随机端口。该偏好不进入普通设置、`.oxide` 或云同步。
 - 终端会话、内容观察和输入控制分别授权。`terminals_open` 只创建应用真实持有的可见终端页：SSH 必须使用已取得的 `node_ref`，保存的 Mosh、Telnet 和串口使用 `connection_ref`，本地终端只允许一次性启动且不会进入保存、导出或同步。公共终端最多全局 128 个、每客户端 32 个（含等待认证的 Mosh）；读取仅返回有界屏幕快照与 generation cursor；搜索复用终端后端；输入正文不进入审计，普通模式批准页只显示输入类型、长度与回车意图。用户从界面关闭 pane 时对应句柄同步失效；SSH 节点重连换 pane 时句柄迁移到新会话。关闭 SSH 终端只关闭自己的 terminal consumer，不等同于物理节点断开。
 - 终端录制控制和录制内容分别授权。`recordings_control` 复用真实 `TerminalPane` recorder，同一终端不会覆盖既有应用录制；当前后端只支持 output-only，因此 `capture_input=true` 会明确拒绝。停止时保留十五分钟有效的有界 asciicast 正文，搜索只给有界片段，导出只生成客户端私有且会独立过期的 artifact，不接受任意本机路径。终端关闭或控制授权关闭会先停止活动录制；客户端撤销会零化保留正文并撤销导出 artifact。
@@ -95,7 +95,7 @@ OxideTerm 应当作为 **MCP 服务端**，让经过用户授权的 Codex、Clau
 
 | 入口 | 使用情形 | 约束 |
 |---|---|---|
-| 受管 stdio bridge | MCP 客户端只能启动子进程 | `oxideterm mcp bridge` 从本地 discovery record 取得回环端点，从 `OXIDETERM_MCP_TOKEN`（或 `--token-env` 指定变量）取得一次性显示的客户端 Bearer；随后只转交 stdio JSON-RPC，不持有或扩大业务权限。 |
+| 受管 stdio bridge | MCP 客户端只能启动子进程 | `oxidelab mcp bridge` 从本地 discovery record 取得回环端点，从 `OXIDELAB_MCP_TOKEN`（或 `--token-env` 指定变量）取得一次性显示的客户端 Bearer；随后只转交 stdio JSON-RPC，不持有或扩大业务权限。 |
 | 回环 Streamable HTTP | 长驻客户端或原生 MCP 配置 | 仅绑定 `127.0.0.1`、`::1` 或受当前用户保护的本地 socket；每个客户端配置有独立连接材料。 |
 
 启用 Public MCP 后，应用为每个已批准客户端生成独立的 `client_ref` 和不可导出的连接凭据。凭据只写入应用生成的客户端配置、受保护发现记录或 OS 凭据存储；不会出现在工具结果、审计、日志、终端或同步对象里。停用客户端、轮换凭据、退出应用或撤销客户端会立即使相关会话失效。
@@ -149,7 +149,7 @@ MCP `2026-07-28` 请求使用 `server/discover` 做可选发现，并在每次�
 
 ### 2.4 确认、提交和撤销
 
-高风险工具的首次调用只固化动作摘要，返回 `approval_required` 和 `approval_ref`。应用内确认页显示客户端、目标、影响、是否可撤销、敏感参数的存在性及经脱敏后的摘要。用户在应用中批准后，客户端调用 `mcp_commit_action`，只传入该 `approval_ref`，服务端才执行原始、不可变的动作。新协议的 MRTR `input_required` 可改善客户端交互，但不能代替设备所有者在 OxideTerm 内的批准。
+高风险工具的首次调用只固化动作摘要，返回 `approval_required` 和 `approval_ref`。应用内确认页显示客户端、目标、影响、是否可撤销、敏感参数的存在性及经脱敏后的摘要。用户在应用中批准后，客户端调用 `mcp_commit_action`，只传入该 `approval_ref`，服务端才执行原始、不可变的动作。新协议的 MRTR `input_required` 可改善客户端交互，但不能代替设备所有者在 OxideLab 内的批准。
 
 批准票据默认五分钟有效、仅能提交一次，并在客户端断开、权限撤销、目标 revision 变化或应用锁定时失效。`mcp_commit_action` 不接受替换后的命令、路径、内容或目标，因此不能把一次确认挪作另一项操作。
 
@@ -431,7 +431,7 @@ RDP/VNC helper 的 JSON line、二进制帧、证书材料、凭据和进程控�
 
 | 阶段 | 交付边界 | 关键验收 |
 |---|---|---|
-| 0. 契约冻结 | MCP `2026-07-28` 与旧版兼容、句柄编码、DTO schema、错误码、授权账本、审计字段、client discovery 和 threat model | 评审确认方向是“外部客户端调用 OxideTerm”；验证没有复用反向 MCP 或 ACP 会话的 token；新旧协议得到相同的产品授权结果。 |
+| 0. 契约冻结 | MCP `2026-07-28` 与旧版兼容、句柄编码、DTO schema、错误码、授权账本、审计字段、client discovery 和 threat model | 评审确认方向是“外部客户端调用 OxideLab”；验证没有复用反向 MCP 或 ACP 会话的 token；新旧协议得到相同的产品授权结果。 |
 | 1. 服务骨架 | `PublicMcpRuntime`、stdio/回环入口、client registration、基础目录、动态工具可见性、operation/approval/audit store | 未获授权的客户端只看到基础目录；撤销能断开会话并使所有其句柄不可用；Host/Origin/认证校验完整；日志中没有 token/参数正文。 |
 | 2. 连接与节点 | 连接投影、凭据只写 broker、`nodes_*`、节点租约 | 打开和关闭最后一个 MCP terminal 后，另一个 SFTP/forward consumer 仍能使用同一 node；显式 node disconnect 才级联停止。 |
 | 3. 终端、命令与文件 | `terminals_*`、SSH `commands_*`、真实 SFTP、artifact、transfer、IDE 与 revision 检查 | SSH exec 返回真实退出码；交互终端只提供精确输入而不伪造完成状态；Mosh、Telnet、串口和本地 terminal 只报告真实能力；本地 terminal 保存被拒绝；文件覆盖冲突、取消和多文件编辑的补偿回滚结果可验证。 |

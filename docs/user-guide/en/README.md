@@ -1,6 +1,6 @@
-# OxideTerm User Guide
+# OxideLab User Guide
 
-OxideTerm Native is a Rust/GPUI SSH workspace with terminal, SFTP, forwarding, Host Tools, graphics/VNC sessions, settings, cloud sync, plugins, AI assistance, and a standalone CLI companion. The desktop app is the product surface; the CLI is an automation and diagnostics companion.
+OxideLab Native is a Rust/GPUI SSH workspace with terminal, SFTP, forwarding, Host Tools, graphics/VNC sessions, settings, cloud sync, plugins, AI assistance, and a standalone CLI companion. The desktop app is the product surface; the CLI is an automation and diagnostics companion.
 
 ## Guides
 

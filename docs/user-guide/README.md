@@ -1,4 +1,4 @@
-# OxideTerm User Guide
+# OxideLab User Guide
 
 Choose a language:
 

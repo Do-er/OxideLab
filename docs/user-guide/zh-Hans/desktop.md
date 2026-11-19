@@ -2,7 +2,7 @@
 
 ## 首次启动
 
-打开 OxideTerm 后，从左侧活动栏管理连接和全局页面，从右侧打开 OxideSens 和主机工具。顶栏筛选标签，不中断隐藏的会话；参见[工作区导航](workspace.md)。
+打开 OxideLab 后，从左侧活动栏管理连接和全局页面，从右侧打开 OxideSens 和主机工具。顶栏筛选标签，不中断隐藏的会话；参见[工作区导航](workspace.md)。
 
 如果当前没有会话，建议先创建一个本地 shell 标签页。这可以先确认终端渲染、shell 集成、输入处理和主题设置都正常，再去添加远端主机。
 
@@ -93,7 +93,7 @@ Sixel 图片按原始像素尺寸和指定的像素比例显示。在滚动模�
 
 打开新的 SSH 终端时，旧版远程集成可能触发更新提醒。选择“稍后”不会修改远端文件，之后仍可从同一设置页手动更新。
 
-远程集成为 Bash、Zsh、Fish、Nushell 和 PowerShell 安装可读的钩子文件。更新并新开终端后仍无法折叠时，应检查实际使用的 Shell 及其启动文件是否加载集成；提示符主题和终端复用器也可能影响完整命令边界是否传到 OxideTerm。
+远程集成为 Bash、Zsh、Fish、Nushell 和 PowerShell 安装可读的钩子文件。更新并新开终端后仍无法折叠时，应检查实际使用的 Shell 及其启动文件是否加载集成；提示符主题和终端复用器也可能影响完整命令边界是否传到 OxideLab。
 
 ### 自由输入模式
 
@@ -110,20 +110,20 @@ macOS 可按 Command+Shift+F，Windows 和 Linux 可按 Ctrl+Alt+F 切换此模�
 
 当自由输入模式确认当前处于普通命令输入区时，macOS 的 Command+C/X/V 与 Windows、Linux 的 Ctrl+C/X/V 会执行编辑器式的复制、剪切和粘贴。可配置的终端动作在 Windows、Linux 上还默认使用 Ctrl+Shift+C/X/V。目标不属于可确认的命令输入或选区时，原有终端按键语义保持不变。
 
-OxideTerm 只发送终端按键和文本序列，远端 Shell 或编辑器始终是状态的唯一来源。全屏和鼠标追踪程序继续自行处理鼠标输入。Vim、Neovim 和 Emacs 可以通过 OxideTerm 的显式适配器上报当前模式和选区；通过验证后，复制、剪切和粘贴快捷键才能作用于编辑器选区，同时不会放宽备用屏幕和鼠标追踪保护。
+OxideLab 只发送终端按键和文本序列，远端 Shell 或编辑器始终是状态的唯一来源。全屏和鼠标追踪程序继续自行处理鼠标输入。Vim、Neovim 和 Emacs 可以通过 OxideLab 的显式适配器上报当前模式和选区；通过验证后，复制、剪切和粘贴快捷键才能作用于编辑器选区，同时不会放宽备用屏幕和鼠标追踪保护。
 
-OxideTerm 不会修改编辑器启动文件。Vim 或使用 `init.vim` 的 Neovim 可在配置中加入：
+OxideLab 不会修改编辑器启动文件。Vim 或使用 `init.vim` 的 Neovim 可在配置中加入：
 
 ```vim
-if exists('$OXIDETERM_VIM_INTEGRATION') && filereadable($OXIDETERM_VIM_INTEGRATION)
-  execute 'source ' . fnameescape($OXIDETERM_VIM_INTEGRATION)
+if exists('$OXIDELAB_VIM_INTEGRATION') && filereadable($OXIDELAB_VIM_INTEGRATION)
+  execute 'source ' . fnameescape($OXIDELAB_VIM_INTEGRATION)
 endif
 ```
 
 使用 `init.lua` 的 Neovim 可加入：
 
 ```lua
-local adapter = vim.env.OXIDETERM_VIM_INTEGRATION
+local adapter = vim.env.OXIDELAB_VIM_INTEGRATION
 if adapter and vim.fn.filereadable(adapter) == 1 then
   vim.cmd("source " .. vim.fn.fnameescape(adapter))
 end
@@ -132,13 +132,13 @@ end
 Emacs 可在启动文件中加入：
 
 ```elisp
-(when-let ((adapter (getenv "OXIDETERM_EMACS_INTEGRATION")))
+(when-let ((adapter (getenv "OXIDELAB_EMACS_INTEGRATION")))
   (when (file-readable-p adapter)
     (load adapter nil t)
     (oxideterm-free-type-mode 1)))
 ```
 
-本地终端会自动提供这些适配器路径。SSH 会话需要先在“设置 → 终端 → 感知与集成”中安装或修复远程 Shell 集成；适配器会安装到 `~/.oxideterm/shell-integration`。只有 SSH 服务器接受 OxideTerm 针对当前通道发送的能力标记时，Shell 才会导出这些路径。限制严格的服务器仍可通过标准 OSC 7 获得目录感知，但会停用私有编辑器增强。已加载的适配器会在 tmux、GNU screen 和 Zellij 中抑制私有消息，因为共享窗格无法按附加客户端隔离这些消息。启用后的适配器只上报编辑器身份、模式、选区形态和能力，以及用户明确请求复制或剪切的选区内容。剪贴板响应有长度限制，而且只有与最近一次用户快捷键请求匹配时才会被接受。
+本地终端会自动提供这些适配器路径。SSH 会话需要先在“设置 → 终端 → 感知与集成”中安装或修复远程 Shell 集成；适配器会安装到 `~/.oxidelab/shell-integration`。只有 SSH 服务器接受 OxideLab 针对当前通道发送的能力标记时，Shell 才会导出这些路径。限制严格的服务器仍可通过标准 OSC 7 获得目录感知，但会停用私有编辑器增强。已加载的适配器会在 tmux、GNU screen 和 Zellij 中抑制私有消息，因为共享窗格无法按附加客户端隔离这些消息。启用后的适配器只上报编辑器身份、模式、选区形态和能力，以及用户明确请求复制或剪切的选区内容。剪贴板响应有长度限制，而且只有与最近一次用户快捷键请求匹配时才会被接受。
 
 ### 退格键与删除键兼容性
 
@@ -167,7 +167,7 @@ Emacs 可在启动文件中加入：
 
 运行时状态和保存配置回答的是不同问题：
 
-- 保存配置：OxideTerm 应该连接哪个主机？
+- 保存配置：OxideLab 应该连接哪个主机？
 - 运行时节点：这个主机当前是否连接或正在重连？
 - 终端会话：哪个可见 shell 附着在运行时上？
 - SFTP 会话：文件浏览是否正在使用在线传输？
@@ -184,7 +184,7 @@ Emacs 可在启动文件中加入：
 
 ### 通过终端传输文件
 
-在 SSH 终端中运行远端传输程序，OxideTerm 识别传输请求后，会打开本地文件或保存位置选择框。
+在 SSH 终端中运行远端传输程序，OxideLab 识别传输请求后，会打开本地文件或保存位置选择框。
 
 | 操作 | 远端命令 | 本地选择 |
 | --- | --- | --- |

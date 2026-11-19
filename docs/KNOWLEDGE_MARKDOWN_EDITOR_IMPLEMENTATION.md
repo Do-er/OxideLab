@@ -1,6 +1,6 @@
 # Notes workspace
 
-The notes workspace uses OxideTerm's existing native text editor, Markdown renderer, UI
+The notes workspace uses OxideLab's existing native text editor, Markdown renderer, UI
 components, theme metrics, and RAG document store. It supports source editing and read-only
 preview. There is no WYSIWYG mode or additional browser runtime.
 

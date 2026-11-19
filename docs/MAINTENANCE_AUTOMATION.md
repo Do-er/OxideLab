@@ -1,6 +1,6 @@
 # Maintenance Automation
 
-OxideTerm maintenance automation reduces repetitive issue handling without transferring product,
+OxideLab maintenance automation reduces repetitive issue handling without transferring product,
 security, merge, release, or user-relationship decisions to an unattended agent.
 
 ## Current status
@@ -13,7 +13,7 @@ The current implementation is **shadow-only**:
 - no model provider is connected;
 - no labels, comments, branches, pull requests, closures, or other repository writes occur.
 
-Set the repository variable `OXIDETERM_AUTOMATION_MODE` to `disabled` to stop shadow analysis.
+Set the repository variable `OXIDELAB_AUTOMATION_MODE` to `disabled` to stop shadow analysis.
 Leaving it unset keeps the safe shadow default.
 
 ## Authority boundaries
@@ -60,10 +60,10 @@ cloud-sync, and plugin capability boundaries require a maintainer.
 
 ## GitHub App
 
-The private OxideTerm Maintainer GitHub App is configured through:
+The private OxideLab Maintainer GitHub App is configured through:
 
-- Actions variable `OXIDETERM_AUTOMATION_CLIENT_ID`;
-- Actions secret `OXIDETERM_AUTOMATION_PRIVATE_KEY`.
+- Actions variable `OXIDELAB_AUTOMATION_CLIENT_ID`;
+- Actions secret `OXIDELAB_AUTOMATION_PRIVATE_KEY`.
 
 The `Verify maintenance app` manual job requests a read-only installation token and confirms that
 the App can see only the intended repository. Shadow triage does not request an App token.

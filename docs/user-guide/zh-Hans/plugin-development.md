@@ -1,6 +1,6 @@
 # Native 插件开发
 
-本文档介绍 OxideTerm Native 插件模型。它和 Tauri/Web 插件模型不同：Native 插件不运行 React 组件，不注入 CSS，也不会通过 WebView 执行 `main.js`。Native 插件通过 `plugin.json` 被发现，然后要么只提供清单声明的元数据，要么通过宿主拥有的进程/WASM 运行时桥接运行。
+本文档介绍 OxideLab Native 插件模型。它和 Tauri/Web 插件模型不同：Native 插件不运行 React 组件，不注入 CSS，也不会通过 WebView 执行 `main.js`。Native 插件通过 `plugin.json` 被发现，然后要么只提供清单声明的元数据，要么通过宿主拥有的进程/WASM 运行时桥接运行。
 
 专用包还支持 `language`、`acp`、`remote-desktop`、`terminal-transport` 和 `helper` 运行时。RDP、VNC 引擎由插件市场分发，保存配置和查看器由宿主管理。进程连接插件可提供独立连接实例和持续更新的工作台。
 
@@ -276,7 +276,7 @@ readline.createInterface({
 
 ```mermaid
 sequenceDiagram
-    participant Host as OxideTerm 宿主
+    participant Host as OxideLab 宿主
     participant Plugin as 插件进程
     Host->>Plugin: stdin 写入 activate 请求
     Plugin-->>Host: stdout 写出 registerContribution sidebar-panel
@@ -499,7 +499,7 @@ sequenceDiagram
         "controls": [
           {
             "kind": "markdown",
-            "text": "This tab is rendered by OxideTerm, not by plugin HTML."
+            "text": "This tab is rendered by OxideLab, not by plugin HTML."
           }
         ]
       }
@@ -660,7 +660,7 @@ flowchart TB
   locales/
 ```
 
-使用 `oxideterm paths --json` 查看当前生效配置目录。CLI 可以在无界面流程中启用、禁用和检查插件状态，但交互式安装、更新和卸载由桌面插件管理器负责。
+使用 `oxidelab paths --json` 查看当前生效配置目录。CLI 可以在无界面流程中启用、禁用和检查插件状态，但交互式安装、更新和卸载由桌面插件管理器负责。
 
 ## 最小清单插件
 
@@ -707,7 +707,7 @@ flowchart TB
   "id": "com.example.backgrounds",
   "name": "背景素材",
   "version": "1.0.0",
-  "engines": { "oxideterm": ">2.2.2" },
+  "engines": { "oxidelab": ">2.2.2" },
   "tags": ["backgrounds"],
   "contributes": { "backgrounds": ["assets/day.mp4", "assets/night.mp4"] }
 }
@@ -902,7 +902,7 @@ WebAssembly 解析器、高亮查询、各自的 SHA-256 校验值、宿主版�
 
 进程插件通过 `contributes.connections` 声明连接类型，直接进入现有的新建连接窗口和连接管理，
 支持搜索、编辑、删除、批量选择和分组。同一配置每次打开都会创建独立实例。
-此接口需要 OxideTerm 2.2.5 或更高版本；在 `engines.oxideterm` 中排除旧版本，并声明 `ui.write` 权限。
+此接口需要 OxideLab 2.2.5 或更高版本；在 `engines.oxideterm` 中排除旧版本，并声明 `ui.write` 权限。
 
 ```json
 {
@@ -981,7 +981,7 @@ stdout 仍只用于 JSON Lines 协议，后台任务不得混入诊断文本。
 
 切换或关闭普通注册标签页不会停止插件进程。插件负责自身网络连接和任务，提供明确的断开操作；
 停用插件、卸载或退出工作区时，宿主终止运行时及其输出读取任务，并丢弃旧运行实例的更新。
-这些能力需要 OxideTerm 2.2.5 或更高版本；依赖它们的插件应在 `engines.oxideterm` 中排除旧版本。
+这些能力需要 OxideLab 2.2.5 或更高版本；依赖它们的插件应在 `engines.oxideterm` 中排除旧版本。
 
 表格声明 `id`、`selectable: true` 和 `rowKey` 后支持鼠标选择，以及获得焦点后的方向键、
 Home、End 选择。`rowKey` 指定行对象中的字段名，每行必须提供非空、唯一的字符串标识。
@@ -1014,7 +1014,7 @@ Home、End 选择。`rowKey` 指定行对象中的字段名，每行必须提供
 插件显式改变 `value` 时替换文本。`disabled` 禁止编辑。关闭所属页面后释放编辑器状态。
 `label`、`placeholder` 等文案继续使用插件的 11 语言翻译词典。
 
-Native 插件通过带版本的结构选择 OxideTerm 组件。插件提供数据并接收事件；
+Native 插件通过带版本的结构选择 OxideLab 组件。插件提供数据并接收事件；
 宿主提供真正的共享组件、主题令牌、密度、字体、焦点、输入法行为、无障碍语义
 和响应式布局。插件运行时不会获得原始 GPUI 对象，也不能注入 HTML、CSS、
 闭包或自绘代码。
@@ -1065,7 +1065,7 @@ Native 插件通过带版本的结构选择 OxideTerm 组件。插件提供数�
 | `radioGroup`, `radio-group`, `segmentedControl`, `segmented-control`, `slider` | 共享选择/范围组件，需要稳定的 `id` |
 | `button`, `iconButton`, `icon-button` | 共享动作组件；有 `id`、未禁用且未加载时可操作；图标按钮还需要 `icon` 和 `label` |
 | `alert` | 带语义色调、可选图标、标题和说明的宿主提示 |
-| `markdown` | 使用 OxideTerm 的 Markdown 渲染器解析；禁用后台图片和本地文件链接 |
+| `markdown` | 使用 OxideLab 的 Markdown 渲染器解析；禁用后台图片和本地文件链接 |
 | `code`, `codeBlock`, `code-block` | 代码块 |
 | `statusBadge`, `status-badge`, `badge` | 带语义色调和强度的共享状态徽章 |
 | `progress` | 共享进度组件，数值可使用 `0..1` 或 `0..100` |
@@ -1286,7 +1286,7 @@ rows: (string | null)[][], rowCount, page, pageCount }`。每页 50 行，末页
 
 插件管理器会在启用插件时集中展示所有申请的敏感能力。批准前不会激活插件；批准后，运行时会在 `activate` 请求里收到最终生效的权限集，插件应把它作为准确信息来源。仅升级版本不会再次提示，也不会扩大权限。新增能力或改变运行时边界需要重新审核；移除能力只会缩小权限，不会再次提示。
 
-进程插件需要特别谨慎：它会隐式申请且不能移除 `runtime.process.trusted`。进程不受 OxideTerm 操作系统沙箱限制，因此其可执行文件可以绕过宿主 API 权限门，直接使用当前用户拥有的系统权限。只应安装并批准可信发布者的进程插件，不能把 WASM 与进程插件描述为具有相同的安全边界。
+进程插件需要特别谨慎：它会隐式申请且不能移除 `runtime.process.trusted`。进程不受 OxideLab 操作系统沙箱限制，因此其可执行文件可以绕过宿主 API 权限门，直接使用当前用户拥有的系统权限。只应安装并批准可信发布者的进程插件，不能把 WASM 与进程插件描述为具有相同的安全边界。
 
 HTTP 请求当前通过兼容层适配器实现。插件必须同时申请 `legacy.invoke` 和 `network.http`，并在 `contributes.apiCommands` 中列出 `plugin_http_request`，才能通过 `api.invoke` 调用该命令。
 
@@ -1362,9 +1362,9 @@ com.example.native-dashboard/
 5. 只在无界面状态/设置检查中使用 CLI：
 
 ```sh
-oxideterm plugins list --json
-oxideterm plugins enable com.example.native-dashboard --dry-run --json
-oxideterm plugins settings export --json
+oxidelab plugins list --json
+oxidelab plugins enable com.example.native-dashboard --dry-run --json
+oxidelab plugins settings export --json
 ```
 
 ## 接口参考
@@ -1379,7 +1379,7 @@ interface NativePluginManifest {
   description?: string;
   author?: string;
   main?: string; // Tauri 旧 JS 入口；Native 可见但不执行。
-  engines?: { oxideterm?: string };
+  engines?: { oxidelab?: string };
   manifestVersion?: number;
   format?: string;
   assets?: string;
@@ -1501,7 +1501,7 @@ interface NativePluginAiToolDef {
 
 - `id`、`name`、`version`、贡献 id、标题和图标必须是非空文本。
 - 活动栏动作的命令必须非空，插件内的动作 id 必须唯一，`position` 只接受 `top` 或 `bottom`。
-- 标签页、侧栏面板和活动栏动作的图标从 OxideTerm 内置 Lucide 图标中解析；匹配时忽略 ASCII 大小写、连字符与下划线，不支持的名称回退为 `Puzzle`。
+- 标签页、侧栏面板和活动栏动作的图标从 OxideLab 内置 Lucide 图标中解析；匹配时忽略 ASCII 大小写、连字符与下划线，不支持的名称回退为 `Puzzle`。
 - 相对路径必须留在插件目录内。
 - `terminalTransports` 当前接受 `telnet`。
 - `apiCommands` 条目是兼容层适配器命令，例如 `get_app_version` 或 `plugin_http_request`；直接宿主 API 不在这里声明。
@@ -2054,8 +2054,8 @@ SCP 是面向 POSIX 主机的兼容传输，不是浏览接口。SFTP 可用时�
 - 开发时一次只注册一个贡献。
 - 确认 `registrationId` 在插件内稳定且唯一。
 - 确认每个宿主调用都已声明并被允许。
-- 使用 `oxideterm plugins list --json` 检查无界面状态。
-- 使用 `oxideterm plugins settings export --json` 检查插件设置。
+- 使用 `oxidelab plugins list --json` 检查无界面状态。
+- 使用 `oxidelab plugins settings export --json` 检查插件设置。
 
 如果进程插件已激活但界面没有出现，检查两侧：
 

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideTerm：在一个工作区中管理你的服务器" width="920">
+<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab：在一个工作区中管理你的服务器" width="920">
 
-# ⚡ OxideTerm
+# ⚡ OxideLab
 
 **免费的原生 SSH 客户端与远程运维工作区，内置使用自备密钥的 AI 助手。**
 
@@ -27,7 +27,7 @@ SSH · Mosh · Telnet · 串口 · RDP/VNC · SFTP · 端口转发 · 内置编�
 
 ## 快速上手
 
-1. **安装 OxideTerm。** 从[最新发布页面](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)下载安装包；各平台的说明见下方[安装](#install)一节。
+1. **安装 OxideLab。** 从[最新发布页面](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)下载安装包；各平台的说明见下方[安装](#install)一节。
 2. **添加服务器。** 打开会话管理，新建 SSH 连接，或从 `~/.ssh/config` 导入主机。
 3. **连接服务器。** 打开终端。主机密钥会与 `~/.ssh/known_hosts` 中的记录核对。
 4. **使用工作区中的其他功能。** 在同一节点上打开 SFTP、端口转发或内置编辑器。默认情况下，它们共享一个 SSH 连接。
@@ -55,7 +55,7 @@ SSH · Mosh · Telnet · 串口 · RDP/VNC · SFTP · 端口转发 · 内置编�
 
 ---
 
-## 为什么选择 OxideTerm
+## 为什么选择 OxideLab
 
 - **免费，本地优先。** 无需账号，无需订阅，不采集遥测。连接与运维数据由你掌控。
 - **每台服务器，一个工作区。** 终端、SFTP、端口转发、RDP/VNC、编辑器、监控和 AI 都连接到同一节点，不再像各自独立的工具。
@@ -75,7 +75,7 @@ SSH · Mosh · Telnet · 串口 · RDP/VNC · SFTP · 端口转发 · 内置编�
 | macOS | 318.7 MB | 81.3 MB | 约 74% |
 | Windows | 182.4 MB | 23.5 MB | 约 87% |
 
-旧版的总占用包含 OxideTerm 及其关联的 WebView 进程。原生版不再需要这些浏览器进程。
+旧版的总占用包含 OxideLab 及其关联的 WebView 进程。原生版不再需要这些浏览器进程。
 
 ![附系统进程截图的空闲内存对比：Tauri 1.x 与原生 2.0](../../docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -95,7 +95,7 @@ SSH · Mosh · Telnet · 串口 · RDP/VNC · SFTP · 端口转发 · 内置编�
 <summary><b>观看 OxideSens 根据自然语言请求打开终端</b></summary>
 
 <a href="../../docs/media/ai-terminal-demo.mp4">
-  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens 在 OxideTerm 中打开终端" width="720">
+  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens 在 OxideLab 中打开终端" width="720">
 </a>
 
 </details>
@@ -119,7 +119,7 @@ OxideSens 是可选的助手，可查看正在运行的会话，并且**仅在�
 
 ## 插件
 
-OxideTerm 支持三种插件方式：
+OxideLab 支持三种插件方式：
 
 | 类型 | 运行方式 | 边界 |
 |---|---|---|
@@ -146,7 +146,7 @@ OxideTerm 支持三种插件方式：
 | **插件** | 见[插件](#plugins) |
 | **遥测** | 无 |
 
-**合法使用。** OxideTerm 采用 GPL-3.0-only 许可证，无额外限制。请仅访问你拥有或获明确授权访问的系统、网络和设备，并遵守适用法律。不得使用 OxideTerm 进行未授权访问、干扰服务或绕过访问控制。
+**合法使用。** OxideLab 采用 GPL-3.0-only 许可证，无额外限制。请仅访问你拥有或获明确授权访问的系统、网络和设备，并遵守适用法律。不得使用 OxideLab 进行未授权访问、干扰服务或绕过访问控制。
 
 ---
 
@@ -156,9 +156,9 @@ OxideTerm 支持三种插件方式：
 
 - 仅支持桌面平台（macOS、Windows、Linux），没有移动应用。
 - 项目迭代较快，发布频繁。请参阅[更新日志](../../.github/release-notes/stable-changelog.md)和[未解决的问题](https://github.com/AnalyseDeCircuit/oxideterm/issues)。
-- 审计与会话录制需主动启用，且只反映 OxideTerm 自身能够观察到的活动。
+- 审计与会话录制需主动启用，且只反映 OxideLab 自身能够观察到的活动。
 - 进程插件不受操作系统沙箱隔离。
-- 如果渲染器在你的机器上无法正常运行，可尝试兼容模式：`OXIDETERM_RENDER_PROFILE=compatibility`。
+- 如果渲染器在你的机器上无法正常运行，可尝试兼容模式：`OXIDELAB_RENDER_PROFILE=compatibility`。
 
 ---
 
@@ -176,7 +176,7 @@ OxideTerm 支持三种插件方式：
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -185,7 +185,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-使用 Nix：`nix build .#oxideterm`、`nix run .#oxideterm` 或 `nix develop`。
+使用 Nix：`nix build .#oxidelab`、`nix run .#oxidelab` 或 `nix develop`。
 
 命令行工具的构建产物位于 `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm`。
 
@@ -194,7 +194,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 <details>
 <summary><b>命令行接口</b></summary>
 
-无界面的 `oxideterm` 命令行工具无需启动应用即可运行，适用于自动化、CI 和诊断。它涵盖设置、连接、端口转发、插件、快捷命令、秘密数据、便携文件包、诊断、报告、批量计划、备份和云同步。
+无界面的 `oxidelab` 命令行工具无需启动应用即可运行，适用于自动化、CI 和诊断。它涵盖设置、连接、端口转发、插件、快捷命令、秘密数据、便携文件包、诊断、报告、批量计划、备份和云同步。
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -232,7 +232,7 @@ cargo run -p oxideterm-cli -- --config-dir ./fixture-config doctor --strict
 └─────────────────────────────────────────────────┘
 ```
 
-| 方面 | 捆绑浏览器的方案 | OxideTerm |
+| 方面 | 捆绑浏览器的方案 | OxideLab |
 |---|---|---|
 | 渲染 | 浏览器引擎与网页布局 | 在 GPU 画面上使用 GPUI |
 | 终端数据流 | WebSocket → JS 事件循环 → xterm.js | Rust 输入 → `TerminalState` → GPUI 渲染 |
@@ -294,7 +294,7 @@ SFTP 会话带有连接世代标识：重连后，符合条件的会话会重新
 如果 Gatekeeper 阻止运行应用，请移除隔离标记：
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -305,13 +305,13 @@ xattr -cr /Applications/OxideTerm.app
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -331,15 +331,15 @@ nix run github:AnalyseDeCircuit/oxideterm
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-可复现的缺陷与回归问题会优先处理。功能请求会根据范围、安全性，以及是否符合 OxideTerm 远程服务器工作区的方向进行评估。如果 OxideTerm 对你的工作有帮助，GitHub Star、可复现的问题报告、翻译修正或插件，都能帮助项目继续发展。
+可复现的缺陷与回归问题会优先处理。功能请求会根据范围、安全性，以及是否符合 OxideLab 远程服务器工作区的方向进行评估。如果 OxideLab 对你的工作有帮助，GitHub Star、可复现的问题报告、翻译修正或插件，都能帮助项目继续发展。
 
 ### 贡献者
 
-感谢每一位帮助 OxideTerm 变得更好的贡献者。
+感谢每一位帮助 OxideLab 变得更好的贡献者。
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideTerm 贡献者">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab 贡献者">
   </a>
 </p>
 

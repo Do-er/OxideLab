@@ -189,7 +189,7 @@ Highlight query predicates iterate the pieces intersecting each captured node. M
 parsing uses a bounded source view; injected languages retain their global included ranges.
 Bracket scans and indentation consume the same source without joining text.
 
-The implementation uses OxideTerm's existing piece table and tree-sitter's callback/provider
+The implementation uses OxideLab's existing piece table and tree-sitter's callback/provider
 interfaces. Zed informed the choice of chunked reads; no Zed implementation was incorporated.
 Undo storage, grammar loading and the final syntax-tree representation are unchanged.
 
@@ -1214,7 +1214,7 @@ consider an indexed piece tree, not to add another whole-document cache.
   illustrates compact local indexes rather than heavyweight objects for every text position.
 
 These references inform the ownership and representation decisions. The changes here are
-implemented against OxideTerm's existing piece table and editor contracts.
+implemented against OxideLab's existing piece table and editor contracts.
 
 ## Verification
 

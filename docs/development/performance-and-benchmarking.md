@@ -14,7 +14,7 @@ Performance work starts with a measured regression and ends with the same worklo
 
 ## Terminal Benchmark Workloads
 
-[`benchmark/`](../../benchmark/README.md) contains reproducible terminal-output workloads for plain text, ANSI style changes, Unicode, and long control sequences. Run the complete workload in an OxideTerm terminal pane:
+[`benchmark/`](../../benchmark/README.md) contains reproducible terminal-output workloads for plain text, ANSI style changes, Unicode, and long control sequences. Run the complete workload in an OxideLab terminal pane:
 
 ```sh
 ./benchmark/benchmark.sh

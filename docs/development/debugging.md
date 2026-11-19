@@ -20,7 +20,7 @@ Relevant redacted log lines and screenshot/video:
 Use a clean configuration directory when possible:
 
 ```sh
-oxideterm --config-dir ./fixture-config doctor --strict
+oxidelab --config-dir ./fixture-config doctor --strict
 ```
 
 Do not use production connection data as a test fixture. Redact hostnames, usernames, local paths, commands, keys, passwords, tokens, and MFA responses before sharing anything.
@@ -32,9 +32,9 @@ The desktop log is `oxideterm-native.log` in the `logs` directory beside `settin
 Enable debug logging in the app only for a bounded reproduction, then collect a redacted report with the CLI:
 
 ```sh
-oxideterm paths --json
-oxideterm diagnose --json
-oxideterm report --bundle ./oxideterm-report.json --json
+oxidelab paths --json
+oxidelab diagnose --json
+oxidelab report --bundle ./oxideterm-report.json --json
 ```
 
 Enable **Settings → Help → Diagnostics → Debug Logging** only for a bounded reproduction, then restart the app before collecting the report. Review a report before sharing it. A support bundle is safer than copying an entire settings directory, but it can still contain private environment details that need redaction.

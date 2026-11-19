@@ -3,7 +3,7 @@
 ## Install Shape
 
 Native packages bundle the desktop app, icons, Linux musl remote file/code-agent
-binaries, and the standalone `oxideterm` CLI companion. The remote agent uses
+binaries, and the standalone `oxidelab` CLI companion. The remote agent uses
 stdio JSON-RPC for structured file, search, Git, and symbol operations; it is
 not an SSH authentication agent and does not own terminal, SFTP, or forwarding
 connections. The desktop app is the main entry point.
@@ -12,7 +12,7 @@ On macOS, packaged artifacts include a `.dmg`, an `.app.zip`, and a portable arc
 
 ## First Launch
 
-Open the OxideTerm desktop app first. The left side manages connections and global pages, the top bar selects a tab scope, and the right side opens OxideSens and Host Tools. See [Workspace Navigation](workspace.md).
+Open the OxideLab desktop app first. The left side manages connections and global pages, the top bar selects a tab scope, and the right side opens OxideSens and Host Tools. See [Workspace Navigation](workspace.md).
 
 Start with a local terminal tab:
 
@@ -43,9 +43,9 @@ After the first local terminal and first SSH connection work, check the app surf
 Use the CLI companion only when you want a read-only diagnostic view of paths and health:
 
 ```sh
-oxideterm paths
-oxideterm doctor --strict
-oxideterm report --json
+oxidelab paths
+oxidelab doctor --strict
+oxidelab report --json
 ```
 
 During development, run the same commands through Cargo:
@@ -60,20 +60,20 @@ cargo run -p oxideterm-cli -- doctor --strict
 The desktop app and CLI read the same configuration files. Use the desktop Settings UI for normal interactive changes. Use `paths` when you need to see the active files for diagnostics or scripting:
 
 ```sh
-oxideterm paths --json
+oxidelab paths --json
 ```
 
 For scripts, CI, or migrations, the CLI can point at another config root:
 
 ```sh
-oxideterm --config-dir ./fixtures/profile-a paths
-OXIDETERM_CONFIG_DIR=./fixtures/profile-a oxideterm doctor --strict
+oxidelab --config-dir ./fixtures/profile-a paths
+OXIDELAB_CONFIG_DIR=./fixtures/profile-a oxidelab doctor --strict
 ```
 
 Use named profiles when one config root must hold several isolated profiles:
 
 ```sh
-oxideterm --config-dir ./fixtures --profile staging paths
+oxidelab --config-dir ./fixtures --profile staging paths
 ```
 
 Profile data is stored under `profiles/<name>` inside the selected config directory.
@@ -83,8 +83,8 @@ Profile data is stored under `profiles/<name>` inside the selected config direct
 For everyday app use, make ordinary configuration changes from Settings, the connection manager, the privilege credentials page, the plugin manager, or the cloud sync surface. For scripted CLI writes, inspect the plan first, then repeat with `--yes` only when the change is expected:
 
 ```sh
-oxideterm settings set terminal.fontSize 14 --dry-run --json
-oxideterm settings set terminal.fontSize 14 --yes
+oxidelab settings set terminal.fontSize 14 --dry-run --json
+oxidelab settings set terminal.fontSize 14 --yes
 ```
 
 Backups and restore flows should be used before high-risk changes such as bulk imports, cloud-sync apply, privilege credential changes, or `.oxide` imports.

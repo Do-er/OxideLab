@@ -1,25 +1,25 @@
 # Agent Skills in OxideSens
 
-> **Status**: Implemented in OxideTerm `2.0.15`
+> **Status**: Implemented in OxideLab `2.0.15`
 > **Last reviewed**: 2026-07-31
 
 OxideSens supports the Agent Skills `SKILL.md` convention for the native model
-toolchain. ACP sessions can request the same bounded loader through OxideTerm's
+toolchain. ACP sessions can request the same bounded loader through OxideLab's
 tool bridge, but ACP itself does not yet have a standard host-managed Skills
 capability negotiation. An ACP agent may also perform its own native discovery;
-that path is separate from OxideTerm's catalog and permissions.
+that path is separate from OxideLab's catalog and permissions.
 
 ## Discovery
 
 Each skill is a directory whose name matches the `name` field in its
-`SKILL.md` frontmatter. OxideTerm discovers direct child directories from these
+`SKILL.md` frontmatter. OxideLab discovers direct child directories from these
 locations, in precedence order:
 
 1. `<workspace>/.agents/skills`
 2. `<workspace>/.github/skills`
 3. `<workspace>/.claude/skills`
 4. `<workspace>/.opencode/skills`
-5. `<OxideTerm data directory>/skills`
+5. `<OxideLab data directory>/skills`
 6. `~/.agents/skills`
 7. `~/.claude/skills`
 8. `~/.copilot/skills`
@@ -30,7 +30,7 @@ Portable installations create `<dataDir>/skills` during startup. That directory
 is user-owned portable data rather than an update-managed package entry, so
 in-place portable updates preserve its contents.
 
-The workspace root is captured when the OxideTerm window is created. Changing
+The workspace root is captured when the OxideLab window is created. Changing
 the working directory inside a terminal does not silently replace the skill
 catalog. If two locations provide the same skill name, the higher-precedence
 entry wins and the other entry is reported as shadowed.
@@ -47,7 +47,7 @@ Resources referenced by a loaded skill are read with
 must stay inside that directory after symlink resolution, and must contain
 valid UTF-8 text. `SKILL.md` itself is loaded only through `load_skill`.
 
-OxideTerm records the loaded skill identifier and content hash in conversation
+OxideLab records the loaded skill identifier and content hash in conversation
 metadata. Repeated loads are marked in the tool result. Loaded instructions can
 remain in conversation metadata across a native-model/ACP switch, but the
 selected backend still receives them only through its available tool/context
@@ -76,7 +76,7 @@ Open **Settings → OxideSens → Tools → Agent Skills** to:
 - refresh the registry after adding or removing skill directories.
 
 ACP currently has no standard capability negotiation for host-managed skills.
-OxideTerm therefore exposes bounded loader tools through its ACP MCP bridge and
+OxideLab therefore exposes bounded loader tools through its ACP MCP bridge and
 instructs the agent to use that catalog. An ACP implementation may also have
-its own native skill discovery, but it cannot use that path to bypass OxideTerm
+its own native skill discovery, but it cannot use that path to bypass OxideLab
 tool permissions.

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideTerm：在一個工作區中管理你的伺服器" width="920">
+<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab：在一個工作區中管理你的伺服器" width="920">
 
-# ⚡ OxideTerm
+# ⚡ OxideLab
 
 **免費的原生 SSH 用戶端與遠端維運工作區，內建使用自備金鑰的 AI 助手。**
 
@@ -27,7 +27,7 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 
 ## 快速上手
 
-1. **安裝 OxideTerm。** 從[最新發布頁面](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)下載安裝套件；各平台的說明見下方[安裝](#install)一節。
+1. **安裝 OxideLab。** 從[最新發布頁面](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)下載安裝套件；各平台的說明見下方[安裝](#install)一節。
 2. **新增伺服器。** 開啟工作階段管理，新增 SSH 連線，或從 `~/.ssh/config` 匯入主機。
 3. **連線伺服器。** 開啟終端。主機金鑰會與 `~/.ssh/known_hosts` 中的記錄核對。
 4. **使用工作區中的其他功能。** 在同一節點上開啟 SFTP、連接埠轉送或內建編輯器。預設情況下，它們共用一個 SSH 連線。
@@ -55,7 +55,7 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 
 ---
 
-## 為什麼選擇 OxideTerm
+## 為什麼選擇 OxideLab
 
 - **免費，本機優先。** 無需帳號，無需訂閱，不蒐集遙測。連線與維運資料由你掌控。
 - **每台伺服器，一個工作區。** 終端、SFTP、連接埠轉送、RDP/VNC、編輯器、監控和 AI 都連線到同一節點，不再像各自獨立的工具。
@@ -75,7 +75,7 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 | macOS | 318.7 MB | 81.3 MB | 約 74% |
 | Windows | 182.4 MB | 23.5 MB | 約 87% |
 
-舊版的總佔用包含 OxideTerm 及其關聯的 WebView 行程。原生版不再需要這些瀏覽器行程。
+舊版的總佔用包含 OxideLab 及其關聯的 WebView 行程。原生版不再需要這些瀏覽器行程。
 
 ![附系統行程螢幕截圖的閒置記憶體對比：Tauri 1.x 與原生 2.0](../../docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -95,7 +95,7 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 <summary><b>觀看 OxideSens 根據自然語言請求開啟終端</b></summary>
 
 <a href="../../docs/media/ai-terminal-demo.mp4">
-  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens 在 OxideTerm 中開啟終端" width="720">
+  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens 在 OxideLab 中開啟終端" width="720">
 </a>
 
 </details>
@@ -119,7 +119,7 @@ OxideSens 是可選的助手，可查看正在執行的工作階段，並且**�
 
 ## 外掛
 
-OxideTerm 支援三種外掛方式：
+OxideLab 支援三種外掛方式：
 
 | 類型 | 執行方式 | 邊界 |
 |---|---|---|
@@ -146,7 +146,7 @@ OxideTerm 支援三種外掛方式：
 | **外掛** | 見[外掛](#plugins) |
 | **遙測** | 無 |
 
-**合法使用。** OxideTerm 採用 GPL-3.0-only 授權條款，無額外限制。請僅存取你擁有或獲明確授權存取的系統、網路和裝置，並遵守適用法律。不得使用 OxideTerm 進行未授權存取、干擾服務或繞過存取控制。
+**合法使用。** OxideLab 採用 GPL-3.0-only 授權條款，無額外限制。請僅存取你擁有或獲明確授權存取的系統、網路和裝置，並遵守適用法律。不得使用 OxideLab 進行未授權存取、干擾服務或繞過存取控制。
 
 ---
 
@@ -156,9 +156,9 @@ OxideTerm 支援三種外掛方式：
 
 - 僅支援桌面平台（macOS、Windows、Linux），沒有行動版應用程式。
 - 專案更新較快，發布頻繁。請參閱[更新紀錄](../../.github/release-notes/stable-changelog.md)和[未解決的問題](https://github.com/AnalyseDeCircuit/oxideterm/issues)。
-- 稽核與工作階段錄製需主動啟用，且只反映 OxideTerm 自身能夠觀察到的活動。
+- 稽核與工作階段錄製需主動啟用，且只反映 OxideLab 自身能夠觀察到的活動。
 - 行程外掛不受作業系統沙箱隔離。
-- 如果繪製器在你的機器上無法正常執行，可嘗試相容模式：`OXIDETERM_RENDER_PROFILE=compatibility`。
+- 如果繪製器在你的機器上無法正常執行，可嘗試相容模式：`OXIDELAB_RENDER_PROFILE=compatibility`。
 
 ---
 
@@ -176,7 +176,7 @@ OxideTerm 支援三種外掛方式：
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -185,7 +185,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-使用 Nix：`nix build .#oxideterm`、`nix run .#oxideterm` 或 `nix develop`。
+使用 Nix：`nix build .#oxidelab`、`nix run .#oxidelab` 或 `nix develop`。
 
 命令列工具的建置產物位於 `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm`。
 
@@ -194,7 +194,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 <details>
 <summary><b>命令列介面</b></summary>
 
-無介面的 `oxideterm` 命令列工具無需啟動應用程式即可執行，適用於自動化、CI 和診斷。它涵蓋設定、連線、連接埠轉送、外掛、快速指令、秘密資料、可攜檔案包、診斷、報告、批次計畫、備份和雲同步。
+無介面的 `oxidelab` 命令列工具無需啟動應用程式即可執行，適用於自動化、CI 和診斷。它涵蓋設定、連線、連接埠轉送、外掛、快速指令、秘密資料、可攜檔案包、診斷、報告、批次計畫、備份和雲同步。
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -232,7 +232,7 @@ cargo run -p oxideterm-cli -- --config-dir ./fixture-config doctor --strict
 └─────────────────────────────────────────────────┘
 ```
 
-| 方面 | 捆綁瀏覽器的方案 | OxideTerm |
+| 方面 | 捆綁瀏覽器的方案 | OxideLab |
 |---|---|---|
 | 繪製 | 瀏覽器引擎與網頁配置 | GPU 繪圖表面上的 GPUI |
 | 終端資料流 | WebSocket → JS 事件循環 → xterm.js | Rust 輸入 → `TerminalState` → GPUI 繪製 |
@@ -294,7 +294,7 @@ SFTP 工作階段帶有連線世代識別碼：重新連線後，符合條件的
 如果 Gatekeeper 阻止執行應用程式，請移除隔離標記：
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -305,13 +305,13 @@ xattr -cr /Applications/OxideTerm.app
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -331,15 +331,15 @@ nix run github:AnalyseDeCircuit/oxideterm
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-可重現的缺陷與回歸問題會優先處理。功能請求會根據範圍、安全性，以及是否符合 OxideTerm 遠端伺服器工作區的方向進行評估。如果 OxideTerm 對你的工作有幫助，GitHub Star、可重現的問題報告、翻譯修正或外掛，都能幫助專案繼續發展。
+可重現的缺陷與回歸問題會優先處理。功能請求會根據範圍、安全性，以及是否符合 OxideLab 遠端伺服器工作區的方向進行評估。如果 OxideLab 對你的工作有幫助，GitHub Star、可重現的問題報告、翻譯修正或外掛，都能幫助專案繼續發展。
 
 ### 貢獻者
 
-感謝每一位幫助 OxideTerm 變得更好的貢獻者。
+感謝每一位幫助 OxideLab 變得更好的貢獻者。
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideTerm 貢獻者">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab 貢獻者">
   </a>
 </p>
 

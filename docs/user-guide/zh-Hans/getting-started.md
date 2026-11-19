@@ -3,7 +3,7 @@
 ## 安装形态
 
 Native 包会包含桌面应用、图标、Linux musl 远程文件/代码 agent 二进制和独立
-`oxideterm` CLI 伴侣工具。远程 agent 通过 stdio JSON-RPC 提供结构化文件、搜索、
+`oxidelab` CLI 伴侣工具。远程 agent 通过 stdio JSON-RPC 提供结构化文件、搜索、
 Git 和符号操作；它不是 SSH authentication agent，也不拥有终端、SFTP 或转发连接。
 桌面应用是主要入口。
 
@@ -11,7 +11,7 @@ macOS 打包产物包含 `.dmg`、`.app.zip` 和便携压缩包。Linux 与 Wind
 
 ## 首次启动
 
-先打开 OxideTerm 桌面应用。左侧管理连接和全局页面，顶栏选择标签范围，右侧打开 OxideSens 和主机工具。参见[工作区导航](workspace.md)。
+先打开 OxideLab 桌面应用。左侧管理连接和全局页面，顶栏选择标签范围，右侧打开 OxideSens 和主机工具。参见[工作区导航](workspace.md)。
 
 建议从本地终端标签页开始：
 
@@ -42,9 +42,9 @@ macOS 打包产物包含 `.dmg`、`.app.zip` 和便携压缩包。Linux 与 Wind
 只有在需要只读诊断路径和健康状态时，才使用 CLI 伴侣工具：
 
 ```sh
-oxideterm paths
-oxideterm doctor --strict
-oxideterm report --json
+oxidelab paths
+oxidelab doctor --strict
+oxidelab report --json
 ```
 
 开发环境可以通过 Cargo 运行同样的命令：
@@ -59,20 +59,20 @@ cargo run -p oxideterm-cli -- doctor --strict
 桌面应用和 CLI 读取同一套配置文件。日常交互式修改优先使用桌面设置页面。需要诊断或脚本化时，可以用 `paths` 查看当前生效路径：
 
 ```sh
-oxideterm paths --json
+oxidelab paths --json
 ```
 
 脚本、CI 或迁移场景可以让 CLI 指定另一个配置根目录：
 
 ```sh
-oxideterm --config-dir ./fixtures/profile-a paths
-OXIDETERM_CONFIG_DIR=./fixtures/profile-a oxideterm doctor --strict
+oxidelab --config-dir ./fixtures/profile-a paths
+OXIDELAB_CONFIG_DIR=./fixtures/profile-a oxidelab doctor --strict
 ```
 
 如果一个配置根目录下需要多个隔离配置档，可以使用命名配置档：
 
 ```sh
-oxideterm --config-dir ./fixtures --profile staging paths
+oxidelab --config-dir ./fixtures --profile staging paths
 ```
 
 配置档数据会存放在所选配置目录的 `profiles/<name>` 下面。
@@ -82,8 +82,8 @@ oxideterm --config-dir ./fixtures --profile staging paths
 日常使用时，通过设置、连接管理器、提权凭据页面、插件管理器或云同步页面完成普通配置变更。脚本化 CLI 写入时，先查看计划，再在确认符合预期后重复执行并加上 `--yes`：
 
 ```sh
-oxideterm settings set terminal.fontSize 14 --dry-run --json
-oxideterm settings set terminal.fontSize 14 --yes
+oxidelab settings set terminal.fontSize 14 --dry-run --json
+oxidelab settings set terminal.fontSize 14 --yes
 ```
 
 批量导入、云同步应用、提权凭据变更、`.oxide` 导入等高风险操作前，应该先创建备份，并用恢复预演检查回滚路径。

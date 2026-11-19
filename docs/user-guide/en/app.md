@@ -1,10 +1,10 @@
 # Application Guide
 
-This guide introduces the OxideTerm desktop app. Use it for day-to-day terminal, SSH, file, forwarding, Host Tools, graphics/VNC, AI, plugin, sync, and settings work. The `oxideterm` CLI is a separate companion for automation, diagnostics, CI, migration, and recovery.
+This guide introduces the OxideLab desktop app. Use it for day-to-day terminal, SSH, file, forwarding, Host Tools, graphics/VNC, AI, plugin, sync, and settings work. The `oxidelab` CLI is a separate companion for automation, diagnostics, CI, migration, and recovery.
 
 ## First Run
 
-Open OxideTerm from your operating system launcher. On first run, start with a local terminal tab before adding remote hosts. A local tab confirms that rendering, keyboard input, shell startup, font settings, and theme settings work on the current machine.
+Open OxideLab from your operating system launcher. On first run, start with a local terminal tab before adding remote hosts. A local tab confirms that rendering, keyboard input, shell startup, font settings, and theme settings work on the current machine.
 
 Recommended first pass:
 
@@ -94,7 +94,7 @@ File Transfer settings default to **Auto**: SFTP remains the browsing and prefer
 
 For PDF, SQLite, or certificate previews, install and enable **PDF Preview**, **SQLite Preview**, or **Certificate Viewer** in **Plugin Manager → Marketplace**. The plugins run locally for both File Manager and SFTP previews; they are not installed on the SSH host. SQLite browsing is read-only, and certificate previews do not display private keys. File browsing and transfers remain available without these preview plugins.
 
-Terminal-native modem transfers are separate from SFTP. Run the remote transfer program (such as `rz` for upload or `sz <file>` for download), then choose the local file or directory when OxideTerm detects the transfer. For serial devices that require manual negotiation, use **Binary transfer** in the serial control bar after starting the device's transfer program.
+Terminal-native modem transfers are separate from SFTP. Run the remote transfer program (such as `rz` for upload or `sz <file>` for download), then choose the local file or directory when OxideLab detects the transfer. For serial devices that require manual negotiation, use **Binary transfer** in the serial control bar after starting the device's transfer program.
 
 Before overwriting important remote files, confirm the path and keep a backup. Remote file writes are real writes on the target system.
 
@@ -128,7 +128,7 @@ Use Host Tools from the connected-node context when you need a read-oriented vie
 
 Under **Terminal multiplexers**, select the host and switch between tmux, Zellij, and Herdr. Expand a running Zellij session to see its tabs and panes, or a Herdr session to see its workspaces, tabs, and panes. Use the controls beside an object to focus, create, split, or close it where supported. Closing an object asks for confirmation. Attach opens a terminal on the selected host. Restore reopens an exited session.
 
-For remote desktops, first install and enable **RDP** or **VNC** in **Plugin Manager → Marketplace**, then open the connection from New Connection or Session Manager. OxideTerm owns the profiles, SSH gateway settings, and native viewer; the plugin supplies the protocol engine. See [Graphics and VNC](connections-and-forwards.md#graphics-and-vnc). Windows WSL Graphics uses a separate built-in viewer and does not require these remote-desktop plugins.
+For remote desktops, first install and enable **RDP** or **VNC** in **Plugin Manager → Marketplace**, then open the connection from New Connection or Session Manager. OxideLab owns the profiles, SSH gateway settings, and native viewer; the plugin supplies the protocol engine. See [Graphics and VNC](connections-and-forwards.md#graphics-and-vnc). Windows WSL Graphics uses a separate built-in viewer and does not require these remote-desktop plugins.
 
 ## AI Sidebar
 
@@ -152,7 +152,7 @@ OxideSens can discover bounded `SKILL.md` workflows from the workspace, user dat
 
 ## Knowledge
 
-Open Knowledge from the activity bar. OxideTerm opens or focuses one central Knowledge tab instead of placing the browser in the global companion sidebar.
+Open Knowledge from the activity bar. OxideLab opens or focuses one central Knowledge tab instead of placing the browser in the global companion sidebar.
 
 - The left navigator manages collections and the documents in the selected collection. Create a collection from the workspace header; create a document from the document-section header so it is bound to the visible collection. Collections can be global or scoped to a saved connection.
 - The right editor opens in Source mode with Markdown syntax highlighting. Read-only Preview renders the same draft. Switching modes preserves the editor buffer and undo history.
@@ -163,22 +163,22 @@ Use the Knowledge settings page for embedding and retrieval configuration. Docum
 
 ## External MCP Clients
 
-External editors, command-line AI tools, and other MCP clients can use saved SSH connections through OxideTerm when diagnosing a server. Open **Settings → Network & Proxy → External MCP Control**, then:
+External editors, command-line AI tools, and other MCP clients can use saved SSH connections through OxideLab when diagnosing a server. Open **Settings → Network & Proxy → External MCP Control**, then:
 
 1. Create a standard or full-access client. Standard mode requires in-app approval for high-risk actions; full-access mode skips per-action approval only for enabled tool groups.
 2. Copy the loopback HTTP endpoint and the client credential, which is shown only once.
    The listening port defaults to `0`, which lets the app choose automatically. Enter and apply a value from `1` to `65535` when a fixed port is required. The preference remains device-local and is excluded from ordinary settings, `.oxide` exports, and cloud sync.
 3. Configure the endpoint as a Streamable HTTP URL in the external MCP client and add an `Authorization: Bearer <credential>` request header.
-   If the client supports stdio only, configure the command as `oxideterm mcp bridge` and provide `OXIDETERM_MCP_TOKEN=<credential>` through the client's secret environment settings. The bridge discovers the current loopback endpoint automatically. Never put the credential in command arguments.
+   If the client supports stdio only, configure the command as `oxidelab mcp bridge` and provide `OXIDELAB_MCP_TOKEN=<credential>` through the client's secret environment settings. The bridge discovers the current loopback endpoint automatically. Never put the credential in command arguments.
 
    CC Switch and clients that accept a `command`, `args`, and `env` object can use the configuration generated by **Copy stdio JSON** in the app:
 
    ```json
    {
-     "command": "oxideterm",
+     "command": "oxidelab",
      "args": ["mcp", "bridge"],
      "env": {
-       "OXIDETERM_MCP_TOKEN": "<client credential>"
+       "OXIDELAB_MCP_TOKEN": "<client credential>"
      }
    }
    ```
@@ -188,20 +188,20 @@ External editors, command-line AI tools, and other MCP clients can use saved SSH
    ```json
    {
      "mcpServers": {
-       "oxideterm": {
-         "command": "oxideterm",
+       "oxidelab": {
+         "command": "oxidelab",
          "args": ["mcp", "bridge"],
          "env": {
-           "OXIDETERM_MCP_TOKEN": "<client credential>"
+           "OXIDELAB_MCP_TOKEN": "<client credential>"
          }
        }
      }
    }
    ```
 
-   Both JSON forms contain the client credential. Store them only in a trusted client's secret configuration, never in project files, logs, or public content. Install the command-line tool under **Settings → General** and keep OxideTerm running.
+   Both JSON forms contain the client credential. Store them only in a trusted client's secret configuration, never in project files, logs, or public content. Install the command-line tool under **Settings → General** and keep OxideLab running.
 4. Have the client call `connections_browse`, then inspect the selected connection. The connection-management group can create, update, or remove SSH, Mosh, Telnet, serial, RDP, and VNC profiles. Credential tools can store a new value, report presence, or forget a slot, but never read an existing secret.
-5. In standard mode, review the actual client, target, and command under **Pending Actions** in OxideTerm, then have the client call `mcp_commit_action`. Full-access mode executes directly.
+5. In standard mode, review the actual client, target, and command under **Pending Actions** in OxideLab, then have the client call `mcp_commit_action`. Full-access mode executes directly.
 6. Use the returned `command_ref` to query state and read bounded stdout and stderr ranges.
 
 The current implementation exposes connection and credential management, NodeRouter leases, terminal and recording workflows, RDP/VNC, SSH exec, bounded temporary artifacts, SFTP and background single-file transfers, remote IDE workspaces, forwarding, Quick Commands, managed addon lifecycle, Cloud Sync, the current client's redacted MCP audit records, and typed Host Tools snapshots/actions. Background transfers move data only between an authorized SFTP root and client-owned artifact storage; they never accept local paths. The current bound is 64 MiB and restartable resume is not yet available. IDE workspaces are mounted from an authorized SFTP file session; reading and structured editing are separate grants, reads are limited to 4 MiB, and edits require an observed revision. Cloud Sync returns a one-use preview plan and rechecks both local and remote revisions before applying it. Remote publishes do not claim false undo support, and pulls containing SSH, Mosh, or credentials retain only the product's existing encrypted recovery backup. Host Tools accepts only fixed resource and action schemas; it does not expose free-form shell text or plugin calls. Releasing an MCP node lease does not disconnect a physical SSH node still used by terminal, SFTP, IDE, or forwarding consumers; only an explicitly approved `nodes_disconnect` does that.
@@ -210,7 +210,7 @@ Background commands and SFTP transfers return an `operation_ref` in addition to 
 
 An action is reversible only when its result explicitly contains an `undo_ref`. `mcp_revert` currently reuses the strict local Cloud Sync restore path, including the Cloud Sync tool-group and revision checks. Remote publishes, commands, uploads, and permanent deletion never receive a fabricated undo handle.
 
-OxideTerm stores only a digest of each client credential. Disabling or revoking a client immediately cancels its commands, pending actions, and node leases. The endpoint, authorization records, and credential are excluded from ordinary settings, `.oxide` exports, and cloud sync. The external client process is responsible for protecting the stdio bridge environment variable; OxideTerm does not write it back to configuration files.
+OxideLab stores only a digest of each client credential. Disabling or revoking a client immediately cancels its commands, pending actions, and node leases. The endpoint, authorization records, and credential are excluded from ordinary settings, `.oxide` exports, and cloud sync. The external client process is responsible for protecting the stdio bridge environment variable; OxideLab does not write it back to configuration files.
 
 Full-access mode does not enable every tool. Each client still needs explicit grants for connection, node, command, audit, and temporary-content groups. A client may request additional groups with `mcp_request_access`, but that request always needs approval in the app even in full-access mode. `mcp_revoke_access` immediately disables the client's selected groups and releases their capabilities. Disabled tools are neither advertised nor callable. Bearer authentication, app lock, secret non-disclosure, and audit remain active in both modes.
 
@@ -257,19 +257,19 @@ For normal daily work, start in the desktop app. The CLI should support the desk
 Install the CLI companion from Settings, then open a new tab in a project directory:
 
 ```sh
-oxideterm terminal --cwd ~/project
-oxideterm terminal --cwd ~/project -- claude --resume SESSION_ID
-oxideterm terminal --cwd ~/project -- codex resume SESSION_ID
+oxidelab terminal --cwd ~/project
+oxidelab terminal --cwd ~/project -- claude --resume SESSION_ID
+oxidelab terminal --cwd ~/project -- codex resume SESSION_ID
 ```
 
-OxideTerm starts if necessary; otherwise the existing instance opens a new tab. This command targets the application's active data directory, so it does not accept the CLI's isolated `--config-dir` or `--profile` options.
+OxideLab starts if necessary; otherwise the existing instance opens a new tab. This command targets the application's active data directory, so it does not accept the CLI's isolated `--config-dir` or `--profile` options.
 
-Without a program, the tab uses your configured shell. With a program, OxideTerm resolves it using the caller's `PATH` and passes each argument literally. Quote paths with spaces. Relative working directories are resolved from the caller's directory; relative executable paths are resolved inside the selected working directory. On Windows, invoke batch files through an explicit `cmd.exe /c` command.
+Without a program, the tab uses your configured shell. With a program, OxideLab resolves it using the caller's `PATH` and passes each argument literally. Quote paths with spaces. Relative working directories are resolved from the caller's directory; relative executable paths are resolved inside the selected working directory. On Windows, invoke batch files through an explicit `cmd.exe /c` command.
 
 Shell expressions require an explicit shell:
 
 ```sh
-oxideterm terminal --cwd ~/project -- /bin/zsh -lc 'echo hello; exec zsh'
+oxidelab terminal --cwd ~/project -- /bin/zsh -lc 'echo hello; exec zsh'
 ```
 
 Launch arguments travel through a one-shot pipe and authenticated local IPC, not a temporary file. The request limit is 60 KiB. Exit status zero means the launch was dispatched, not that the child program finished successfully. Split panes use the configured shell rather than replaying the launch command.

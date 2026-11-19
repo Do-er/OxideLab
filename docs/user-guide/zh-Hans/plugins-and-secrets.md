@@ -20,7 +20,7 @@
 
 ## 更新与主程序兼容性
 
-插件市场提供同时兼容当前应用版本和平台的最高版本。更高但不兼容的版本会显示要求，不会替换已安装版本。不兼容的已安装插件保留文件和设置，但不能启用。找不到更新时，刷新市场并检查最低应用版本；仍使用冻结的第一版目录的旧客户端，需要升级 OxideTerm 才能获取后续插件版本。
+插件市场提供同时兼容当前应用版本和平台的最高版本。更高但不兼容的版本会显示要求，不会替换已安装版本。不兼容的已安装插件保留文件和设置，但不能启用。找不到更新时，刷新市场并检查最低应用版本；仍使用冻结的第一版目录的旧客户端，需要升级 OxideLab 才能获取后续插件版本。
 
 插件连接配置及受支持的凭据可通过加密导出和云同步迁移，每台设备仍需单独安装提供该连接的插件。连接前检查凭据和路由，运行中的实例不参与同步。更新或禁用连接插件会停止它的活动实例，保留已保存配置。
 
@@ -49,17 +49,17 @@ WASM 插件使用宿主授权的能力；进程插件和原生协议帮助程序
 无界面插件检查或脚本化配置使用 CLI 伴侣工具：
 
 ```sh
-oxideterm plugins list --json
-oxideterm plugins enable demo.plugin --dry-run
-oxideterm plugins disable demo.plugin --dry-run
-oxideterm plugins settings export --json
+oxidelab plugins list --json
+oxidelab plugins enable demo.plugin --dry-run
+oxidelab plugins disable demo.plugin --dry-run
+oxidelab plugins settings export --json
 ```
 
 CLI 写入凭据时，优先使用标准输入或环境变量：
 
 ```sh
-oxideterm secrets status --scope ai --json
-printf '%s' "$OPENAI_API_KEY" | oxideterm secrets set --scope ai --id builtin-openai --stdin
-oxideterm secrets set --scope plugin --plugin-id demo.plugin --key token --env PLUGIN_TOKEN
-oxideterm secrets clear --scope cloud-sync --key token
+oxidelab secrets status --scope ai --json
+printf '%s' "$OPENAI_API_KEY" | oxidelab secrets set --scope ai --id builtin-openai --stdin
+oxidelab secrets set --scope plugin --plugin-id demo.plugin --key token --env PLUGIN_TOKEN
+oxidelab secrets clear --scope cloud-sync --key token
 ```

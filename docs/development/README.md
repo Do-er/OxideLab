@@ -1,4 +1,4 @@
-# OxideTerm Development Guide
+# OxideLab Development Guide
 
 This guide is the entry point for contributors working on the native desktop application. Product workflows belong in the [user guide](../user-guide/en/README.md); personal investigations and future proposals under `docs/local/` are not development contracts.
 

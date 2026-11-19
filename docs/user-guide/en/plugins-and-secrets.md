@@ -20,7 +20,7 @@ If a plugin appears to be installed but inactive, check the plugin manager first
 
 ## Updates and Host Compatibility
 
-The marketplace offers the highest plugin release compatible with both your app version and platform. A newer incompatible release shows its requirements rather than replacing the installed version. Incompatible installed plugins keep their files and settings but cannot activate. Refresh the marketplace and check the required app version when an update is missing; older clients using the frozen v1 catalog must upgrade OxideTerm to discover newer releases.
+The marketplace offers the highest plugin release compatible with both your app version and platform. A newer incompatible release shows its requirements rather than replacing the installed version. Incompatible installed plugins keep their files and settings but cannot activate. Refresh the marketplace and check the required app version when an update is missing; older clients using the frozen v1 catalog must upgrade OxideLab to discover newer releases.
 
 Saved plugin connection profiles and supported credentials can travel through encrypted export and cloud sync. Install the provider separately on each device. Review credentials and routes before connecting; live plugin instances are not synchronized. Updating or disabling a connection provider stops its active instances while retaining saved profiles.
 
@@ -49,17 +49,17 @@ Secret rules:
 For headless plugin checks or scripted setup, use the CLI companion:
 
 ```sh
-oxideterm plugins list --json
-oxideterm plugins enable demo.plugin --dry-run
-oxideterm plugins disable demo.plugin --dry-run
-oxideterm plugins settings export --json
+oxidelab plugins list --json
+oxidelab plugins enable demo.plugin --dry-run
+oxidelab plugins disable demo.plugin --dry-run
+oxidelab plugins settings export --json
 ```
 
 For CLI secret writes, prefer stdin or environment variables:
 
 ```sh
-oxideterm secrets status --scope ai --json
-printf '%s' "$OPENAI_API_KEY" | oxideterm secrets set --scope ai --id builtin-openai --stdin
-oxideterm secrets set --scope plugin --plugin-id demo.plugin --key token --env PLUGIN_TOKEN
-oxideterm secrets clear --scope cloud-sync --key token
+oxidelab secrets status --scope ai --json
+printf '%s' "$OPENAI_API_KEY" | oxidelab secrets set --scope ai --id builtin-openai --stdin
+oxidelab secrets set --scope plugin --plugin-id demo.plugin --key token --env PLUGIN_TOKEN
+oxidelab secrets clear --scope cloud-sync --key token
 ```

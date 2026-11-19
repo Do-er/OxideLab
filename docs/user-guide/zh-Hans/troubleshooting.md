@@ -50,7 +50,7 @@ RDP/VNC 问题：先在插件管理器中确认对应插件已安装、已启用
 
 - 未列出串口：手动输入 `/dev/cu.*`、`/dev/ttyUSB*`、`/dev/ttyACM*` 或 `COMx`，并确认系统能看到该设备。
 - 权限被拒绝：Linux 检查 `dialout`、`uucp` 或发行版对应串口组，修改组后退出登录再进入。macOS 检查系统权限和 USB 串口驱动。
-- 设备忙：关闭可能占用该端口的其他终端程序、调试器、烧录工具或 OxideTerm 标签页。
+- 设备忙：关闭可能占用该端口的其他终端程序、调试器、烧录工具或 OxideLab 标签页。
 - 设备拔出：关闭当前串口终端，重新插入设备后再打开。如果系统分配了新路径，更新串口配置。
 
 ## 连接与传输排查
@@ -68,7 +68,7 @@ RDP/VNC 问题：先在插件管理器中确认对应插件已安装、已启用
 | 下载文件使用了新名字 | 默认保留已有文件；确实需要替换时，使用发送程序的显式覆盖选项 |
 | 远程编辑提示文件冲突 | 对比当前编辑内容和远程文件，再选择重新加载或覆盖；先保留仍需要的编辑内容 |
 
-SSH 网络中断时，先查看重连阶段。OxideTerm 会先探测原连接，再决定是否替换，无需为此重新创建连接配置。重连后先检查传输和编辑状态，再决定是否重试可能已完成的操作。
+SSH 网络中断时，先查看重连阶段。OxideLab 会先探测原连接，再决定是否替换，无需为此重新创建连接配置。重连后先检查传输和编辑状态，再决定是否重试可能已完成的操作。
 
 没有审计录制时，同时检查“启用审计”和“记录终端输出”。它们初始均关闭，开启前的输出无法回放。内容缺失或过期的含义见[会话录制](desktop.md#审计与会话录制)。
 
@@ -81,10 +81,10 @@ SSH 网络中断时，先查看重连阶段。OxideTerm 会先探测原连接，
 需要只读诊断、CI 检查或支持包时使用 CLI 伴侣工具：
 
 ```sh
-oxideterm paths --json
-oxideterm diagnose --json
-oxideterm doctor --strict
-oxideterm report --json
+oxidelab paths --json
+oxidelab diagnose --json
+oxidelab doctor --strict
+oxidelab report --json
 ```
 
 `doctor --strict` 会把警告当作失败，适合 CI 或迁移脚本。
@@ -92,9 +92,9 @@ oxideterm report --json
 针对性检查：
 
 ```sh
-oxideterm settings validate --strict
-oxideterm connections validate --strict
-oxideterm cloud-sync status --json
+oxidelab settings validate --strict
+oxidelab connections validate --strict
+oxidelab cloud-sync status --json
 ```
 
 ## 问题报告
@@ -102,7 +102,7 @@ oxideterm cloud-sync status --json
 提交问题报告时优先附加脱敏支持包，而不是原始配置文件：
 
 ```sh
-oxideterm report --bundle ./oxideterm-report.json --json
+oxidelab report --bundle ./oxideterm-report.json --json
 ```
 
 分享前先检查支持包。必要时移除私人主机名、用户名、路径或项目名。

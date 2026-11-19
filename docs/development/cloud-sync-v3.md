@@ -45,7 +45,7 @@ The CLI holds the desktop-instance locks through recovery and synchronization. P
 - `GET /v1/namespaces/{namespace}/objects/{path}` returns exact bytes or 404. `PUT` stores the object; the client reads it back before acknowledging publication.
 - `DELETE` at the same path removes a superseded object. Successful responses and 404 are idempotent success.
 
-Listings must cover all matching objects. Cursors are opaque and must advance. Malformed identities and repeated cursors are errors, not partial success. Deploy a compatible `oxideterm.cloud-sync-server` with listing and deletion support before using v3; individual-object read/write endpoints alone are insufficient.
+Listings must cover all matching objects. Cursors are opaque and must advance. Malformed identities and repeated cursors are errors, not partial success. Deploy a compatible `oxidelab.cloud-sync-server` with listing and deletion support before using v3; individual-object read/write endpoints alone are insufficient.
 
 ## Archives, Upgrade, and Password Changes
 

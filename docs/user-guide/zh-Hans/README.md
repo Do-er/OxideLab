@@ -1,6 +1,6 @@
-# OxideTerm 使用指南
+# OxideLab 使用指南
 
-OxideTerm Native 是基于 Rust/GPUI 的 SSH 工作区，包含终端、SFTP、端口转发、主机工具、图形/VNC 会话、设置、云同步、插件、AI 辅助和独立 CLI 伴侣工具。桌面应用是产品主体；CLI 用于自动化和诊断。
+OxideLab Native 是基于 Rust/GPUI 的 SSH 工作区，包含终端、SFTP、端口转发、主机工具、图形/VNC 会话、设置、云同步、插件、AI 辅助和独立 CLI 伴侣工具。桌面应用是产品主体；CLI 用于自动化和诊断。
 
 ## 文档
 

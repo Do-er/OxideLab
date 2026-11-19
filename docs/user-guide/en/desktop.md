@@ -2,7 +2,7 @@
 
 ## First Launch
 
-Open OxideTerm and use the left activity bar for connection management and global pages. OxideSens and Host Tools are on the right. The top bar filters tabs without interrupting hidden sessions; see [Workspace Navigation](workspace.md).
+Open OxideLab and use the left activity bar for connection management and global pages. OxideSens and Host Tools are on the right. The top bar filters tabs without interrupting hidden sessions; see [Workspace Navigation](workspace.md).
 
 If the app starts with no sessions, create a local shell tab first. This verifies the terminal renderer, shell integration, input handling, and theme settings before you add remote hosts.
 
@@ -109,7 +109,7 @@ Folding requires reliable command-start, output-start, and completion informatio
 
 An outdated remote integration can trigger an update reminder when a new SSH terminal opens. Choosing **Later** leaves it unchanged; you can update manually from the same settings page.
 
-The remote integration installs readable hooks for Bash, Zsh, Fish, Nushell, and PowerShell. If folding remains unavailable after updating and opening a new terminal, check the actual shell and whether its startup files load the integration. Prompt themes and terminal multiplexers may also affect whether complete command boundaries reach OxideTerm.
+The remote integration installs readable hooks for Bash, Zsh, Fish, Nushell, and PowerShell. If folding remains unavailable after updating and opening a new terminal, check the actual shell and whether its startup files load the integration. Prompt themes and terminal multiplexers may also affect whether complete command boundaries reach OxideLab.
 
 ### Free Type Mode
 
@@ -126,20 +126,20 @@ Toggle the mode with Command+Shift+F on macOS or Ctrl+Alt+F on Windows and Linux
 
 While the mode owns an ordinary command input, Command+C/X/V on macOS and Ctrl+C/X/V on Windows and Linux perform editor-style copy, cut, and paste. The configurable terminal actions also default to Ctrl+Shift+C/X/V on Windows and Linux. Outside a verified command input or selection, these keys keep their existing terminal behavior.
 
-OxideTerm sends ordinary terminal key and text sequences; the remote shell or editor remains the source of truth. Full-screen and mouse-tracking programs keep their own pointer input. Vim, Neovim, and Emacs can additionally expose their current mode and selection through OxideTerm's explicit adapter, allowing the same Copy/Cut/Paste shortcuts to operate on a verified editor selection without weakening the alternate-screen or mouse protections.
+OxideLab sends ordinary terminal key and text sequences; the remote shell or editor remains the source of truth. Full-screen and mouse-tracking programs keep their own pointer input. Vim, Neovim, and Emacs can additionally expose their current mode and selection through OxideLab's explicit adapter, allowing the same Copy/Cut/Paste shortcuts to operate on a verified editor selection without weakening the alternate-screen or mouse protections.
 
-OxideTerm does not alter editor startup files. To opt in for Vim or Neovim, add this to `vimrc` or `init.vim`:
+OxideLab does not alter editor startup files. To opt in for Vim or Neovim, add this to `vimrc` or `init.vim`:
 
 ```vim
-if exists('$OXIDETERM_VIM_INTEGRATION') && filereadable($OXIDETERM_VIM_INTEGRATION)
-  execute 'source ' . fnameescape($OXIDETERM_VIM_INTEGRATION)
+if exists('$OXIDELAB_VIM_INTEGRATION') && filereadable($OXIDELAB_VIM_INTEGRATION)
+  execute 'source ' . fnameescape($OXIDELAB_VIM_INTEGRATION)
 endif
 ```
 
 For a Neovim `init.lua`, use:
 
 ```lua
-local adapter = vim.env.OXIDETERM_VIM_INTEGRATION
+local adapter = vim.env.OXIDELAB_VIM_INTEGRATION
 if adapter and vim.fn.filereadable(adapter) == 1 then
   vim.cmd("source " .. vim.fn.fnameescape(adapter))
 end
@@ -148,13 +148,13 @@ end
 For Emacs, add this to the init file:
 
 ```elisp
-(when-let ((adapter (getenv "OXIDETERM_EMACS_INTEGRATION")))
+(when-let ((adapter (getenv "OXIDELAB_EMACS_INTEGRATION")))
   (when (file-readable-p adapter)
     (load adapter nil t)
     (oxideterm-free-type-mode 1)))
 ```
 
-Local terminal sessions provide these adapter paths automatically. For SSH sessions, first install or repair Remote Shell Integration under Settings → Terminal → Awareness & Integration; it installs the readable adapter files under `~/.oxideterm/shell-integration`. Their paths are exported only when the SSH server accepts OxideTerm's per-channel capability marker. Restrictive servers still retain standard OSC 7 directory awareness but disable the private editor enhancement. Loaded adapters suppress private messages inside tmux, GNU screen, and Zellij because a shared pane cannot isolate them by attached client. An active adapter reports only editor identity, mode, selection shape, capabilities, and a user-requested copied/cut selection. Clipboard responses are bounded and ignored unless they match a recent user shortcut.
+Local terminal sessions provide these adapter paths automatically. For SSH sessions, first install or repair Remote Shell Integration under Settings → Terminal → Awareness & Integration; it installs the readable adapter files under `~/.oxidelab/shell-integration`. Their paths are exported only when the SSH server accepts OxideLab's per-channel capability marker. Restrictive servers still retain standard OSC 7 directory awareness but disable the private editor enhancement. Loaded adapters suppress private messages inside tmux, GNU screen, and Zellij because a shared pane cannot isolate them by attached client. An active adapter reports only editor identity, mode, selection shape, capabilities, and a user-requested copied/cut selection. Clipboard responses are bounded and ignored unless they match a recent user shortcut.
 
 ### Backspace and Delete compatibility
 
@@ -165,7 +165,7 @@ Settings → Terminal also lets you choose the sequences sent by the physical Ba
 1. With paste protection enabled, paste multiline text into the destination terminal to open the editor. To open it for any copied text, right-click the terminal and choose **Edit before pasting**.
 2. Edit the text in the dialog. **Enter** inserts a newline. You can also use **Undo** and **Redo**.
 3. If you copied a Markdown code block, choose **Remove code block markers** to remove its surrounding fence. This is an explicit action; ordinary paste keeps the text as copied.
-4. Click **Paste** to send the text, or press **Esc** to discard the draft. If you made no changes, OxideTerm passes the original text to the terminal's normal paste handling.
+4. Click **Paste** to send the text, or press **Esc** to discard the draft. If you made no changes, OxideLab passes the original text to the terminal's normal paste handling.
 
 Newlines are sent with the pasted text and may cause the receiving shell to execute commands. The dialog keeps edits locally until you choose Paste.
 
@@ -183,7 +183,7 @@ The connection pool and monitor show live runtime state. Use them when a termina
 
 Runtime state answers different questions than saved profiles:
 
-- Saved profile: what host should OxideTerm connect to?
+- Saved profile: what host should OxideLab connect to?
 - Runtime node: is that host currently connected or reconnecting?
 - Terminal session: which visible shell is attached to the runtime?
 - SFTP session: is file browsing using a live transport?
@@ -204,7 +204,7 @@ To jump to your terminal's working directory, use **Go to terminal directory** b
 
 ### Transfer files through a terminal
 
-In an SSH terminal, start the matching transfer program on the remote host. OxideTerm recognizes its transfer request and opens the local file or destination picker.
+In an SSH terminal, start the matching transfer program on the remote host. OxideLab recognizes its transfer request and opens the local file or destination picker.
 
 | Task | Remote command | Local action |
 | --- | --- | --- |
@@ -213,7 +213,7 @@ In an SSH terminal, start the matching transfer program on the remote host. Oxid
 | Upload with ZMODEM | `rz` | Choose local files |
 | Download with ZMODEM | `sz report.txt` | Choose a destination folder |
 
-The remote host needs the corresponding program installed. For a download that should replace an existing local file, run `tsz -y report.txt` or `sz -y report.txt`. Without that overwrite request, a conflicting filename is renamed. OxideTerm keeps the existing file while receiving its replacement: trzsz commits after validation, and ZMODEM commits replacements after the batch succeeds. Cancelling the transfer preserves the existing file.
+The remote host needs the corresponding program installed. For a download that should replace an existing local file, run `tsz -y report.txt` or `sz -y report.txt`. Without that overwrite request, a conflicting filename is renamed. OxideLab keeps the existing file while receiving its replacement: trzsz commits after validation, and ZMODEM commits replacements after the batch succeeds. Cancelling the transfer preserves the existing file.
 
 For serial devices, open **Binary transfer** in the terminal control bar and choose the matching XMODEM, YMODEM, or ZMODEM upload/receive action. Put the device into its matching transfer mode first. XMODEM reception also needs a destination filename because the protocol does not carry one.
 

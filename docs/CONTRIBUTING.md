@@ -1,6 +1,6 @@
-# Contributing to OxideTerm
+# Contributing to OxideLab
 
-Pull requests are welcome, including bug fixes, documentation, translations, and features. OxideTerm has one maintainer, with contributions from the community. Focused changes with clear reproduction steps and verification results are easier to review.
+Pull requests are welcome, including bug fixes, documentation, translations, and features. OxideLab has one maintainer, with contributions from the community. Focused changes with clear reproduction steps and verification results are easier to review.
 
 ## Before you start
 
@@ -29,7 +29,7 @@ For performance changes, include before-and-after measurements using the same wo
 
 ## Keep the UI consistent across platforms
 
-Prefer OxideTerm's existing GPUI-rendered controls over operating-system-native widgets and dialogs. Reuse the shared buttons, text fields, menus, modals, and scrollbars, together with their theme tokens and interaction handling. This keeps appearance and behavior consistent across macOS, Windows, and Linux. Read the [product UI guide](development/gpui-product-ui.md) and the complete implementation of a similar interaction before making UI changes.
+Prefer OxideLab's existing GPUI-rendered controls over operating-system-native widgets and dialogs. Reuse the shared buttons, text fields, menus, modals, and scrollbars, together with their theme tokens and interaction handling. This keeps appearance and behavior consistent across macOS, Windows, and Linux. Read the [product UI guide](development/gpui-product-ui.md) and the complete implementation of a similar interaction before making UI changes.
 
 Use native UI only when a required platform integration cannot reasonably be handled by the existing components, and explain that need in the PR. Do not build a separate custom control when a shared component already covers the interaction.
 

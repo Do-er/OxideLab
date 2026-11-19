@@ -30,7 +30,7 @@ The fields depend on the backend:
 | GitHub Gist | The same Gist ID and namespace; an empty ID can create a private Gist on first publication |
 | Dropbox | Account and folder path |
 | OneDrive / Google Drive | Account and configured sync folder or namespace |
-| HTTP JSON | A server implementing OxideTerm's current sync protocol, endpoint, and namespace |
+| HTTP JSON | A server implementing OxideLab's current sync protocol, endpoint, and namespace |
 
 For Alibaba Cloud OSS, select **S3 Compatible**, enter an endpoint such as `https://s3.oss-cn-hangzhou.aliyuncs.com`, and set the region to the bucket's actual region, such as `cn-hangzhou`. Replace Hangzhou in this example with your bucket's region. Enter the bucket name separately and use the object prefix to separate sync spaces. The client uses the virtual-hosted addressing required by OSS. It also recognizes native official endpoints such as `https://oss-cn-hangzhou.aliyuncs.com` and official endpoints already qualified with the same bucket name. Internal endpoints require access to the corresponding Alibaba Cloud internal network.
 
@@ -63,18 +63,18 @@ If local settings changed while the remote preview was loading, the apply step i
 | Shared data cannot be decrypted | Confirm that the location and sync password match the other device |
 | Upload failed after local changes were applied | Keep the current configuration and synchronize again to retry publication |
 | Cleanup is pending | Synchronize again to finish cleanup |
-| Sync was interrupted while applying data | Reopen OxideTerm so it can recover the pending operation, then retry sync |
+| Sync was interrupted while applying data | Reopen OxideLab so it can recover the pending operation, then retry sync |
 | HTTP JSON server upgrade required | Update that server to support the current protocol before retrying |
 
-If recovery remains blocked, keep the current data directory and report the error. Do not remove the recovery files to bypass it. For command-line recovery, close the desktop app and run `oxideterm cloud-sync sync --yes`; this command can apply and publish changes as well as recover an interrupted operation.
+If recovery remains blocked, keep the current data directory and report the error. Do not remove the recovery files to bypass it. For command-line recovery, close the desktop app and run `oxidelab cloud-sync sync --yes`; this command can apply and publish changes as well as recover an interrupted operation.
 
 ## Change the sync password
 
-Enter the new password in Cloud Sync settings and save. After confirmation, OxideTerm creates a new sync space and switches to it once the upload is verified. The previous space and its data remain available. Update the namespace and password on your other devices to join the new space.
+Enter the new password in Cloud Sync settings and save. After confirmation, OxideLab creates a new sync space and switches to it once the upload is verified. The previous space and its data remain available. Update the namespace and password on your other devices to join the new space.
 
 If the upload fails, submit the same new password again to resume the change.
 
-Save other settings changes before changing the password. The CLI command `oxideterm cloud-sync change-password --yes` reads the new password from standard input, which can be supplied by a password manager.
+Save other settings changes before changing the password. The CLI command `oxidelab cloud-sync change-password --yes` reads the new password from standard input, which can be supplied by a password manager.
 
 ## Backups
 
@@ -99,15 +99,15 @@ If the Cloud Sync History view contains an earlier rollback backup, select it an
 The CLI also creates a JSON backup of settings, connections, and cloud-sync metadata. It does not replace an encrypted credential export. A settings-only restore can be reviewed and applied with:
 
 ```sh
-oxideterm backup create --output ./oxideterm-backup.json --json
-oxideterm backup verify ./oxideterm-backup.json --json
-oxideterm backup restore ./oxideterm-backup.json --section settings --dry-run --json
+oxidelab backup create --output ./oxideterm-backup.json --json
+oxidelab backup verify ./oxideterm-backup.json --json
+oxidelab backup restore ./oxideterm-backup.json --section settings --dry-run --json
 ```
 
 After reviewing the dry-run, apply that settings-only restore:
 
 ```sh
-oxideterm backup restore ./oxideterm-backup.json --section settings --yes --json
+oxidelab backup restore ./oxideterm-backup.json --section settings --yes --json
 ```
 
 Reopen the affected settings and verify the result. For a complete copy of local history and recordings, see [data-directory backups](portable-oxide.md#data-directory-backups).
@@ -121,13 +121,13 @@ Use support bundles when you need to share diagnostics. Review the generated bun
 For scripted sync, restore plans, CI checks, or support bundles, use the CLI companion:
 
 ```sh
-oxideterm cloud-sync status --json
-oxideterm cloud-sync sync --dry-run --json
-oxideterm cloud-sync preview --json
-oxideterm cloud-sync diff --dirty-only --format table
-oxideterm backup preview --json
-oxideterm backup create --output ./oxideterm-backup.json --json
-oxideterm report --bundle ./oxideterm-report.json --json
+oxidelab cloud-sync status --json
+oxidelab cloud-sync sync --dry-run --json
+oxidelab cloud-sync preview --json
+oxidelab cloud-sync diff --dirty-only --format table
+oxidelab backup preview --json
+oxidelab backup create --output ./oxideterm-backup.json --json
+oxidelab report --bundle ./oxideterm-report.json --json
 ```
 
 `cloud-sync sync --dry-run` prepares a preview from the remote backend without applying or publishing it. The separate `preview` and `diff` commands inspect cached state. Close the desktop app before running sync from the CLI, which needs exclusive access to the configuration.
@@ -135,5 +135,5 @@ oxideterm report --bundle ./oxideterm-report.json --json
 For CLI writes, run a dry-run first and confirm after the plan matches the intended changes:
 
 ```sh
-oxideterm cloud-sync sync --yes --json
+oxidelab cloud-sync sync --yes --json
 ```

@@ -1,6 +1,6 @@
 # Native Plugin Development
 
-This guide describes the OxideTerm Native plugin model. It is intentionally different from the Tauri/Web plugin model: native plugins do not run React components, do not inject CSS, and do not execute `main.js` through a WebView. A native plugin is discovered through `plugin.json`, then either contributes manifest-only metadata or runs through a host-owned process/WASM runtime bridge.
+This guide describes the OxideLab Native plugin model. It is intentionally different from the Tauri/Web plugin model: native plugins do not run React components, do not inject CSS, and do not execute `main.js` through a WebView. A native plugin is discovered through `plugin.json`, then either contributes manifest-only metadata or runs through a host-owned process/WASM runtime bridge.
 
 Specialized packages also use `language`, `acp`, `remote-desktop`, `terminal-transport`, and `helper` runtimes. RDP and VNC engines are marketplace plugins; the host retains saved profiles and the viewer. Process connection providers can supply independent connection instances and live workbenches.
 
@@ -276,7 +276,7 @@ The process runtime has one line-oriented conversation.
 
 ```mermaid
 sequenceDiagram
-    participant Host as OxideTerm Host
+    participant Host as OxideLab Host
     participant Plugin as Plugin Process
     Host->>Plugin: activate request on stdin
     Plugin-->>Host: registerContribution sidebar-panel on stdout
@@ -499,7 +499,7 @@ Register a tab view:
         "controls": [
           {
             "kind": "markdown",
-            "text": "This tab is rendered by OxideTerm, not by plugin HTML."
+            "text": "This tab is rendered by OxideLab, not by plugin HTML."
           }
         ]
       }
@@ -660,7 +660,7 @@ Plugins live under the app configuration directory:
   locales/
 ```
 
-Use `oxideterm paths --json` to find the active configuration directory. The CLI can enable, disable, and inspect plugin state for headless workflows, but interactive install/update/uninstall work is owned by the desktop Plugin Manager.
+Use `oxidelab paths --json` to find the active configuration directory. The CLI can enable, disable, and inspect plugin state for headless workflows, but interactive install/update/uninstall work is owned by the desktop Plugin Manager.
 
 ## Minimal Manifest-Only Plugin
 
@@ -708,7 +708,7 @@ Background packs use the same installer and declare only
   "id": "com.example.backgrounds",
   "name": "Backgrounds",
   "version": "1.0.0",
-  "engines": { "oxideterm": ">2.2.2" },
+  "engines": { "oxidelab": ">2.2.2" },
   "tags": ["backgrounds"],
   "contributes": { "backgrounds": ["assets/day.mp4", "assets/night.mp4"] }
 }
@@ -917,7 +917,7 @@ A registration must use the same plugin id as the plugin that emitted it. Dispos
 Process plugins can declare connection types in `contributes.connections`. They appear in
 the existing New Connection dialog and Session Manager, including search, editing,
 deletion, batch selection and groups. Each opening creates an independent instance even
-when it uses the same saved profile. This API requires OxideTerm 2.2.5 or later; exclude
+when it uses the same saved profile. This API requires OxideLab 2.2.5 or later; exclude
 older hosts in `engines.oxideterm` and request `ui.write`.
 
 ```json
@@ -1012,7 +1012,7 @@ Keep stdout exclusively for JSON Lines protocol frames.
 Switching or closing an ordinary contributed tab does not stop the plugin process. The plugin owns its network
 connections and should provide an explicit disconnect action. Disabling, uninstalling or
 closing the workspace stops its runtime and output readers; updates from a retired instance
-are discarded. These capabilities require OxideTerm 2.2.5 or later. Exclude older hosts in
+are discarded. These capabilities require OxideLab 2.2.5 or later. Exclude older hosts in
 `engines.oxideterm` when using them.
 
 A table with `id`, `selectable: true` and `rowKey` supports mouse selection and, when focused,
@@ -1048,7 +1048,7 @@ updates preserve the draft; explicitly changing `value` replaces it. `disabled` 
 editing. Closing the owning surface releases editor state. Labels and placeholders use
 the plugin's existing eleven-language translation dictionary.
 
-Native plugins select OxideTerm components through a versioned schema. The
+Native plugins select OxideLab components through a versioned schema. The
 plugin supplies data and receives events; the host supplies the real shared
 components, theme tokens, density, typography, focus, IME behavior,
 accessibility semantics, and responsive layout. Plugin runtimes never receive
@@ -1100,7 +1100,7 @@ Supported control kinds:
 | `radioGroup`, `radio-group`, `segmentedControl`, `segmented-control`, `slider` | Shared choice/range controls; require stable `id` values |
 | `button`, `iconButton`, `icon-button` | Shared actions; actionable only with `id` and while enabled/not loading; icon buttons also require `icon` and `label` |
 | `alert` | Semantic host notice with `tone`, optional icon, title, and description |
-| `markdown` | Parsed using OxideTerm's Markdown renderer; background images and local-file links are disabled |
+| `markdown` | Parsed using OxideLab's Markdown renderer; background images and local-file links are disabled |
 | `code`, `codeBlock`, `code-block` | Code block |
 | `statusBadge`, `status-badge`, `badge` | Shared status pill with semantic tone/strength |
 | `progress` | Shared progress display; values may be `0..1` or `0..100` |
@@ -1340,7 +1340,7 @@ Current capability names are:
 
 The Plugin Manager presents all requested sensitive capabilities together when a plugin is enabled. Activation waits for approval, then the runtime receives the effective permission set in the `activate` request. Treat that request as the source of truth. A version-only update does not prompt again and does not expand access. Adding a capability or changing the runtime boundary requires a new review; removing capabilities narrows access without another prompt.
 
-Process plugins deserve special care: `runtime.process.trusted` is implicit and cannot be removed from their approval. The process is not confined by an OxideTerm OS sandbox, so its executable can exercise the operating-system access of the current user independently of Host API gates. Install and approve process plugins only from trusted publishers. WASM and process plugins must not be described as having the same security boundary.
+Process plugins deserve special care: `runtime.process.trusted` is implicit and cannot be removed from their approval. The process is not confined by an OxideLab OS sandbox, so its executable can exercise the operating-system access of the current user independently of Host API gates. Install and approve process plugins only from trusted publishers. WASM and process plugins must not be described as having the same security boundary.
 
 HTTP requests currently use the compatibility adapter. A plugin must request both `legacy.invoke` and `network.http`, and must list `plugin_http_request` in `contributes.apiCommands` before calling `api.invoke` with that command.
 
@@ -1421,9 +1421,9 @@ During development:
 5. Use CLI only for headless state/settings checks:
 
 ```sh
-oxideterm plugins list --json
-oxideterm plugins enable com.example.native-dashboard --dry-run --json
-oxideterm plugins settings export --json
+oxidelab plugins list --json
+oxidelab plugins enable com.example.native-dashboard --dry-run --json
+oxidelab plugins settings export --json
 ```
 
 ## Interface Reference
@@ -1438,7 +1438,7 @@ interface NativePluginManifest {
   description?: string;
   author?: string;
   main?: string; // Tauri legacy JS entry; visible but not executed by Native.
-  engines?: { oxideterm?: string };
+  engines?: { oxidelab?: string };
   manifestVersion?: number;
   format?: string;
   assets?: string;
@@ -1560,7 +1560,7 @@ Validation rules:
 
 - `id`, `name`, `version`, contribution ids, titles, and icons must be non-empty text.
 - Activity-bar item commands must be non-empty, item ids must be unique within the plugin, and `position` accepts only `top` or `bottom`.
-- Tab, sidebar-panel, and activity-bar-item icons resolve against OxideTerm's bundled Lucide icons. Matching ignores ASCII case, hyphens, and underscores; unsupported names fall back to `Puzzle`.
+- Tab, sidebar-panel, and activity-bar-item icons resolve against OxideLab's bundled Lucide icons. Matching ignores ASCII case, hyphens, and underscores; unsupported names fall back to `Puzzle`.
 - Relative paths must stay inside the plugin directory.
 - `terminalTransports` currently accepts `telnet`.
 - `apiCommands` entries are compatibility-adapter commands such as `get_app_version` or `plugin_http_request`; direct host APIs are not listed there.
@@ -2115,8 +2115,8 @@ Start with the Plugin Manager:
 - Register one contribution at a time while developing.
 - Confirm that `registrationId` values are stable and unique per plugin.
 - Confirm that every host call is declared and allowed.
-- Use `oxideterm plugins list --json` for headless state.
-- Use `oxideterm plugins settings export --json` to inspect plugin settings.
+- Use `oxidelab plugins list --json` for headless state.
+- Use `oxidelab plugins settings export --json` to inspect plugin settings.
 
 If a process plugin activates but no UI appears, verify both sides:
 

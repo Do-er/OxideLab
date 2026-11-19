@@ -15,7 +15,7 @@ Use groups, colors, and tags for navigation. Do not put passwords, tokens, or en
 Use Kerberos when your organization provides a current system sign-in or ticket and the SSH server accepts Kerberos authentication.
 
 1. Create or edit an SSH connection and enable **Prefer Kerberos** under authentication.
-2. Check the credential-availability message. OxideTerm uses credentials from the current operating-system session; obtain or renew them through your organization's sign-in procedure if none are available.
+2. Check the credential-availability message. OxideLab uses credentials from the current operating-system session; obtain or renew them through your organization's sign-in procedure if none are available.
 3. Leave **Kerberos server identity (optional)** empty to use `host/<SSH host>`. When connecting through an alias or load balancer, enter the service identity provided by your administrator, such as `host/server.example.com`.
 4. Choose the **Fallback authentication** method and configure its password, key, or agent as needed.
 5. Save and connect. If authentication fails, check the connection progress, ticket availability, server identity, and the server's Kerberos support.
@@ -30,7 +30,7 @@ Use Kerberos when your organization provides a current system sign-in or ticket 
 4. Review the prompt-matching regular expression, leave the credential enabled, and save.
 5. Edit the SSH connection and select the credential in **TOTP credential**. Select it separately on each jump host that needs it, then reconnect.
 
-OxideTerm generates a code when a matching SSH authentication prompt appears. Both hidden and visible-input verification prompts are supported, including matching JumpServer prompts. Other prompts still require their own answers. If the code is not filled in, check that the credential is enabled, bound to the correct host, and matches the actual prompt. If it is rejected, check the device clock and the service's code parameters. Existing custom prompt expressions are preserved when updating OxideTerm.
+OxideLab generates a code when a matching SSH authentication prompt appears. Both hidden and visible-input verification prompts are supported, including matching JumpServer prompts. Other prompts still require their own answers. If the code is not filled in, check that the credential is enabled, bound to the correct host, and matches the actual prompt. If it is rejected, check the device clock and the service's code parameters. Existing custom prompt expressions are preserved when updating OxideLab.
 
 When editing a credential, leave the secret empty to keep its saved value. Remove its bindings from connections and jump hosts before deleting it. See [troubleshooting](troubleshooting.md#connection-and-transfer-checks) for authentication checks.
 
@@ -50,7 +50,7 @@ SSH and any jump hosts are used to start the remote session. The subsequent UDP 
 
 ### OpenSSH configuration
 
-**Settings → Connections → Import from SSH Config** shows the configuration file being scanned. Host discovery, alias lookup, and automatic synchronization use this same path. In portable mode, `<data directory>/.ssh/config` takes priority when it exists; otherwise OxideTerm reads the current user's `~/.ssh/config`. An empty portable config keeps the host list empty. Portable private-key discovery, imported keys, and `known_hosts` continue to use the portable data directory.
+**Settings → Connections → Import from SSH Config** shows the configuration file being scanned. Host discovery, alias lookup, and automatic synchronization use this same path. In portable mode, `<data directory>/.ssh/config` takes priority when it exists; otherwise OxideLab reads the current user's `~/.ssh/config`. An empty portable config keeps the host list empty. Portable private-key discovery, imported keys, and `known_hosts` continue to use the portable data directory.
 
 ### Other clients
 
@@ -68,13 +68,13 @@ Supported sources and inputs:
 | Electerm | Bookmarks JSON containing `bookmarkGroups` and `bookmarks`, or a legacy bookmark array |
 | FinalShell | The `conn` folder, or the FinalShell data folder that contains `conn` |
 
-OxideTerm imports safe connection metadata such as names, groups, hosts, ports, usernames, and supported key-file paths. Passwords, passphrases, embedded private keys, certificates, proxy credentials, and other secret values are not imported. Unsupported proxy, jump-host, and forwarding settings are shown as preview warnings. Configure authentication and review those advanced settings in OxideTerm after the metadata import.
+OxideLab imports safe connection metadata such as names, groups, hosts, ports, usernames, and supported key-file paths. Passwords, passphrases, embedded private keys, certificates, proxy credentials, and other secret values are not imported. Unsupported proxy, jump-host, and forwarding settings are shown as preview warnings. Configure authentication and review those advanced settings in OxideLab after the metadata import.
 
 ## Connection Runtime
 
 Saved profiles and live runtime nodes are different things:
 
-- Saved profile: the host and connection settings OxideTerm should use.
+- Saved profile: the host and connection settings OxideLab should use.
 - SSH node: the live or reconnecting runtime state for a host.
 - Terminal session: a visible shell attached to an SSH node.
 - SFTP session: a file browsing or transfer surface attached to an SSH node.
@@ -169,11 +169,11 @@ Use a standalone tunnel when you need a forwarded port without opening a termina
 2. Enter a name and optional group, then select the saved SSH host that will carry the tunnel.
 3. Choose **Local**, **Remote**, or **Dynamic (SOCKS5)**. Set the bind address and port; local and remote forwards also need a destination host and port.
 4. Choose **Save** for later use, or **Save and Start** to connect now.
-5. Enable **Connect on application startup** only if this tunnel should connect whenever OxideTerm starts. Authentication may still require your input.
+5. Enable **Connect on application startup** only if this tunnel should connect whenever OxideLab starts. Authentication may still require your input.
 
 To start several tunnels, select their rows in **Session Manager**, right-click the selection, and choose **Start selected tunnels**. You stay on the same tab. Tunnels using the same saved SSH host share one connection and start in sequence; a failure notice names the affected tunnel. **Port Forwarding** lists saved tunnel names alongside their addresses.
 
-A tunnel retains its own SSH connection usage, so closing an unrelated terminal does not stop it. Stop the tunnel explicitly when it is no longer needed. Exiting OxideTerm stops its tunnels; they do not run as an independent background service.
+A tunnel retains its own SSH connection usage, so closing an unrelated terminal does not stop it. Stop the tunnel explicitly when it is no longer needed. Exiting OxideLab stops its tunnels; they do not run as an independent background service.
 
 Tunnel profiles participate in cloud sync and encrypted `.oxide` import/export. Running connections are not synchronized. After moving a profile to another device, check the associated SSH host, authentication, and local bind port before starting it.
 
@@ -182,9 +182,9 @@ Tunnel profiles participate in cloud sync and encrypted `.oxide` import/export. 
 Use the app to inspect visible connection and forward state. Use the CLI companion for CI, reviewable exports, or support workflows:
 
 ```sh
-oxideterm connections validate --strict
-oxideterm connections export --format raw-safe --json
-oxideterm forwards validate --json
+oxidelab connections validate --strict
+oxidelab connections export --format raw-safe --json
+oxidelab forwards validate --json
 ```
 
 `raw-safe` output is intended for review and automation without credential values.

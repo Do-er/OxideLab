@@ -1,4 +1,4 @@
-# OxideTerm Native Architecture
+# OxideLab Native Architecture
 
 > **Version**: Native desktop architecture
 > **Source of truth**: the current Rust/GPUI workspace; see [Cargo.toml](../../../Cargo.toml) for its version and [development guides](../../development/README.md) for contributor workflows.
@@ -66,7 +66,7 @@ flowchart TB
 3. **Node-first remote workspace** - Remote workflows are anchored by a stable SSH node, not by a transient terminal pane.
 4. **Default shared connection** - Terminal, SFTP, forwarding, and IDE can share a node's registry connection; AI and plugins use validated capability handles, snapshots, or hooks rather than becoming physical connection consumers.
 5. **Explicit lifecycle ownership** - Saved profiles, live nodes, terminal sessions, SFTP sessions, forwards, editor buffers, and tabs have different owners.
-6. **Local-first state** - SSH, SFTP, local terminal, settings, plugins, and AI provider configuration work without an OxideTerm cloud account.
+6. **Local-first state** - SSH, SFTP, local terminal, settings, plugins, and AI provider configuration work without an OxideLab cloud account.
 7. **Secret separation** - Navigation metadata, settings, AI prompts, logs, support bundles, and plugin labels are not secret storage.
 8. **Minimum visible coupling** - User-facing surfaces should not require users to reason about internal transport handles.
 
@@ -178,8 +178,8 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    User["User"] --> App["OxideTerm Desktop App"]
-    User --> Cli["oxideterm CLI Companion"]
+    User["User"] --> App["OxideLab Desktop App"]
+    User --> Cli["oxidelab CLI Companion"]
 
     subgraph Local["Local Machine"]
         App
@@ -1646,7 +1646,7 @@ Native provider requests and ACP sessions share UI and application-tool boundari
 
 Implementation: [acp_workspace](../../../crates/oxideterm-gpui-app/src/workspace/acp_workspace.rs), [core](../../../crates/oxideterm-gpui-app/src/workspace/sidebar/ai/actions/stream/core.rs).
 
-OxideSens is a workspace-aware assistant. It uses configured providers and local app context; it does not require an OxideTerm account.
+OxideSens is a workspace-aware assistant. It uses configured providers and local app context; it does not require an OxideLab account.
 
 Agent Skills are a bounded instruction layer for repeatable workflows. The AI runtime discovers `SKILL.md` catalogs, loads full instructions and resources only on demand, and records the loaded skill hash in conversation metadata. Loading a skill does not grant runtime authority; terminal, file, credential, network, and other actions still require the existing capability and approval checks.
 
@@ -1832,7 +1832,7 @@ Implementation: [host_api_snapshot](../../../crates/oxideterm-gpui-app/src/works
 ```mermaid
 %%{init: {"layout": "dagre", "flowchart": {"nodeSpacing": 45, "rankSpacing": 75, "curve": "basis"}}}%%
 flowchart TB
-    Cli["oxideterm CLI<br/>parsed command and structured arguments"]
+    Cli["oxidelab CLI<br/>parsed command and structured arguments"]
     Manage["Persistent-state management"]
     Plan["Validation / dry-run plan<br/>confirmation where required"]
     Store["Shared domain stores<br/>settings, profiles, backups and sync"]
@@ -1860,7 +1860,7 @@ Management commands operate on persisted stores; GUI launches and MCP calls reac
 
 Implementation: [main](../../../crates/oxideterm-cli/src/main.rs), [public_mcp](../../../crates/oxideterm-gpui-app/src/workspace/public_mcp.rs).
 
-The `oxideterm` CLI companion shares configuration and data paths with the desktop app, but it is not the primary interactive interface.
+The `oxidelab` CLI companion shares configuration and data paths with the desktop app, but it is not the primary interactive interface.
 
 Use the CLI for:
 

@@ -51,7 +51,7 @@ For serial terminal issues, start from the device and permission boundary:
 
 - No ports listed: enter `/dev/cu.*`, `/dev/ttyUSB*`, `/dev/ttyACM*`, or `COMx` manually and confirm the OS can see the device.
 - Permission denied: on Linux, check `dialout`, `uucp`, or the distribution-specific serial group and log out/in after changing membership. On macOS, check system permissions and USB serial drivers.
-- Device busy: close other terminal programs, debuggers, flashing tools, or OxideTerm tabs that may already hold the port.
+- Device busy: close other terminal programs, debuggers, flashing tools, or OxideLab tabs that may already hold the port.
 - Device unplugged: close the current serial terminal, reconnect the device, and reopen it. If the OS assigned a new path, update the serial profile.
 
 ## Connection and transfer checks
@@ -69,7 +69,7 @@ For serial terminal issues, start from the device and permission boundary:
 | A download gets a new filename | The default keeps the existing file; use the sender's explicit overwrite request only when replacement is intended |
 | A remote edit reports a file conflict | Compare your buffer with the current remote file, then choose whether to reload or overwrite; keep a copy of edits you still need |
 
-If output stops during an SSH network interruption, watch the reconnect phase. OxideTerm first probes the existing connection before replacing it. Reopening or deleting the profile is not required for this recovery. Check transfer and editor status after reconnection before repeating an operation that may already have completed.
+If output stops during an SSH network interruption, watch the reconnect phase. OxideLab first probes the existing connection before replacing it. Reopening or deleting the profile is not required for this recovery. Check transfer and editor status after reconnection before repeating an operation that may already have completed.
 
 If no audit recording appears, check both **Enable audit** and **Record terminal output**. They are initially off, so there is no earlier output to replay. Missing or expired-content indicators are explained in [session recordings](desktop.md#audit-and-session-recordings).
 
@@ -82,10 +82,10 @@ Before applying a restore, import, sync apply, or manual file repair, [create or
 Use the CLI companion when you need read-only diagnostics, CI checks, or support bundles:
 
 ```sh
-oxideterm paths --json
-oxideterm diagnose --json
-oxideterm doctor --strict
-oxideterm report --json
+oxidelab paths --json
+oxidelab diagnose --json
+oxidelab doctor --strict
+oxidelab report --json
 ```
 
 `doctor --strict` treats warnings as failures, which is useful for CI or migration scripts.
@@ -93,9 +93,9 @@ oxideterm report --json
 For focused checks:
 
 ```sh
-oxideterm settings validate --strict
-oxideterm connections validate --strict
-oxideterm cloud-sync status --json
+oxidelab settings validate --strict
+oxidelab connections validate --strict
+oxidelab cloud-sync status --json
 ```
 
 ## Bug Reports
@@ -103,7 +103,7 @@ oxideterm cloud-sync status --json
 For issue reports, attach a redacted bundle rather than raw config files:
 
 ```sh
-oxideterm report --bundle ./oxideterm-report.json --json
+oxidelab report --bundle ./oxideterm-report.json --json
 ```
 
 Review the bundle before sharing. Remove private hostnames, usernames, paths, or project names if needed.

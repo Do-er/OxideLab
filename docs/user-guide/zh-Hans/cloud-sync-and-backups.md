@@ -30,7 +30,7 @@
 | GitHub Gist | 同一个 Gist ID 和命名空间；ID 留空时可在首次发布时创建私有 Gist |
 | Dropbox | 账号和文件夹路径 |
 | OneDrive / Google Drive | 账号和配置的同步文件夹或命名空间 |
-| HTTP JSON | 支持 OxideTerm 当前同步协议的服务器、端点和命名空间 |
+| HTTP JSON | 支持 OxideLab 当前同步协议的服务器、端点和命名空间 |
 
 使用阿里云 OSS 时，选择“S3 兼容存储”，服务端点填写 `https://s3.oss-cn-hangzhou.aliyuncs.com`，区域填写存储桶的实际地域，例如 `cn-hangzhou`；请将示例中的杭州地域替换为自己的存储桶地域。存储桶名称单独填写，对象前缀用于区分同步空间。客户端会采用 OSS 要求的虚拟主机式地址，也可识别 `https://oss-cn-hangzhou.aliyuncs.com` 形式的官方端点，以及带有同一存储桶名称的官方端点。内网端点仅适用于能够访问对应阿里云内网的设备。
 
@@ -63,10 +63,10 @@ OSS 的 RAM 凭据需要目标存储桶的 `oss:ListObjects` 权限，以及同�
 | 无法解密共享数据 | 确认存储位置和同步密码与另一台设备一致 |
 | 本地修改已应用，但上传失败 | 保留当前配置，再次同步以重试发布 |
 | 等待清理 | 再次同步以完成清理 |
-| 应用数据时同步中断 | 重新打开 OxideTerm，让应用恢复未完成的操作，再重试同步 |
+| 应用数据时同步中断 | 重新打开 OxideLab，让应用恢复未完成的操作，再重试同步 |
 | HTTP JSON 服务器需要升级 | 先将该服务器升级到支持当前协议的版本 |
 
-恢复仍失败时，保留当前数据目录并记录错误，不要通过删除恢复文件绕过检查。需要从命令行恢复时，先关闭桌面应用，再运行 `oxideterm cloud-sync sync --yes`；该命令除了恢复中断操作，还可能应用和发布同步修改。
+恢复仍失败时，保留当前数据目录并记录错误，不要通过删除恢复文件绕过检查。需要从命令行恢复时，先关闭桌面应用，再运行 `oxidelab cloud-sync sync --yes`；该命令除了恢复中断操作，还可能应用和发布同步修改。
 
 ## 更改同步密码
 
@@ -74,7 +74,7 @@ OSS 的 RAM 凭据需要目标存储桶的 `oss:ListObjects` 权限，以及同�
 
 如果上传失败，重新提交同一新密码可以继续上次的变更。
 
-修改后端等其他设置时，先保存这些设置，再更改密码。CLI 可使用 `oxideterm cloud-sync change-password --yes`，由密码管理器通过标准输入传入新密码。
+修改后端等其他设置时，先保存这些设置，再更改密码。CLI 可使用 `oxidelab cloud-sync change-password --yes`，由密码管理器通过标准输入传入新密码。
 
 ## 备份
 
@@ -99,15 +99,15 @@ OSS 的 RAM 凭据需要目标存储桶的 `oss:ListObjects` 权限，以及同�
 命令行也能创建包含设置、连接和云同步元数据的 JSON 备份。迁移凭据仍需要加密导出。仅恢复设置时，可以按以下步骤预览和应用：
 
 ```sh
-oxideterm backup create --output ./oxideterm-backup.json --json
-oxideterm backup verify ./oxideterm-backup.json --json
-oxideterm backup restore ./oxideterm-backup.json --section settings --dry-run --json
+oxidelab backup create --output ./oxideterm-backup.json --json
+oxidelab backup verify ./oxideterm-backup.json --json
+oxidelab backup restore ./oxideterm-backup.json --section settings --dry-run --json
 ```
 
 检查预演结果后，执行这次仅恢复设置的操作：
 
 ```sh
-oxideterm backup restore ./oxideterm-backup.json --section settings --yes --json
+oxidelab backup restore ./oxideterm-backup.json --section settings --yes --json
 ```
 
 重新打开相关设置确认结果。需要完整保存本地历史和录制时，参阅[数据目录备份](portable-oxide.md#数据目录备份)。
@@ -121,13 +121,13 @@ oxideterm backup restore ./oxideterm-backup.json --section settings --yes --json
 脚本化同步、恢复计划、CI 检查或支持包使用 CLI 伴侣工具：
 
 ```sh
-oxideterm cloud-sync status --json
-oxideterm cloud-sync sync --dry-run --json
-oxideterm cloud-sync preview --json
-oxideterm cloud-sync diff --dirty-only --format table
-oxideterm backup preview --json
-oxideterm backup create --output ./oxideterm-backup.json --json
-oxideterm report --bundle ./oxideterm-report.json --json
+oxidelab cloud-sync status --json
+oxidelab cloud-sync sync --dry-run --json
+oxidelab cloud-sync preview --json
+oxidelab cloud-sync diff --dirty-only --format table
+oxidelab backup preview --json
+oxidelab backup create --output ./oxideterm-backup.json --json
+oxidelab report --bundle ./oxideterm-report.json --json
 ```
 
 `cloud-sync sync --dry-run` 会从远程后端准备预览，不应用或发布修改。独立的 `preview` 和 `diff` 命令查看的是缓存状态。命令行同步需要独占访问配置，运行前先关闭桌面应用。
@@ -135,5 +135,5 @@ oxideterm report --bundle ./oxideterm-report.json --json
 命令行写入先执行预演，确认修改符合预期后再执行：
 
 ```sh
-oxideterm cloud-sync sync --yes --json
+oxidelab cloud-sync sync --yes --json
 ```

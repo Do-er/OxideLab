@@ -1,10 +1,10 @@
 # GPUI Maintenance Boundary
 
-`crates/gpui-ce/` contains six local patches to Longbridge's `gpui-pre` 0.3.7 packages, the version used by GPUI Kit v0.7.0. Other gpui-pre packages resolve through crates.io. The six patches retain OxideTerm behavior and community-derived GPUI-CE filters, colors, and window capabilities; this is not an unmodified Zed distribution. The authoritative provenance and local-delta records are [`UPSTREAM_BASELINE.toml`](../../crates/gpui-ce/gpui/UPSTREAM_BASELINE.toml) and [`OXIDETERM_PATCHES.md`](../../crates/gpui-ce/gpui/OXIDETERM_PATCHES.md).
+`crates/gpui-ce/` contains six local patches to Longbridge's `gpui-pre` 0.3.7 packages, the version used by GPUI Kit v0.7.0. Other gpui-pre packages resolve through crates.io. The six patches retain OxideLab behavior and community-derived GPUI-CE filters, colors, and window capabilities; this is not an unmodified Zed distribution. The authoritative provenance and local-delta records are [`UPSTREAM_BASELINE.toml`](../../crates/gpui-ce/gpui/UPSTREAM_BASELINE.toml) and [`OXIDELAB_PATCHES.md`](../../crates/gpui-ce/gpui/OXIDELAB_PATCHES.md).
 
 ## Decide The Layer First
 
-Change application code when the behavior belongs to OxideTerm navigation, modal ownership, settings, terminal UX, or a product-specific view. Change shared UI code when the primitive is owned by `oxideterm-gpui-ui`.
+Change application code when the behavior belongs to OxideLab navigation, modal ownership, settings, terminal UX, or a product-specific view. Change shared UI code when the primitive is owned by `oxideterm-gpui-ui`.
 
 Consider a local GPUI patch only when all of the following are true:
 
@@ -29,12 +29,12 @@ Do not copy unrelated Zed application code into product fixes. A framework refre
 ## Vendor Rules
 
 - Preserve the six local package paths and root `[patch.crates-io]` mappings recorded by the baseline file. Do not treat a downloaded research sample as the complete dependency graph.
-- Record every intentional OxideTerm framework delta in `OXIDETERM_PATCHES.md`.
+- Record every intentional OxideLab framework delta in `OXIDELAB_PATCHES.md`.
 - Refresh from checksum-verified registry archives with the recorded `package.metadata.gpui-pre` Zed revision. Keep the remaining dependencies registry-resolved; do not replay the old 18-directory CE layout or a monolithic diff.
 - Keep renderer changes platform-specific: Windows uses Direct3D 11, macOS uses Metal, and Linux uses WGPU with separate Wayland and X11 windowing paths.
-- Prefer an upstream equivalent when it satisfies the complete contract. Preserve GPUI-CE provenance and its root license for carried community code; do not silently drop an OxideTerm delta.
+- Prefer an upstream equivalent when it satisfies the complete contract. Preserve GPUI-CE provenance and its root license for carried community code; do not silently drop an OxideLab delta.
 
-Every intentional local framework change needs an English modification notice near the affected source and a semantic entry in `OXIDETERM_PATCHES.md`. The ledger records behavior rather than fragile line numbers so the change survives audited upstream refreshes.
+Every intentional local framework change needs an English modification notice near the affected source and a semantic entry in `OXIDELAB_PATCHES.md`. The ledger records behavior rather than fragile line numbers so the change survives audited upstream refreshes.
 
 ## Change Workflow
 

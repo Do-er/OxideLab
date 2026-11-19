@@ -76,8 +76,8 @@ Producer completion, parser completion and final snapshot readiness are recorded
 Run the current benchmark sequentially with the repository-pinned toolchain and no other builds running. The linked September report records its original toolchain and measurements; newer runs should record their own commit and environment:
 
 ```sh
-OXIDETERM_SSH_BENCH_MODE=sync cargo test --release -p oxideterm-terminal ssh_background_performance --lib -- --ignored --nocapture
-OXIDETERM_SSH_BENCH_MODE=worker cargo test --release -p oxideterm-terminal ssh_background_performance --lib -- --ignored --nocapture
+OXIDELAB_SSH_BENCH_MODE=sync cargo test --release -p oxideterm-terminal ssh_background_performance --lib -- --ignored --nocapture
+OXIDELAB_SSH_BENCH_MODE=worker cargo test --release -p oxideterm-terminal ssh_background_performance --lib -- --ignored --nocapture
 ```
 
 Results and raw samples are recorded in [the benchmark report](benchmarks/ssh-background-2026-09-11.md).

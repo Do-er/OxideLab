@@ -17,7 +17,7 @@ cargo run
 If rendering is unavailable on the current machine, use the supported compatibility profile:
 
 ```sh
-OXIDETERM_RENDER_PROFILE=compatibility target/debug/oxideterm-native
+OXIDELAB_RENDER_PROFILE=compatibility target/debug/oxideterm-native
 ```
 
 The compatibility profile is a diagnostic tool, not a renderer fix. Record whether a bug changes under it, then investigate the renderer or platform boundary with that evidence.
@@ -62,13 +62,13 @@ Linux packaging and the main workspace CI job use Ubuntu 22.04. That workspace j
 
 ### Nix and Git Dependency Hashes
 
-When building via Nix (`nix build .#oxideterm -L --show-trace`) or Nix Flake checks (`nix flake check -L`), `rustPlatform.buildRustPackage` builds inside an isolated sandbox and requires fixed-output hashes in [`nix/package.nix`](../../nix/package.nix) for Git dependencies such as `russh`. RDP/VNC engines are built in the separate `oxideterm-plugins` repository. Standard crates from crates.io do not need entries in `cargoLock.outputHashes` because their checksums are already recorded in `Cargo.lock`.
+When building via Nix (`nix build .#oxidelab -L --show-trace`) or Nix Flake checks (`nix flake check -L`), `rustPlatform.buildRustPackage` builds inside an isolated sandbox and requires fixed-output hashes in [`nix/package.nix`](../../nix/package.nix) for Git dependencies such as `russh`. RDP/VNC engines are built in the separate `oxideterm-plugins` repository. Standard crates from crates.io do not need entries in `cargoLock.outputHashes` because their checksums are already recorded in `Cargo.lock`.
 
 Whenever adding or bumping a Git dependency in `Cargo.toml`:
 1. Update `Cargo.toml` and update `Cargo.lock` (`cargo check` or `cargo update -p <crate>`).
-2. Run `nix build .#oxideterm -L --show-trace`.
+2. Run `nix build .#oxidelab -L --show-trace`.
 3. If a hash mismatch error occurs, verify the locked Git revision in `Cargo.lock`, then copy the `got:` SHA-256 value into `nix/package.nix` under `cargoLock.outputHashes`.
-4. Re-run `nix build .#oxideterm -L --show-trace` and `nix flake check -L` to confirm the package builds cleanly.
+4. Re-run `nix build .#oxidelab -L --show-trace` and `nix flake check -L` to confirm the package builds cleanly.
 
 For detailed documentation, see [`nix/README.md`](../../nix/README.md).
 

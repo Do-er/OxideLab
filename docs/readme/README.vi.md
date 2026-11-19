@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideTerm: các máy chủ của bạn, một không gian làm việc" width="920">
+<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab: các máy chủ của bạn, một không gian làm việc" width="920">
 
-# ⚡ OxideTerm
+# ⚡ OxideLab
 
 **Trình khách SSH miễn phí, chạy trực tiếp trên hệ điều hành, kết hợp không gian làm việc cho hoạt động từ xa và trợ lý AI dùng khóa của riêng bạn.**
 
@@ -27,7 +27,7 @@ Không cần tài khoản. Không cần đăng ký thuê bao. Không thu thập 
 
 ## Bắt đầu nhanh
 
-1. **Cài đặt OxideTerm.** Tải gói cài đặt từ [bản phát hành mới nhất](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); hướng dẫn cho từng nền tảng nằm trong phần [Cài đặt](#install) bên dưới.
+1. **Cài đặt OxideLab.** Tải gói cài đặt từ [bản phát hành mới nhất](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); hướng dẫn cho từng nền tảng nằm trong phần [Cài đặt](#install) bên dưới.
 2. **Thêm máy chủ.** Mở Trình quản lý phiên và tạo kết nối SSH hoặc nhập máy chủ từ `~/.ssh/config`.
 3. **Kết nối.** Mở một terminal. Khóa máy chủ được đối chiếu với `~/.ssh/known_hosts`.
 4. **Sử dụng các phần còn lại của không gian làm việc.** Mở SFTP, chuyển tiếp cổng hoặc trình biên tập tích hợp trên cùng một nút. Theo mặc định, các thành phần này dùng chung một kết nối SSH.
@@ -55,7 +55,7 @@ Xem [tài liệu](https://oxideterm.app) để tìm hiểu ứng dụng qua hư�
 
 ---
 
-## Vì sao chọn OxideTerm
+## Vì sao chọn OxideLab
 
 - **Miễn phí, ưu tiên sử dụng cục bộ.** Không tài khoản, không thuê bao, không thu thập dữ liệu đo từ xa. Bạn luôn kiểm soát các kết nối và dữ liệu vận hành của mình.
 - **Một không gian làm việc cho mỗi máy chủ.** Terminal, SFTP, chuyển tiếp cổng, RDP/VNC, trình biên tập, giám sát và AI cùng gắn vào một nút, thay vì hoạt động như những công cụ rời rạc.
@@ -75,7 +75,7 @@ Xem [tài liệu](https://oxideterm.app) để tìm hiểu ứng dụng qua hư�
 | macOS | 318.7 MB | 81.3 MB | Khoảng 74% |
 | Windows | 182.4 MB | 23.5 MB | Khoảng 87% |
 
-Tổng bộ nhớ của phiên bản cũ bao gồm OxideTerm và các tiến trình WebView liên quan. Phiên bản mới không còn cần những tiến trình trình duyệt đó.
+Tổng bộ nhớ của phiên bản cũ bao gồm OxideLab và các tiến trình WebView liên quan. Phiên bản mới không còn cần những tiến trình trình duyệt đó.
 
 ![So sánh bộ nhớ khi không hoạt động bằng ảnh chụp tiến trình hệ thống: Tauri 1.x và bản 2.0 chạy trực tiếp trên hệ điều hành](../../docs/screenshots/oxideterm-memory-comparison.png)
 
@@ -95,7 +95,7 @@ Tổng bộ nhớ của phiên bản cũ bao gồm OxideTerm và các tiến tr�
 <summary><b>Xem OxideSens mở terminal từ một yêu cầu bằng ngôn ngữ tự nhiên</b></summary>
 
 <a href="../../docs/media/ai-terminal-demo.mp4">
-  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens mở terminal bên trong OxideTerm" width="720">
+  <img src="../../docs/media/ai-terminal-demo.gif" alt="OxideSens mở terminal bên trong OxideLab" width="720">
 </a>
 
 </details>
@@ -118,7 +118,7 @@ OxideSens là trợ lý tùy chọn có thể xem xét các phiên đang hoạt 
 <a id="plugins"></a>
 ## Plugin
 
-OxideTerm hỗ trợ ba hình thức plugin:
+OxideLab hỗ trợ ba hình thức plugin:
 
 | Loại | Cách chạy | Ranh giới |
 |---|---|---|
@@ -145,7 +145,7 @@ Plugin ESM cũ của Tauri (1.x) có thể xuất hiện trong danh sách nhưng
 | **Plugin** | Xem [Plugin](#plugins) |
 | **Dữ liệu đo từ xa** | Không thu thập |
 
-**Sử dụng hợp pháp.** OxideTerm được cấp phép GPL-3.0-only, không có hạn chế bổ sung. Chỉ truy cập hệ thống, mạng và thiết bị mà bạn sở hữu hoặc được cho phép truy cập một cách rõ ràng, đồng thời tuân thủ pháp luật hiện hành. Không dùng OxideTerm để truy cập trái phép, làm gián đoạn dịch vụ hoặc vượt qua cơ chế kiểm soát truy cập.
+**Sử dụng hợp pháp.** OxideLab được cấp phép GPL-3.0-only, không có hạn chế bổ sung. Chỉ truy cập hệ thống, mạng và thiết bị mà bạn sở hữu hoặc được cho phép truy cập một cách rõ ràng, đồng thời tuân thủ pháp luật hiện hành. Không dùng OxideLab để truy cập trái phép, làm gián đoạn dịch vụ hoặc vượt qua cơ chế kiểm soát truy cập.
 
 ---
 
@@ -155,9 +155,9 @@ Những điều bạn nên biết trước khi cài đặt:
 
 - Chỉ dành cho máy tính (macOS, Windows, Linux). Không có ứng dụng di động.
 - Dự án phát triển nhanh và phát hành thường xuyên. Xem [lịch sử thay đổi](../../.github/release-notes/stable-changelog.md) và [các sự cố đang mở](https://github.com/AnalyseDeCircuit/oxideterm/issues).
-- Kiểm tra hoạt động và ghi lại phiên cần được bật chủ động, và chỉ phản ánh những gì chính OxideTerm có thể quan sát.
+- Kiểm tra hoạt động và ghi lại phiên cần được bật chủ động, và chỉ phản ánh những gì chính OxideLab có thể quan sát.
 - Plugin dạng tiến trình không được hệ điều hành cô lập.
-- Nếu bộ kết xuất không hoạt động trên máy của bạn, hãy thử cấu hình tương thích: `OXIDETERM_RENDER_PROFILE=compatibility`.
+- Nếu bộ kết xuất không hoạt động trên máy của bạn, hãy thử cấu hình tương thích: `OXIDELAB_RENDER_PROFILE=compatibility`.
 
 ---
 
@@ -174,7 +174,7 @@ Những điều bạn nên biết trước khi cài đặt:
 cargo run
 
 # If the renderer fails on your machine
-OXIDETERM_RENDER_PROFILE=compatibility cargo run
+OXIDELAB_RENDER_PROFILE=compatibility cargo run
 
 # Build the headless CLI companion
 ./scripts/build/build-cli.sh
@@ -183,7 +183,7 @@ OXIDETERM_RENDER_PROFILE=compatibility cargo run
 ./scripts/build/build-agent.sh
 ```
 
-Với Nix: `nix build .#oxideterm`, `nix run .#oxideterm` hoặc `nix develop`.
+Với Nix: `nix build .#oxidelab`, `nix run .#oxidelab` hoặc `nix develop`.
 
 Các tệp thực thi CLI được tạo tại `crates/oxideterm-gpui-app/resources/cli-bin/<target-triple>/oxideterm`.
 
@@ -192,7 +192,7 @@ Các tệp thực thi CLI được tạo tại `crates/oxideterm-gpui-app/resour
 <details>
 <summary><b>Giao diện dòng lệnh</b></summary>
 
-CLI `oxideterm` không có giao diện đồ họa hoạt động mà không cần khởi chạy ứng dụng, phù hợp cho tự động hóa, CI và chẩn đoán. CLI hỗ trợ cài đặt, kết nối, chuyển tiếp cổng, plugin, lệnh nhanh, bí mật, gói di động, chẩn đoán, báo cáo, kế hoạch theo lô, sao lưu và đồng bộ đám mây.
+CLI `oxidelab` không có giao diện đồ họa hoạt động mà không cần khởi chạy ứng dụng, phù hợp cho tự động hóa, CI và chẩn đoán. CLI hỗ trợ cài đặt, kết nối, chuyển tiếp cổng, plugin, lệnh nhanh, bí mật, gói di động, chẩn đoán, báo cáo, kế hoạch theo lô, sao lưu và đồng bộ đám mây.
 
 ```bash
 cargo run -p oxideterm-cli -- doctor --strict
@@ -230,7 +230,7 @@ Giao diện và phần xử lý terminal/SSH dùng chung một tiến trình Rus
 └─────────────────────────────────────────────────┘
 ```
 
-| Khía cạnh | Cách tiếp cận kèm trình duyệt | OxideTerm |
+| Khía cạnh | Cách tiếp cận kèm trình duyệt | OxideLab |
 |---|---|---|
 | Kết xuất | Bộ máy trình duyệt và bố cục web | GPUI trên bề mặt GPU |
 | Luồng dữ liệu terminal | WebSocket → vòng lặp sự kiện JS → xterm.js | Đầu vào Rust → `TerminalState` → kết xuất GPUI |
@@ -291,7 +291,7 @@ Kiểm tra bản tải xuống bằng tệp `sha256sums.txt` trên trang phát h
 Nếu Gatekeeper chặn ứng dụng, hãy xóa cờ cách ly:
 
 ```bash
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -302,13 +302,13 @@ Nếu SmartScreen hiển thị cảnh báo, chọn **Thông tin thêm → Vẫn 
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian / Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 
 # Fedora / RHEL-compatible
-sudo dnf install ./OxideTerm_*_linux_*.rpm
+sudo dnf install ./OxideLab_*_linux_*.rpm
 
 # Nix; updates are managed by Nix
 nix run github:AnalyseDeCircuit/oxideterm
@@ -328,15 +328,15 @@ Báo cáo lỗi hữu ích nhất khi kèm gói chẩn đoán đã che dữ li�
 cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 ```
 
-Lỗi có thể tái hiện và lỗi hồi quy được ưu tiên. Đề xuất tính năng được xem xét theo phạm vi, mức độ an toàn và sự phù hợp với định hướng không gian làm việc cho máy chủ từ xa của OxideTerm. Nếu OxideTerm giúp ích cho công việc của bạn, một lượt gắn sao trên GitHub, báo cáo lỗi có thể tái hiện, sửa bản dịch hoặc một plugin đều góp phần duy trì sự phát triển của dự án.
+Lỗi có thể tái hiện và lỗi hồi quy được ưu tiên. Đề xuất tính năng được xem xét theo phạm vi, mức độ an toàn và sự phù hợp với định hướng không gian làm việc cho máy chủ từ xa của OxideLab. Nếu OxideLab giúp ích cho công việc của bạn, một lượt gắn sao trên GitHub, báo cáo lỗi có thể tái hiện, sửa bản dịch hoặc một plugin đều góp phần duy trì sự phát triển của dự án.
 
 ### Người đóng góp
 
-Cảm ơn tất cả những người giúp OxideTerm ngày càng tốt hơn.
+Cảm ơn tất cả những người giúp OxideLab ngày càng tốt hơn.
 
 <p align="center">
   <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Những người đóng góp cho OxideTerm">
+    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Những người đóng góp cho OxideLab">
   </a>
 </p>
 

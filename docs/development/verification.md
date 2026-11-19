@@ -27,7 +27,7 @@ Complete a coherent set of implementation, caller, and test changes before check
 | Windows framework code | `cargo check -p gpui-pre-windows` and `cargo check -p oxideterm-gpui-app` on Windows | IME, pointer capture, cursor recovery, titlebar, and Direct3D behavior |
 | Linux framework code | Relevant Linux crate and application checks | Both affected compositor paths: Wayland and/or X11 |
 | Repository scripts or workflows | The matching script test module | Dispatch only the workflow needed by the change |
-| Git dependencies, Nix package, or flake | `nix build .#oxideterm -L --show-trace` and `nix flake check -L` | Confirm `result/bin/oxideterm` builds and runs |
+| Git dependencies, Nix package, or flake | `nix build .#oxidelab -L --show-trace` and `nix flake check -L` | Confirm `result/bin/oxidelab` builds and runs |
 | Documentation only | Relative links, referenced paths, locale/route parity, and `git diff --check`; build the docs website when changed | Inspect changed website pages; no Rust build |
 
 ## Selecting The Scope
@@ -92,4 +92,4 @@ CI uses the following execution policy:
 
 The required checks keep the names `Rust workspace (check + fmt + test)` and `i18n completeness`. The Rust workflow still starts for documentation PRs and completes its scope step instead of omitting a required status through a workflow-level path filter. PR scope is determined from the checked-out merge commit against its first parent, with both parents fetched. Deleted paths and both sides of renames participate; a failed diff fails the job rather than skipping validation.
 
-The independent [Nix Package workflow](../../.github/workflows/nix-package.yml) runs `nix build .#oxideterm -L --show-trace` and `nix flake check -L` with a 90-minute timeout. It runs automatically on ready PRs when Nix expressions, the flake lock, Cargo manifests, the Cargo lock, or the workflow itself change. Run it manually before a release or when direct pushes or other changes need Nix verification. See the [Nix packaging guide](../../nix/README.md#package-verification) for the trigger paths and manual workflow.
+The independent [Nix Package workflow](../../.github/workflows/nix-package.yml) runs `nix build .#oxidelab -L --show-trace` and `nix flake check -L` with a 90-minute timeout. It runs automatically on ready PRs when Nix expressions, the flake lock, Cargo manifests, the Cargo lock, or the workflow itself change. Run it manually before a release or when direct pushes or other changes need Nix verification. See the [Nix packaging guide](../../nix/README.md#package-verification) for the trigger paths and manual workflow.
