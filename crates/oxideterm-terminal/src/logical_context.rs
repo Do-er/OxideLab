@@ -155,7 +155,7 @@ mod tests {
     fn unchanged_wrapped_context_reuses_text_after_cursor_movement() {
         let mut terminal = TerminalSession::recording_playback(10, 4, Default::default(), 100);
         terminal.feed_recording_output(b"'abcdefghijklmnopqrstuvwx'\r\nDONE");
-        let before = terminal.snapshot_consuming_damage();
+        let before = terminal.snapshot();
         let unchanged = terminal.snapshot_incremental(&before);
         assert!(std::sync::Arc::ptr_eq(
             &before.logical_context[0].text,
@@ -178,7 +178,7 @@ mod tests {
     fn scrolling_reuses_full_text_and_releases_it_with_the_last_snapshot() {
         let mut terminal = TerminalSession::recording_playback(10, 4, Default::default(), 100);
         terminal.feed_recording_output(b"'abcdefghijklmnopqrstuvwx0123456789'\r\nDONE\r\nEND");
-        let mut previous = terminal.snapshot_consuming_damage();
+        let mut previous = terminal.snapshot();
         let weak = Arc::downgrade(&previous.logical_context[0].text);
         let scrolled = terminal.scroll_lines_snapshot_incremental(1, &previous);
         assert!(Arc::ptr_eq(

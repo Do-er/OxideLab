@@ -1,22 +1,22 @@
 # WSLENV translates this owned Windows directory; no drive or mount root is assumed.
-directory=$OXIDETERM_SHELL_DIR
+directory=$OXIDELAB_SHELL_DIR
 shell=${SHELL:-/bin/sh}
-export OXIDETERM_VIM_INTEGRATION="$directory/oxideterm-free-type.vim"
-export OXIDETERM_EMACS_INTEGRATION="$directory/oxideterm-free-type.el"
+export OXIDELAB_VIM_INTEGRATION="$directory/oxidelab-free-type.vim"
+export OXIDELAB_EMACS_INTEGRATION="$directory/oxidelab-free-type.el"
 case "${shell##*/}" in
     bash)
         exec "$shell" --noprofile --rcfile "$directory/bashrc" -i
         ;;
     zsh)
-        export OXIDETERM_USER_ZDOTDIR="${ZDOTDIR:-$HOME}"
+        export OXIDELAB_USER_ZDOTDIR="${ZDOTDIR:-$HOME}"
         export ZDOTDIR="$directory"
         exec "$shell" -i
         ;;
     fish)
         if [ "$1" = 1 ]; then
-            exec "$shell" --login --init-command 'source "$OXIDETERM_SHELL_DIR/fish.fish"'
+            exec "$shell" --login --init-command 'source "$OXIDELAB_SHELL_DIR/fish.fish"'
         else
-            exec "$shell" --no-config --init-command 'source "$OXIDETERM_SHELL_DIR/fish.fish"'
+            exec "$shell" --no-config --init-command 'source "$OXIDELAB_SHELL_DIR/fish.fish"'
         fi
         ;;
     nu)
@@ -28,9 +28,9 @@ case "${shell##*/}" in
         ;;
     pwsh|powershell)
         if [ "$1" = 1 ]; then
-            exec "$shell" -NoLogo -NoExit -Command '. "$env:OXIDETERM_SHELL_DIR/profile.ps1"'
+            exec "$shell" -NoLogo -NoExit -Command '. "$env:OXIDELAB_SHELL_DIR/profile.ps1"'
         else
-            exec "$shell" -NoLogo -NoExit -NoProfile -Command '. "$env:OXIDETERM_SHELL_DIR/profile.ps1"'
+            exec "$shell" -NoLogo -NoExit -NoProfile -Command '. "$env:OXIDELAB_SHELL_DIR/profile.ps1"'
         fi
         ;;
     *)

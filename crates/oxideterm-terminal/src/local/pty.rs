@@ -1918,7 +1918,7 @@ mod incremental_snapshot_tests {
             colors[0].fg, colors[2].fg,
             "decoration glyphs bypass contrast adjustment"
         );
-        assert_eq!(colors[2].fg, crate::color::OXIDETERM_DARK_THEME.ansi[7]);
+        assert_eq!(colors[2].fg, crate::color::OXIDELAB_DARK_THEME.ansi[7]);
         assert_eq!(colors[12].fg, TerminalColor::rgb(1, 2, 3));
         let linked = &snapshot.lines[1].cells;
         assert_eq!(snapshot.lines[1].text().trim_end(), "ABe\u{301}CDEF");

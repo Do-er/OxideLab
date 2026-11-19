@@ -28,16 +28,16 @@ fn benchmark_privilege_prompt_stream(criterion: &mut Criterion) {
     let workloads = [
         (
             "plain",
-            repeated_corpus(b"OxideTerm prompt scanner plain text 0123456789\r\n"),
+            repeated_corpus(b"OxideLab prompt scanner plain text 0123456789\r\n"),
         ),
         (
             "ansi",
-            repeated_corpus(b"\x1b[1;38;2;72;183;255mOxideTerm ANSI workload\x1b[0m\r\n"),
+            repeated_corpus(b"\x1b[1;38;2;72;183;255mOxideLab ANSI workload\x1b[0m\r\n"),
         ),
         (
             "unicode",
             repeated_corpus(
-                "OxideTerm Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀\r\n".as_bytes(),
+                "OxideLab Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀\r\n".as_bytes(),
             ),
         ),
         (

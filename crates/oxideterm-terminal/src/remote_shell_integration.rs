@@ -10,10 +10,10 @@ use crate::{
 
 // Older clients must not reinstall command hooks that run in unmarked sessions.
 pub const REMOTE_SHELL_INTEGRATION_VERSION: u32 = 7;
-pub const REMOTE_SHELL_INTEGRATION_RELATIVE_DIR: &str = ".oxideterm/shell-integration";
+pub const REMOTE_SHELL_INTEGRATION_RELATIVE_DIR: &str = ".oxidelab/shell-integration";
 
-const MANAGED_BLOCK_START: &str = ">>> OxideTerm remote shell integration >>>";
-const MANAGED_BLOCK_END: &str = "<<< OxideTerm remote shell integration <<<";
+const MANAGED_BLOCK_START: &str = ">>> OxideLab remote shell integration >>>";
+const MANAGED_BLOCK_END: &str = "<<< OxideLab remote shell integration <<<";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RemoteShellKind {
@@ -193,7 +193,7 @@ pub async fn install_remote_shell_integration(
         return Err(RemoteShellIntegrationError::NewerVersion);
     }
     let layout = integration_layout(sftp.home(), remote_env)?;
-    ensure_remote_directory(sftp, &join_remote(&layout.home, ".oxideterm")).await?;
+    ensure_remote_directory(sftp, &join_remote(&layout.home, ".oxidelab")).await?;
     ensure_remote_directory(sftp, &layout.integration_directory).await?;
 
     for (name, content) in integration_files() {
@@ -230,7 +230,7 @@ pub async fn install_remote_shell_integration(
     inspect_remote_shell_integration(sftp, remote_env).await
 }
 
-/// Removes only OxideTerm's marked startup block and optionally its owned files.
+/// Removes only OxideLab's marked startup block and optionally its owned files.
 pub async fn remove_remote_shell_integration(
     sftp: &SftpSession,
     remote_env: Option<&RemoteEnvInfo>,
@@ -326,8 +326,8 @@ fn integration_versions(content: &str) -> impl Iterator<Item = u32> + '_ {
     content.lines().filter_map(|line| {
         let line = line.trim();
         let version = line
-            .strip_prefix("# oxideterm-shell-integration-version: ")
-            .or_else(|| line.strip_prefix("# OxideTerm remote shell integration v"))
+            .strip_prefix("# oxidelab-shell-integration-version: ")
+            .or_else(|| line.strip_prefix("# OxideLab remote shell integration v"))
             .or_else(|| line.strip_prefix("Version: "));
         version.and_then(|version| version.trim_end_matches('.').trim().parse::<u32>().ok())
     })
@@ -431,8 +431,8 @@ fn integration_files() -> [(&'static str, Cow<'static, str>); 8] {
         ("fish.fish", FISH_INTEGRATION),
         ("nushell.nu", NUSHELL_INTEGRATION),
         ("powershell.ps1", POWERSHELL_INTEGRATION),
-        ("oxideterm-free-type.vim", VIM_FREE_TYPE_INTEGRATION_SOURCE),
-        ("oxideterm-free-type.el", EMACS_FREE_TYPE_INTEGRATION_SOURCE),
+        ("oxidelab-free-type.vim", VIM_FREE_TYPE_INTEGRATION_SOURCE),
+        ("oxidelab-free-type.el", EMACS_FREE_TYPE_INTEGRATION_SOURCE),
     ]
     .map(|(name, source)| (name, normalize_integration_script(source)))
 }
@@ -440,23 +440,23 @@ fn integration_files() -> [(&'static str, Cow<'static, str>); 8] {
 fn startup_reference(shell: RemoteShellKind) -> String {
     let reference = match shell {
         RemoteShellKind::Bash => {
-            r#"[ -r "$HOME/.oxideterm/shell-integration/bash.sh" ] && . "$HOME/.oxideterm/shell-integration/bash.sh""#
+            r#"[ -r "$HOME/.oxidelab/shell-integration/bash.sh" ] && . "$HOME/.oxidelab/shell-integration/bash.sh""#
         }
         RemoteShellKind::Zsh => {
-            r#"[ -r "$HOME/.oxideterm/shell-integration/zsh.zsh" ] && source "$HOME/.oxideterm/shell-integration/zsh.zsh""#
+            r#"[ -r "$HOME/.oxidelab/shell-integration/zsh.zsh" ] && source "$HOME/.oxidelab/shell-integration/zsh.zsh""#
         }
         RemoteShellKind::Fish => {
-            r#"test -r "$HOME/.oxideterm/shell-integration/fish.fish"; and source "$HOME/.oxideterm/shell-integration/fish.fish""#
+            r#"test -r "$HOME/.oxidelab/shell-integration/fish.fish"; and source "$HOME/.oxidelab/shell-integration/fish.fish""#
         }
         RemoteShellKind::Nushell => {
-            r#"source ($nu.home-path | path join '.oxideterm' 'shell-integration' 'nushell.nu')"#
+            r#"source ($nu.home-path | path join '.oxidelab' 'shell-integration' 'nushell.nu')"#
         }
         RemoteShellKind::PowerShell => {
-            r#". (Join-Path $HOME '.oxideterm/shell-integration/powershell.ps1')"#
+            r#". (Join-Path $HOME '.oxidelab/shell-integration/powershell.ps1')"#
         }
     };
     format!(
-        "# {MANAGED_BLOCK_START}\n# oxideterm-shell-integration-version: {REMOTE_SHELL_INTEGRATION_VERSION}\n{reference}\n# {MANAGED_BLOCK_END}"
+        "# {MANAGED_BLOCK_START}\n# oxidelab-shell-integration-version: {REMOTE_SHELL_INTEGRATION_VERSION}\n{reference}\n# {MANAGED_BLOCK_END}"
     )
 }
 
@@ -588,7 +588,7 @@ fn remote_parent(path: &str) -> Option<String> {
     (!parent.is_empty() && !parent.ends_with(':')).then(|| parent.to_string())
 }
 
-const REMOTE_INTEGRATION_README: &str = r#"OxideTerm Remote Shell Integration
+const REMOTE_INTEGRATION_README: &str = r#"OxideLab Remote Shell Integration
 =====================================
 
 Version: 7
@@ -596,17 +596,17 @@ Directory protocol: OSC 7
 Command boundary protocol: OSC 133
 Private editor protocol: OSC 7719 v3
 
-These hooks report the working directory and host via OSC 7. OxideTerm
+These hooks report the working directory and host via OSC 7. OxideLab
 enables command boundary markers only when the server accepts the per-channel
 capability marker. Fish 4 and Nushell can also emit native command markers
-independently of OxideTerm. These signals are not an authentication boundary.
+independently of OxideLab. These signals are not an authentication boundary.
 
-The active shell startup file contains a clearly marked OxideTerm reference.
-Use OxideTerm Settings > Terminal > Awareness & Integration to inspect, repair,
+The active shell startup file contains a clearly marked OxideLab reference.
+Use OxideLab Settings > Terminal > Awareness & Integration to inspect, repair,
 or remove the reference and these files.
 
 The same directory contains optional Free Type Mode adapters for Vim, Neovim,
-and Emacs. Their paths are exported only when the SSH server accepts OxideTerm's
+and Emacs. Their paths are exported only when the SSH server accepts OxideLab's
 per-channel capability marker. The adapters suppress private OSC inside tmux,
 GNU screen, and Zellij because one shared pane cannot isolate output by attached
 terminal client. Load the matching adapter explicitly from your editor
@@ -614,14 +614,14 @@ configuration to enable full-screen editor integration.
 "#;
 
 const BASH_INTEGRATION: &str = concat!(
-    r#"# OxideTerm remote shell integration v7.
+    r#"# OxideLab remote shell integration v7.
 # Keep cwd tracking available even if the server rejects the session marker.
-if [ -n "${LC_OXIDETERM_SESSION:-}" ] || [ "${OXIDETERM_PRIVATE_OSC:-}" = 1 ]; then
-  export OXIDETERM_PRIVATE_OSC=1
-  export OXIDETERM_VIM_INTEGRATION="$HOME/.oxideterm/shell-integration/oxideterm-free-type.vim"
-  export OXIDETERM_EMACS_INTEGRATION="$HOME/.oxideterm/shell-integration/oxideterm-free-type.el"
+if [ -n "${LC_OXIDELAB_SESSION:-}" ] || [ "${OXIDELAB_PRIVATE_OSC:-}" = 1 ]; then
+  export OXIDELAB_PRIVATE_OSC=1
+  export OXIDELAB_VIM_INTEGRATION="$HOME/.oxidelab/shell-integration/oxidelab-free-type.vim"
+  export OXIDELAB_EMACS_INTEGRATION="$HOME/.oxidelab/shell-integration/oxidelab-free-type.el"
 fi
-unset LC_OXIDETERM_SESSION
+unset LC_OXIDELAB_SESSION
 if [[ ${__oxideterm_cwd_hooks:-0} != 1 ]]; then
 __oxideterm_pct() {
   printf '%s' "$1" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g'
@@ -664,39 +664,39 @@ fi
 unset __oxideterm_hook_name
 __oxideterm_cwd_hooks=1
 fi
-[ "${OXIDETERM_PRIVATE_OSC:-}" = 1 ] || return 0
+[ "${OXIDELAB_PRIVATE_OSC:-}" = 1 ] || return 0
 "#,
     include_str!("shell_integration/bash.sh")
 );
 
 const ZSH_INTEGRATION: &str = concat!(
-    "# OxideTerm remote shell integration v7.\n",
+    "# OxideLab remote shell integration v7.\n",
     "# Keep cwd tracking available even if the server rejects the session marker.\n",
-    "if [ -n \"${LC_OXIDETERM_SESSION:-}\" ] || [ \"${OXIDETERM_PRIVATE_OSC:-}\" = 1 ]; then\n  export OXIDETERM_PRIVATE_OSC=1\n  export OXIDETERM_VIM_INTEGRATION=\"$HOME/.oxideterm/shell-integration/oxideterm-free-type.vim\"\n  export OXIDETERM_EMACS_INTEGRATION=\"$HOME/.oxideterm/shell-integration/oxideterm-free-type.el\"\nfi\n",
-    "unset LC_OXIDETERM_SESSION\n",
+    "if [ -n \"${LC_OXIDELAB_SESSION:-}\" ] || [ \"${OXIDELAB_PRIVATE_OSC:-}\" = 1 ]; then\n  export OXIDELAB_PRIVATE_OSC=1\n  export OXIDELAB_VIM_INTEGRATION=\"$HOME/.oxidelab/shell-integration/oxidelab-free-type.vim\"\n  export OXIDELAB_EMACS_INTEGRATION=\"$HOME/.oxidelab/shell-integration/oxidelab-free-type.el\"\nfi\n",
+    "unset LC_OXIDELAB_SESSION\n",
     "__oxideterm_pct() {\n  printf '%s' \"$1\" | od -An -tx1 -v | tr -d ' \\n' | sed 's/../%&/g'\n}\n",
     "__oxideterm_pct_path() {\n  __oxideterm_pct \"$1\" | sed 's|%2f|/|g'\n}\n",
     "__oxideterm_emit_remote_metadata() {\n  __oxideterm_cwd=$(pwd -P 2>/dev/null || pwd 2>/dev/null) || return\n  __oxideterm_host=${HOSTNAME:-$(hostname 2>/dev/null || printf '')}\n  __oxideterm_host=$(printf '%s' \"$__oxideterm_host\" | tr -cd 'A-Za-z0-9._-')\n  [ -n \"$__oxideterm_host\" ] || __oxideterm_host=localhost\n  printf '\\033]7;file://%s%s\\007' \"$__oxideterm_host\" \"$(__oxideterm_pct_path \"$__oxideterm_cwd\")\"\n}\n",
     "autoload -Uz add-zsh-hook\nadd-zsh-hook -d precmd __oxideterm_emit_remote_metadata 2>/dev/null\nadd-zsh-hook precmd __oxideterm_emit_remote_metadata\n",
-    "[ \"${OXIDETERM_PRIVATE_OSC:-}\" = 1 ] || return 0\n",
+    "[ \"${OXIDELAB_PRIVATE_OSC:-}\" = 1 ] || return 0\n",
     include_str!("shell_integration/zsh.zsh"),
 );
 
 const FISH_INTEGRATION: &str = concat!(
-    r#"# OxideTerm remote shell integration v7.
+    r#"# OxideLab remote shell integration v7.
 # Keep cwd tracking available even if the server rejects the session marker.
 set -l __oxideterm_private_session 0
-if set -q LC_OXIDETERM_SESSION; and test -n "$LC_OXIDETERM_SESSION"
+if set -q LC_OXIDELAB_SESSION; and test -n "$LC_OXIDELAB_SESSION"
     set __oxideterm_private_session 1
-else if set -q OXIDETERM_PRIVATE_OSC; and test "$OXIDETERM_PRIVATE_OSC" = 1
+else if set -q OXIDELAB_PRIVATE_OSC; and test "$OXIDELAB_PRIVATE_OSC" = 1
     set __oxideterm_private_session 1
 end
 if test "$__oxideterm_private_session" = 1
-    set -gx OXIDETERM_PRIVATE_OSC 1
-    set -gx OXIDETERM_VIM_INTEGRATION "$HOME/.oxideterm/shell-integration/oxideterm-free-type.vim"
-    set -gx OXIDETERM_EMACS_INTEGRATION "$HOME/.oxideterm/shell-integration/oxideterm-free-type.el"
+    set -gx OXIDELAB_PRIVATE_OSC 1
+    set -gx OXIDELAB_VIM_INTEGRATION "$HOME/.oxidelab/shell-integration/oxidelab-free-type.vim"
+    set -gx OXIDELAB_EMACS_INTEGRATION "$HOME/.oxidelab/shell-integration/oxidelab-free-type.el"
 end
-set -e LC_OXIDETERM_SESSION
+set -e LC_OXIDELAB_SESSION
 set -e __oxideterm_private_session
 function __oxideterm_pct
     command printf '%s' "$argv[1]" | command od -An -tx1 -v | command tr -d ' \n' | command sed 's/../%&/g'
@@ -712,20 +712,20 @@ function __oxideterm_emit_remote_metadata --on-event fish_prompt
     test -n "$__oxideterm_host"; or set __oxideterm_host localhost
     command printf '\033]7;file://%s%s\007' "$__oxideterm_host" (__oxideterm_pct_path "$__oxideterm_cwd")
 end
-set -q OXIDETERM_PRIVATE_OSC; and test "$OXIDETERM_PRIVATE_OSC" = 1; or return 0
+set -q OXIDELAB_PRIVATE_OSC; and test "$OXIDELAB_PRIVATE_OSC" = 1; or return 0
 "#,
     include_str!("shell_integration/fish.fish")
 );
 
-const NUSHELL_INTEGRATION: &str = r#"# OxideTerm remote shell integration v7.
+const NUSHELL_INTEGRATION: &str = r#"# OxideLab remote shell integration v7.
 # Configure native command markers without changing the user's unmarked shell.
-let __oxideterm_private_session = (($env.LC_OXIDETERM_SESSION? | default '') != '') or (($env.OXIDETERM_PRIVATE_OSC? | default '') == '1')
+let __oxideterm_private_session = (($env.LC_OXIDELAB_SESSION? | default '') != '') or (($env.OXIDELAB_PRIVATE_OSC? | default '') == '1')
 if $__oxideterm_private_session {
-    $env.OXIDETERM_PRIVATE_OSC = '1'
-    $env.OXIDETERM_VIM_INTEGRATION = ($nu.home-path | path join '.oxideterm' 'shell-integration' 'oxideterm-free-type.vim')
-    $env.OXIDETERM_EMACS_INTEGRATION = ($nu.home-path | path join '.oxideterm' 'shell-integration' 'oxideterm-free-type.el')
+    $env.OXIDELAB_PRIVATE_OSC = '1'
+    $env.OXIDELAB_VIM_INTEGRATION = ($nu.home-path | path join '.oxidelab' 'shell-integration' 'oxidelab-free-type.vim')
+    $env.OXIDELAB_EMACS_INTEGRATION = ($nu.home-path | path join '.oxidelab' 'shell-integration' 'oxidelab-free-type.el')
 }
-hide-env --ignore-errors LC_OXIDETERM_SESSION
+hide-env --ignore-errors LC_OXIDELAB_SESSION
 let __oxideterm_integration_type = ($env.config.shell_integration? | describe)
 if ($__oxideterm_integration_type | str starts-with 'record') {
     $env.config.shell_integration.osc7 = true
@@ -736,7 +736,7 @@ if ($__oxideterm_integration_type | str starts-with 'record') {
     # Before 0.94, one setting controls both directory and command markers.
     if $__oxideterm_private_session {
         $env.config.shell_integration = true
-    } else if (not $env.config.shell_integration) and (($env.__OXIDETERM_CWD_HOOK_PID? | default '') != ($nu.pid | into string)) {
+    } else if (not $env.config.shell_integration) and (($env.__OXIDELAB_CWD_HOOK_PID? | default '') != ($nu.pid | into string)) {
         let prior = ($env.config.hooks.pre_prompt? | default [])
         let hooks = if ($prior | describe | str starts-with 'list') { $prior } else { [$prior] }
         $env.config.hooks.pre_prompt = ($hooks | append {||
@@ -746,25 +746,25 @@ if ($__oxideterm_integration_type | str starts-with 'record') {
             let host = if ($hostname | is-empty) { 'localhost' } else { $hostname }
             print -n $"\u{1b}]7;file://($host)($path | url encode)\u{7}"
         })
-        $env.__OXIDETERM_CWD_HOOK_PID = ($nu.pid | into string)
+        $env.__OXIDELAB_CWD_HOOK_PID = ($nu.pid | into string)
     }
 }
 "#;
 
 const POWERSHELL_INTEGRATION: &str = concat!(
-    r#"# OxideTerm remote shell integration v7.
+    r#"# OxideLab remote shell integration v7.
 # Keep cwd tracking available even if the server rejects the session marker.
-if ($env:LC_OXIDETERM_SESSION -or $env:OXIDETERM_PRIVATE_OSC -eq '1') {
-    $env:OXIDETERM_PRIVATE_OSC = '1'
-    $env:OXIDETERM_VIM_INTEGRATION = Join-Path $HOME '.oxideterm/shell-integration/oxideterm-free-type.vim'
-    $env:OXIDETERM_EMACS_INTEGRATION = Join-Path $HOME '.oxideterm/shell-integration/oxideterm-free-type.el'
+if ($env:LC_OXIDELAB_SESSION -or $env:OXIDELAB_PRIVATE_OSC -eq '1') {
+    $env:OXIDELAB_PRIVATE_OSC = '1'
+    $env:OXIDELAB_VIM_INTEGRATION = Join-Path $HOME '.oxidelab/shell-integration/oxidelab-free-type.vim'
+    $env:OXIDELAB_EMACS_INTEGRATION = Join-Path $HOME '.oxidelab/shell-integration/oxidelab-free-type.el'
 }
-Remove-Item Env:LC_OXIDETERM_SESSION -ErrorAction SilentlyContinue
+Remove-Item Env:LC_OXIDELAB_SESSION -ErrorAction SilentlyContinue
 if (-not $global:__oxideterm_shell_integration_v4) {
     $global:__oxideterm_shell_integration_v4 = $true
     $legacyPrompt = Get-Variable -Name __oxideterm_original_prompt -Scope Script -ErrorAction SilentlyContinue
     # Reuse the pre-v3 prompt when a repaired profile is reloaded in place;
-    # chaining the v3 OxideTerm wrapper would recurse through the same variable.
+    # chaining the v3 OxideLab wrapper would recurse through the same variable.
     $script:__oxideterm_v4_original_prompt = if ($global:__oxideterm_shell_integration_v3 -and $legacyPrompt) { $legacyPrompt.Value } elseif (Test-Path Function:\prompt) { (Get-Command prompt).ScriptBlock } else { $null }
     Remove-Variable legacyPrompt -ErrorAction SilentlyContinue
     function global:__oxideterm_pct {
@@ -795,7 +795,7 @@ if (-not $global:__oxideterm_shell_integration_v4) {
     }
 }
 "#,
-    "if ($env:OXIDETERM_PRIVATE_OSC -ne '1') { return }\n",
+    "if ($env:OXIDELAB_PRIVATE_OSC -ne '1') { return }\n",
     include_str!("shell_integration/powershell.ps1")
 );
 
@@ -861,10 +861,10 @@ mod tests {
     fn managed_startup_blocks_preserve_user_content_during_install_upgrade_and_removal() {
         for (content, expected) in [
             (
-                "# oxideterm-shell-integration-version: 4\nsource old",
+                "# oxidelab-shell-integration-version: 4\nsource old",
                 vec![4],
             ),
-            ("# OxideTerm remote shell integration v5.\n", vec![5]),
+            ("# OxideLab remote shell integration v5.\n", vec![5]),
             ("Version: 6\n", vec![6]),
             ("source old\n", vec![]),
         ] {
@@ -875,7 +875,7 @@ mod tests {
         );
         let old = format!("# {MANAGED_BLOCK_START}\nold\n# {MANAGED_BLOCK_END}\n");
         let old_block = format!(
-            "# {MANAGED_BLOCK_START}\n# oxideterm-shell-integration-version: 6\nlegacy source\n# {MANAGED_BLOCK_END}"
+            "# {MANAGED_BLOCK_START}\n# oxidelab-shell-integration-version: 6\nlegacy source\n# {MANAGED_BLOCK_END}"
         );
         for (shell, original, prefix, suffix, removed) in [
             (
@@ -928,8 +928,8 @@ mod tests {
                 "fish.fish",
                 "nushell.nu",
                 "powershell.ps1",
-                "oxideterm-free-type.vim",
-                "oxideterm-free-type.el",
+                "oxidelab-free-type.vim",
+                "oxidelab-free-type.el",
             ]
         );
         for (name, content) in integration_files() {
@@ -937,7 +937,7 @@ mod tests {
                 !content.as_bytes().contains(&b'\r'),
                 "{name} contains a carriage return"
             );
-            if !name.starts_with("oxideterm-free-type") {
+            if !name.starts_with("oxidelab-free-type") {
                 assert_eq!(
                     integration_versions(&content).collect::<Vec<_>>(),
                     vec![REMOTE_SHELL_INTEGRATION_VERSION],
@@ -951,10 +951,10 @@ mod tests {
     fn repair_old_crlf_reference_preserves_surrounding_user_bytes() {
         let original = concat!(
             "export EDITOR=vim\r\n",
-            "# >>> OxideTerm remote shell integration >>>\r\n",
-            "# oxideterm-shell-integration-version: 5\r\n",
+            "# >>> OxideLab remote shell integration >>>\r\n",
+            "# oxidelab-shell-integration-version: 5\r\n",
             "source old\r\n",
-            "# <<< OxideTerm remote shell integration <<<\r\n",
+            "# <<< OxideLab remote shell integration <<<\r\n",
             "printf 'user\\r\\n'\r\n",
         );
         let installed = install_managed_block(original, &startup_reference(RemoteShellKind::Bash));
@@ -962,10 +962,10 @@ mod tests {
             installed,
             concat!(
                 "export EDITOR=vim\r\n",
-                "# >>> OxideTerm remote shell integration >>>\n",
-                "# oxideterm-shell-integration-version: 7\n",
-                "[ -r \"$HOME/.oxideterm/shell-integration/bash.sh\" ] && . \"$HOME/.oxideterm/shell-integration/bash.sh\"\n",
-                "# <<< OxideTerm remote shell integration <<<\n",
+                "# >>> OxideLab remote shell integration >>>\n",
+                "# oxidelab-shell-integration-version: 7\n",
+                "[ -r \"$HOME/.oxidelab/shell-integration/bash.sh\" ] && . \"$HOME/.oxidelab/shell-integration/bash.sh\"\n",
+                "# <<< OxideLab remote shell integration <<<\n",
                 "printf 'user\\r\\n'\r\n",
             )
         );
@@ -978,7 +978,7 @@ mod tests {
                 .all(|version| version < REMOTE_SHELL_INTEGRATION_VERSION)
         );
         assert!(has_newer_integration_version(
-            "# OxideTerm remote shell integration v8.\r\n"
+            "# OxideLab remote shell integration v8.\r\n"
         ));
     }
 
@@ -986,11 +986,11 @@ mod tests {
     fn remote_package_contains_exact_editor_adapter_sources() {
         let files = integration_files();
         assert!(files.contains(&(
-            "oxideterm-free-type.vim",
+            "oxidelab-free-type.vim",
             normalize_integration_script(VIM_FREE_TYPE_INTEGRATION_SOURCE)
         )));
         assert!(files.contains(&(
-            "oxideterm-free-type.el",
+            "oxidelab-free-type.el",
             normalize_integration_script(EMACS_FREE_TYPE_INTEGRATION_SOURCE)
         )));
         assert!(REMOTE_INTEGRATION_README.contains("optional Free Type Mode adapters"));
@@ -1107,8 +1107,8 @@ prompt
                 .arg("-i")
                 .env("HOME", home.path())
                 .env("TERM", "xterm")
-                .env_remove("LC_OXIDETERM_SESSION")
-                .env_remove("OXIDETERM_PRIVATE_OSC")
+                .env_remove("LC_OXIDELAB_SESSION")
+                .env_remove("OXIDELAB_PRIVATE_OSC")
                 .env_remove("PROMPT_COMMAND")
                 .env_remove("PS0")
                 .env("PS1", "fixture> ")
@@ -1116,7 +1116,7 @@ prompt
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped());
             if marked {
-                command.env("LC_OXIDETERM_SESSION", "1");
+                command.env("LC_OXIDELAB_SESSION", "1");
             }
             let mut child = command.spawn().unwrap();
             child
@@ -1136,10 +1136,10 @@ prompt
             };
             assert_eq!(count(b"\x1b]7;file://"), 2, "marked={marked}");
             for (marker, expected) in [
-                (b"\x1b]133;A;aid=oxideterm\x07".as_slice(), 2),
-                (b"\x1b]133;B;aid=oxideterm\x07", 2),
-                (b"\x1b]133;C;aid=oxideterm\x07", 2),
-                (b"\x1b]133;D;1;aid=oxideterm\x07", 1),
+                (b"\x1b]133;A;aid=oxidelab\x07".as_slice(), 2),
+                (b"\x1b]133;B;aid=oxidelab\x07", 2),
+                (b"\x1b]133;C;aid=oxidelab\x07", 2),
+                (b"\x1b]133;D;1;aid=oxidelab\x07", 1),
             ] {
                 assert_eq!(
                     count(marker),
@@ -1154,7 +1154,7 @@ prompt
     #[test]
     fn bash_source_exposes_private_adapters_only_for_marked_sessions() {
         let unmarked_script = format!(
-            "unset LC_OXIDETERM_SESSION OXIDETERM_PRIVATE_OSC OXIDETERM_VIM_INTEGRATION OXIDETERM_EMACS_INTEGRATION\n. /dev/stdin <<'OXIDETERM_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDETERM_INTEGRATION\nprintf '%s|%s|%s' \"${{OXIDETERM_PRIVATE_OSC-}}\" \"${{OXIDETERM_VIM_INTEGRATION-}}\" \"${{LC_OXIDETERM_SESSION-}}\""
+            "unset LC_OXIDELAB_SESSION OXIDELAB_PRIVATE_OSC OXIDELAB_VIM_INTEGRATION OXIDELAB_EMACS_INTEGRATION\n. /dev/stdin <<'OXIDELAB_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDELAB_INTEGRATION\nprintf '%s|%s|%s' \"${{OXIDELAB_PRIVATE_OSC-}}\" \"${{OXIDELAB_VIM_INTEGRATION-}}\" \"${{LC_OXIDELAB_SESSION-}}\""
         );
         let unmarked = std::process::Command::new("bash")
             .args(["--noprofile", "--norc", "-c", &unmarked_script])
@@ -1164,7 +1164,7 @@ prompt
         assert_eq!(String::from_utf8_lossy(&unmarked.stdout), "||");
 
         let marked_script = format!(
-            "HOME=/home/alice\nLC_OXIDETERM_SESSION=1\n. /dev/stdin <<'OXIDETERM_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDETERM_INTEGRATION\nprintf '%s|%s|%s' \"${{OXIDETERM_PRIVATE_OSC-}}\" \"${{OXIDETERM_VIM_INTEGRATION-}}\" \"${{LC_OXIDETERM_SESSION-}}\""
+            "HOME=/home/alice\nLC_OXIDELAB_SESSION=1\n. /dev/stdin <<'OXIDELAB_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDELAB_INTEGRATION\nprintf '%s|%s|%s' \"${{OXIDELAB_PRIVATE_OSC-}}\" \"${{OXIDELAB_VIM_INTEGRATION-}}\" \"${{LC_OXIDELAB_SESSION-}}\""
         );
         let marked = std::process::Command::new("bash")
             .args(["--noprofile", "--norc", "-c", &marked_script])
@@ -1173,7 +1173,7 @@ prompt
         assert!(marked.status.success());
         assert_eq!(
             String::from_utf8_lossy(&marked.stdout),
-            "1|/home/alice/.oxideterm/shell-integration/oxideterm-free-type.vim|"
+            "1|/home/alice/.oxidelab/shell-integration/oxidelab-free-type.vim|"
         );
     }
 
@@ -1181,7 +1181,7 @@ prompt
     #[test]
     fn bash_source_emits_standard_osc7_with_encoded_path() {
         let script = format!(
-            "HOSTNAME='build host'\n. /dev/stdin <<'OXIDETERM_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDETERM_INTEGRATION\ncd /tmp\n__oxideterm_emit_remote_metadata"
+            "HOSTNAME='build host'\n. /dev/stdin <<'OXIDELAB_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDELAB_INTEGRATION\ncd /tmp\n__oxideterm_emit_remote_metadata"
         );
         let output = std::process::Command::new("bash")
             .args(["--noprofile", "--norc", "-c", &script])
@@ -1199,7 +1199,7 @@ prompt
     #[test]
     fn bash_source_keeps_existing_prompt_commands_when_executed() {
         let scalar_script = format!(
-            "PROMPT_COMMAND='existing-command'\n. /dev/stdin <<'OXIDETERM_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDETERM_INTEGRATION\nprintf '%s' \"$PROMPT_COMMAND\""
+            "PROMPT_COMMAND='existing-command'\n. /dev/stdin <<'OXIDELAB_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDELAB_INTEGRATION\nprintf '%s' \"$PROMPT_COMMAND\""
         );
         let scalar = std::process::Command::new("bash")
             .args(["--noprofile", "--norc", "-c", &scalar_script])
@@ -1212,7 +1212,7 @@ prompt
         );
 
         let array_script = format!(
-            "PROMPT_COMMAND=(first-command second-command)\n. /dev/stdin <<'OXIDETERM_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDETERM_INTEGRATION\nprintf '%s\\n' \"${{PROMPT_COMMAND[@]}}\""
+            "PROMPT_COMMAND=(first-command second-command)\n. /dev/stdin <<'OXIDELAB_INTEGRATION'\n{BASH_INTEGRATION}\nOXIDELAB_INTEGRATION\nprintf '%s\\n' \"${{PROMPT_COMMAND[@]}}\""
         );
         let array = std::process::Command::new("bash")
             .args(["--noprofile", "--norc", "-c", &array_script])

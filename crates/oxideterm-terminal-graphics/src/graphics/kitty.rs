@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -328,7 +328,7 @@ mod kitty_tests {
     #[test]
     fn shared_memory_requires_authorization_and_is_unlinked_after_read() {
         use std::os::fd::{AsRawFd, FromRawFd};
-        let name = format!("/oxideterm-kgp-{}", std::process::id());
+        let name = format!("/oxidelab-kgp-{}", std::process::id());
         let c_name = std::ffi::CString::new(name.clone()).unwrap();
         let fd = unsafe {
             libc::shm_open(

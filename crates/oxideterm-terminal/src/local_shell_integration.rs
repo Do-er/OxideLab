@@ -10,8 +10,8 @@ use crate::{
     VIM_FREE_TYPE_INTEGRATION_SOURCE, local_shell::shell_args_for_profile,
 };
 
-const VIM_FREE_TYPE_INTEGRATION_ENV: &str = "OXIDETERM_VIM_INTEGRATION";
-const EMACS_FREE_TYPE_INTEGRATION_ENV: &str = "OXIDETERM_EMACS_INTEGRATION";
+const VIM_FREE_TYPE_INTEGRATION_ENV: &str = "OXIDELAB_VIM_INTEGRATION";
+const EMACS_FREE_TYPE_INTEGRATION_ENV: &str = "OXIDELAB_EMACS_INTEGRATION";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TerminalCwdIntegrationLaunchState {
@@ -121,11 +121,11 @@ pub(crate) fn prepare_local_shell_launch(
 
 fn prepare_editor_integration(env: &mut HashMap<String, String>) -> Result<LocalShellIntegration> {
     let directory = tempfile::Builder::new()
-        .prefix("oxideterm-editor-")
+        .prefix("oxidelab-editor-")
         .tempdir()
         .context("create temporary editor integration directory")?;
-    let vim_path = directory.path().join("oxideterm-free-type.vim");
-    let emacs_path = directory.path().join("oxideterm-free-type.el");
+    let vim_path = directory.path().join("oxidelab-free-type.vim");
+    let emacs_path = directory.path().join("oxidelab-free-type.el");
     write_private_file(
         &vim_path,
         &normalize_integration_script(VIM_FREE_TYPE_INTEGRATION_SOURCE),
@@ -167,7 +167,7 @@ fn prepare_known_shell(
     }
 
     let directory = tempfile::Builder::new()
-        .prefix("oxideterm-shell-")
+        .prefix("oxidelab-shell-")
         .tempdir()
         .context("create temporary shell integration directory")?;
     let args = match shell.id.as_str() {
@@ -335,7 +335,7 @@ fn prepare_wsl(
     default_args: &[String],
 ) -> Result<(Vec<String>, LocalShellIntegration)> {
     let directory = tempfile::Builder::new()
-        .prefix("oxideterm-wsl-")
+        .prefix("oxidelab-wsl-")
         .tempdir()
         .context("create temporary WSL integration directory")?;
     let path = directory.path();
@@ -347,18 +347,18 @@ fn prepare_wsl(
         &normalize_integration_script(include_str!("shell_integration/nushell.nu")),
     )?;
     write_private_file(
-        &path.join("oxideterm-free-type.vim"),
+        &path.join("oxidelab-free-type.vim"),
         &normalize_integration_script(VIM_FREE_TYPE_INTEGRATION_SOURCE),
     )?;
     write_private_file(
-        &path.join("oxideterm-free-type.el"),
+        &path.join("oxidelab-free-type.el"),
         &normalize_integration_script(EMACS_FREE_TYPE_INTEGRATION_SOURCE),
     )?;
     let zshenv = if config.load_profile {
         format!(
-            "typeset -g __oxideterm_user_zdotdir=\"$OXIDETERM_USER_ZDOTDIR\"\n\
+            "typeset -g __oxideterm_user_zdotdir=\"$OXIDELAB_USER_ZDOTDIR\"\n\
              typeset -g __oxideterm_integration_zdotdir=\"$ZDOTDIR\"\n\
-             unset OXIDETERM_USER_ZDOTDIR\n{}\nsetopt RCS",
+             unset OXIDELAB_USER_ZDOTDIR\n{}\nsetopt RCS",
             zsh_source_user_file(".zshenv", false),
         )
     } else {
@@ -378,21 +378,21 @@ fn prepare_wsl(
         ),
     )?;
     env.insert(
-        "OXIDETERM_SHELL_DIR".to_string(),
+        "OXIDELAB_SHELL_DIR".to_string(),
         path.display().to_string(),
     );
     let wslenv = env.entry("WSLENV".to_string()).or_default();
     if !wslenv.is_empty() {
         wslenv.push(':');
     }
-    wslenv.push_str("OXIDETERM_SHELL_DIR/p");
+    wslenv.push_str("OXIDELAB_SHELL_DIR/p");
     let mut args = default_args.to_vec();
     args.extend([
         "--exec".to_string(),
         "/bin/sh".to_string(),
         "-c".to_string(),
         normalize_integration_script(include_str!("shell_integration/wsl.sh")).into_owned(),
-        "oxideterm".to_string(),
+        "oxidelab".to_string(),
         if config.load_profile { "1" } else { "0" }.to_string(),
     ]);
     Ok((
@@ -639,7 +639,7 @@ mod tests {
                 launch
                     .args
                     .iter()
-                    .any(|arg| arg.contains("oxideterm-shell-"))
+                    .any(|arg| arg.contains("oxidelab-shell-"))
                     || matches!(shell_id, "zsh"),
                 "{shell_id}"
             );

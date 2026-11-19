@@ -1,14 +1,14 @@
 # Command hooks and their state belong to this interactive shell.
 [[ $- == *i* ]] || return 0
 # Tag our optional OSC parameters so native integration can own the same cycle.
-__oxideterm_prompt_start='\[\e]133;A;aid=oxideterm\a\]'
-__oxideterm_prompt_end='\[\e]133;B;aid=oxideterm\a\]'
+__oxideterm_prompt_start='\[\e]133;A;aid=oxidelab\a\]'
+__oxideterm_prompt_end='\[\e]133;B;aid=oxidelab\a\]'
 
 __oxideterm_command_end() {
     local result=$?
     __oxideterm_at_prompt=0
     if [[ ${__oxideterm_prompt_seen:-} == 1 ]]; then
-        builtin printf '\033]133;D;%s;aid=oxideterm\007' "$result"
+        builtin printf '\033]133;D;%s;aid=oxidelab\007' "$result"
     fi
     __oxideterm_prompt_seen=0
     return "$result"
@@ -24,7 +24,7 @@ __oxideterm_command_prompt() {
         *']133;'*|*']633;'*) __oxideterm_at_prompt=0; return "$result" ;;
     esac
     PS1="$__oxideterm_prompt_start$PS1$__oxideterm_prompt_end"
-    __oxideterm_command_execution=$'\e]133;C;aid=oxideterm\a'
+    __oxideterm_command_execution=$'\e]133;C;aid=oxidelab\a'
     __oxideterm_prompt_seen=1
     __oxideterm_at_prompt=1
     return "$result"
@@ -37,7 +37,7 @@ __oxideterm_command_start() {
         __oxideterm_command_end*|__oxideterm_command_prompt*) return 0 ;;
     esac
     __oxideterm_at_prompt=0
-    builtin printf '\033]133;C;aid=oxideterm\007'
+    builtin printf '\033]133;C;aid=oxidelab\007'
 }
 
 if (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4) )); then

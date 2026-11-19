@@ -108,7 +108,7 @@ async fn restore_shell(
         // exited, it is only a comment in the original shell, never a command or signal.
         writer
             .send(SshTransportCommand::Data(
-                format!("\n#oxideterm-cancel-{token}\n").into_bytes(),
+                format!("\n#oxidelab-cancel-{token}\n").into_bytes(),
             ))
             .await
             .map_err(|_| anyhow::anyhow!("Shell channel closed during restoration"))?;
@@ -273,7 +273,7 @@ mod tests {
             .unwrap()
             .unwrap();
         assert!(
-            matches!(cancel, SshTransportCommand::Data(bytes) if bytes == format!("\n#oxideterm-cancel-{token}\n").as_bytes())
+            matches!(cancel, SshTransportCommand::Data(bytes) if bytes == format!("\n#oxidelab-cancel-{token}\n").as_bytes())
         );
         assert!(sink.is_active());
         assert!(

@@ -664,7 +664,7 @@ mod tests {
     fn classifier_rejects_result_lines_and_non_password_colons() {
         for line in [
             "[sudo] password for failed:",
-            "OxideTerm Unicode workload:",
+            "OxideLab Unicode workload:",
             "time:12:34:56:",
         ] {
             assert!(detect_terminal_privilege_prompt(line).is_none(), "{line}");

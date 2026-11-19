@@ -55,11 +55,11 @@ impl TerminalPalette {
 
 impl Default for TerminalPalette {
     fn default() -> Self {
-        OXIDETERM_DARK_THEME
+        OXIDELAB_DARK_THEME
     }
 }
 
-pub(crate) const OXIDETERM_DARK_THEME: TerminalPalette = TerminalPalette {
+pub(crate) const OXIDELAB_DARK_THEME: TerminalPalette = TerminalPalette {
     foreground: TerminalColor::rgb(0xe6, 0xe8, 0xeb),
     background: TerminalColor::rgb(0x0d, 0x0f, 0x12),
     bright_foreground: TerminalColor::rgb(0xff, 0xff, 0xff),

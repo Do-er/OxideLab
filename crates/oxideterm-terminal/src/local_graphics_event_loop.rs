@@ -1,10 +1,10 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 //
 // This module adapts the PTY event-loop structure used by alacritty_terminal
-// (Apache-2.0 OR MIT) so OxideTerm can intercept graphics protocols between
+// (Apache-2.0 OR MIT) so OxideLab can intercept graphics protocols between
 // PTY reads and the ANSI parser. The graphics interception, event routing, and
-// public integration points are OxideTerm-specific.
+// public integration points are OxideLab-specific.
 
 use std::{
     borrow::Cow,
@@ -798,7 +798,7 @@ where
 
     pub(crate) fn spawn(mut self) -> JoinHandle<()> {
         std::thread::Builder::new()
-            .name("OxideTerm PTY graphics reader".to_string())
+            .name("OxideLab PTY graphics reader".to_string())
             .spawn(move || {
                 let modem_poller = self.poll.clone();
                 let mut state = LocalGraphicsState::new(

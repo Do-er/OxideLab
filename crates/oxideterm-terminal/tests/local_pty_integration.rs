@@ -13,7 +13,7 @@ use oxideterm_terminal::{
 #[test]
 fn local_pty_shutdown_cleans_background_child_processes() {
     let marker_path = std::env::temp_dir().join(format!(
-        "oxideterm-pty-child-{}-{}",
+        "oxidelab-pty-child-{}-{}",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -32,7 +32,7 @@ wait
         ShellInfo::new("test-sh", "Test sh", "/bin/sh").with_args(vec![
             "-c".to_string(),
             script.to_string(),
-            "oxideterm-pty-test".to_string(),
+            "oxidelab-pty-test".to_string(),
             marker_path.display().to_string(),
         ]),
     );
@@ -203,7 +203,7 @@ fn integrated_zsh_loads_history_from_user_config_in_a_real_pty() {
     .expect("write user Zsh config");
     std::fs::write(
         user_config.path().join(".zsh_history"),
-        "oxideterm-history-probe\n",
+        "oxidelab-history-probe\n",
     )
     .expect("write user Zsh history");
     let config = LocalPtyConfig {
@@ -234,7 +234,7 @@ fn integrated_zsh_loads_history_from_user_config_in_a_real_pty() {
 
     let deadline = std::time::Instant::now() + Duration::from_secs(5);
     let mut screen = String::new();
-    while std::time::Instant::now() < deadline && !screen.contains("oxideterm-history-probe") {
+    while std::time::Instant::now() < deadline && !screen.contains("oxidelab-history-probe") {
         session.drain_output();
         screen = session
             .snapshot()
@@ -248,7 +248,7 @@ fn integrated_zsh_loads_history_from_user_config_in_a_real_pty() {
     session.shutdown();
 
     assert!(
-        screen.contains("oxideterm-history-probe"),
+        screen.contains("oxidelab-history-probe"),
         "integrated Zsh PTY did not load configured history"
     );
 }

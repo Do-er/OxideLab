@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::{
@@ -59,7 +59,7 @@ impl PtyReadAhead {
         unsafe {
             poll.add_with_mode(&file, Event::readable(0), PollMode::Level)?;
         }
-        let thread = std::thread::Builder::new().name("OxideTerm PTY read-ahead".into()).spawn(move || {
+        let thread = std::thread::Builder::new().name("OxideLab PTY read-ahead".into()).spawn(move || {
             let result = (|| -> io::Result<()> {
                 let mut events = Events::new();
                 loop {

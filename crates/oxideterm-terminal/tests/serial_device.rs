@@ -8,10 +8,10 @@ use oxideterm_terminal::{
 };
 
 #[test]
-#[ignore = "requires OXIDETERM_SERIAL_MANUAL_PORT to point at a real or pseudo serial device"]
+#[ignore = "requires OXIDELAB_SERIAL_MANUAL_PORT to point at a real or pseudo serial device"]
 fn manual_serial_pseudo_device_round_trip_and_reopen() {
-    let port_path = std::env::var("OXIDETERM_SERIAL_MANUAL_PORT")
-        .expect("OXIDETERM_SERIAL_MANUAL_PORT must point at a serial device");
+    let port_path = std::env::var("OXIDELAB_SERIAL_MANUAL_PORT")
+        .expect("OXIDELAB_SERIAL_MANUAL_PORT must point at a serial device");
     let config = SerialSessionConfig {
         port_path: port_path.clone(),
         baud_rate: 115_200,
@@ -23,10 +23,10 @@ fn manual_serial_pseudo_device_round_trip_and_reopen() {
     };
     config.validate().unwrap();
 
-    let first_ping = b"oxideterm-serial-ping-1\r";
-    let first_pong = b"oxideterm-serial-pong-1\r";
-    let second_ping = b"oxideterm-serial-ping-2\r";
-    let second_pong = b"oxideterm-serial-pong-2\r";
+    let first_ping = b"oxidelab-serial-ping-1\r";
+    let first_pong = b"oxidelab-serial-pong-1\r";
+    let second_ping = b"oxidelab-serial-ping-2\r";
+    let second_pong = b"oxidelab-serial-pong-2\r";
     let first_expected = manual_serial_expected(first_ping, first_pong);
     let second_expected = manual_serial_expected(second_ping, second_pong);
 
@@ -35,14 +35,14 @@ fn manual_serial_pseudo_device_round_trip_and_reopen() {
 }
 
 fn manual_serial_expected(loopback_payload: &[u8], responder_payload: &[u8]) -> Vec<u8> {
-    match std::env::var("OXIDETERM_SERIAL_MANUAL_MODE")
+    match std::env::var("OXIDELAB_SERIAL_MANUAL_MODE")
         .unwrap_or_else(|_| "loopback".to_string())
         .as_str()
     {
         "loopback" => loopback_payload.to_vec(),
         "responder" => responder_payload.to_vec(),
         mode => {
-            panic!("unsupported OXIDETERM_SERIAL_MANUAL_MODE={mode}; use loopback or responder")
+            panic!("unsupported OXIDELAB_SERIAL_MANUAL_MODE={mode}; use loopback or responder")
         }
     }
 }

@@ -2223,8 +2223,8 @@ mod serial_tests {
 
     #[test]
     fn serial_duplicate_reservation_returns_port_busy() {
-        let first = reserve_serial_port("/tmp/oxideterm-test-serial").unwrap();
-        let error = reserve_serial_port("/tmp/oxideterm-test-serial").unwrap_err();
+        let first = reserve_serial_port("/tmp/oxidelab-test-serial").unwrap();
+        let error = reserve_serial_port("/tmp/oxidelab-test-serial").unwrap_err();
 
         assert_eq!(error.code, SerialErrorCode::PortBusy);
         drop(first);
@@ -2232,7 +2232,7 @@ mod serial_tests {
 
     #[test]
     fn failed_worker_releases_port_reservation() {
-        let port_path = "/tmp/oxideterm-test-serial-failed-worker";
+        let port_path = "/tmp/oxidelab-test-serial-failed-worker";
         let reservation = reserve_serial_port(port_path).unwrap();
         let normalized_port_path = reservation.normalized_port_path.clone();
         let mut session = test_serial_session();
@@ -2475,7 +2475,7 @@ mod serial_tests {
     fn serial_shell_control_sequences_do_not_leak_into_prompt_text() {
         for terminator in ["\x07", "\x1b\\"] {
             let prompt = format!(
-                "\x1b]133;D;0;aid=oxideterm{terminator}\x1b]7;file://Lechi/%72%6f%6f%74{terminator}\x1b]133;A;aid=oxideterm{terminator}root@Lechi:~# \x1b]133;B;aid=oxideterm{terminator}\r\n"
+                "\x1b]133;D;0;aid=oxidelab{terminator}\x1b]7;file://Lechi/%72%6f%6f%74{terminator}\x1b]133;A;aid=oxidelab{terminator}root@Lechi:~# \x1b]133;B;aid=oxidelab{terminator}\r\n"
             );
             let output = prompt.repeat(2);
             for chunk_size in [1, 7, output.len()] {

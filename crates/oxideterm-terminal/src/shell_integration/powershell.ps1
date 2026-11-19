@@ -17,7 +17,7 @@ function global:PSConsoleHostReadLine {
     $line = & $global:__oxideterm_command_readline
     if ($global:__oxideterm_command_enabled -and -not [string]::IsNullOrWhiteSpace($line)) {
         $global:__oxideterm_command_running = $true
-        [Console]::Write("$([char]27)]133;C;aid=oxideterm$([char]7)")
+        [Console]::Write("$([char]27)]133;C;aid=oxidelab$([char]7)")
     }
     return $line
 }
@@ -33,15 +33,15 @@ $global:__oxideterm_prompt_wrapper = {
         $exitCode = if ($powerShellError -or -not $nativeExit) { 1 } else { $nativeExit }
     }
     if ($global:__oxideterm_command_running) {
-        [Console]::Write("$([char]27)]133;D;$exitCode;aid=oxideterm$([char]7)")
+        [Console]::Write("$([char]27)]133;D;$exitCode;aid=oxidelab$([char]7)")
         $global:__oxideterm_command_running = $false
     }
-    [Console]::Write("$([char]27)]133;A;aid=oxideterm$([char]7)")
+    [Console]::Write("$([char]27)]133;A;aid=oxidelab$([char]7)")
     # Ignore does not append to $Error or display text. Restore the status
     # before calling prompt themes that inspect $? themselves.
     if (-not $succeeded) { Write-Error 'Command failed.' -ErrorAction Ignore }
     $text = $global:__oxideterm_command_prompt.Invoke()
-    return "$text$([char]27)]133;B;aid=oxideterm$([char]7)"
+    return "$text$([char]27)]133;B;aid=oxidelab$([char]7)"
 }
 
 function global:__oxideterm_install_command_prompt {
@@ -54,7 +54,7 @@ function global:__oxideterm_install_command_prompt {
     if ($AtReadLine -and $global:__oxideterm_command_running) {
         # The replacement prompt has already finished drawing. B identifies
         # the new input; the previous output has no verified D boundary.
-        [Console]::Write("$([char]27)]133;B;aid=oxideterm$([char]7)")
+        [Console]::Write("$([char]27)]133;B;aid=oxidelab$([char]7)")
     }
     $global:__oxideterm_command_running = $false
     if ($current -and $current.Definition -match '\]133;|\]633;') {

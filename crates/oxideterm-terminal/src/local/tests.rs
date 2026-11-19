@@ -15,7 +15,7 @@ mod tests {
 
     use crate::{
         color::{
-            DEFAULT_MINIMUM_CONTRAST_SCORE, OXIDETERM_DARK_THEME, color_for_alacritty_request,
+            DEFAULT_MINIMUM_CONTRAST_SCORE, OXIDELAB_DARK_THEME, color_for_alacritty_request,
             perceptual_contrast_score, style_colors_for_cell,
         },
         process::{parse_lsof_cwd, parse_process_table_for_group},
@@ -173,7 +173,7 @@ mod tests {
             TerminalColor::rgb(51, 51, 51),
             TerminalColor::rgb(255, 255, 255),
             TerminalColor::rgb(51, 51, 51),
-            OXIDETERM_DARK_THEME.ansi,
+            OXIDELAB_DARK_THEME.ansi,
         ));
         session.write_input(b"x").unwrap();
         let text = wait_for(&session, "DONE");
@@ -565,7 +565,7 @@ mod tests {
             StoredRecordingFrameKind,
         };
         use std::time::{Duration, Instant};
-        let record_output = std::env::var("OXIDETERM_BENCH_RECORD_OUTPUT").as_deref() == Ok("1");
+        let record_output = std::env::var("OXIDELAB_BENCH_RECORD_OUTPUT").as_deref() == Ok("1");
         let audit_directory = tempfile::tempdir().unwrap();
         let audit_service =
             AuditService::with_key_provider(audit_directory.path().join("audit.db"), AuditTestKeys)
@@ -957,10 +957,10 @@ mod tests {
 
     #[test]
     fn lsof_cwd_parser_reads_name_record() {
-        let lsof_output = "p12345\nn/Users/dominical/Documents/OxideTerm\n";
+        let lsof_output = "p12345\nn/Users/dominical/Documents/OxideLab\n";
         assert_eq!(
             parse_lsof_cwd(lsof_output),
-            Some(PathBuf::from("/Users/dominical/Documents/OxideTerm"))
+            Some(PathBuf::from("/Users/dominical/Documents/OxideLab"))
         );
     }
 
@@ -2463,7 +2463,7 @@ mod tests {
             (cells[1].ch, cells[1].wide, cells[1].bg),
             (' ', false, TerminalColor::rgb(1, 2, 3))
         );
-        assert_eq!(cells[2].bg, OXIDETERM_DARK_THEME.background);
+        assert_eq!(cells[2].bg, OXIDELAB_DARK_THEME.background);
     }
 
     #[test]
@@ -2486,7 +2486,7 @@ mod tests {
         );
         parser.advance(
             &mut term,
-            b"\x1b[?1049h\x1b[>4;2m\x1b[?1h\x1b=\x1b[?2004h\x1b[?1004h\x1b[1;24r\x1b[m\x1b[H\x1b[2J\x1b[?25l\x1b[24;1H\"oxideterm-vim-test.txt\" [New]\x1b[1;1H\x1b[?25h",
+            b"\x1b[?1049h\x1b[>4;2m\x1b[?1h\x1b=\x1b[?2004h\x1b[?1004h\x1b[1;24r\x1b[m\x1b[H\x1b[2J\x1b[?25l\x1b[24;1H\"oxidelab-vim-test.txt\" [New]\x1b[1;1H\x1b[?25h",
         );
 
         let snapshot = snapshot_from_term(&term, size, &graphics, &TerminalPalette::default());
@@ -2498,7 +2498,7 @@ mod tests {
             snapshot.lines[0]
                 .cells
                 .iter()
-                .all(|cell| cell.bg == OXIDETERM_DARK_THEME.background),
+                .all(|cell| cell.bg == OXIDELAB_DARK_THEME.background),
             "Vim's alternate-screen clear retained shell backgrounds in the first row"
         );
         assert_eq!(snapshot.cursor_row, 0);
@@ -2537,7 +2537,7 @@ mod tests {
             snapshot.lines[0]
                 .cells
                 .iter()
-                .all(|cell| cell.ch == ' ' && cell.bg == OXIDETERM_DARK_THEME.background),
+                .all(|cell| cell.ch == ' ' && cell.bg == OXIDELAB_DARK_THEME.background),
             "alternate-screen resize restored primary-screen prompt cells"
         );
     }
@@ -2758,12 +2758,12 @@ mod tests {
             let mut parser = Processor::<StdSyncHandler>::new();
             let mut integration = crate::shell_integration::TerminalShellIntegration::default();
             let bytes = format!(
-                "\x1b]133;A;aid=oxideterm\x07\
+                "\x1b]133;A;aid=oxidelab\x07\
                  \x1b]{protocol};A\x07$ \x1b]{protocol};B\x07\
-                 \x1b]133;B;aid=oxideterm\x07echo hi\r\n\
-                 \x1b]133;C;aid=oxideterm\x07\
+                 \x1b]133;B;aid=oxidelab\x07echo hi\r\n\
+                 \x1b]133;C;aid=oxidelab\x07\
                  \x1b]{protocol};C\x07hi\r\n\
-                 \x1b]133;D;9;aid=oxideterm\x07\
+                 \x1b]133;D;9;aid=oxidelab\x07\
                  \x1b]{protocol};D;0\x07"
             );
             for byte in bytes.as_bytes().chunks(1) {
@@ -2829,9 +2829,9 @@ mod tests {
         integration.advance(
             &mut parser,
             &mut term,
-            b"\x1b]133;A;aid=oxideterm\x07$ \x1b]133;B;aid=oxideterm\x07theme\r\n\
-              \x1b]133;C;aid=oxideterm\x07NEW> \x1b]133;B;aid=oxideterm\x07echo ok\r\n\
-              \x1b]133;C;aid=oxideterm\x07ok\r\n\x1b]133;D;0;aid=oxideterm\x07",
+            b"\x1b]133;A;aid=oxidelab\x07$ \x1b]133;B;aid=oxidelab\x07theme\r\n\
+              \x1b]133;C;aid=oxidelab\x07NEW> \x1b]133;B;aid=oxidelab\x07echo ok\r\n\
+              \x1b]133;C;aid=oxidelab\x07ok\r\n\x1b]133;D;0;aid=oxidelab\x07",
             |_| {},
         );
         let marks = integration.command_marks();
@@ -3504,7 +3504,7 @@ mod tests {
     fn color_requests_follow_palette_and_runtime_overrides() {
         let light = solarized_light_palette();
         let rgb = |color: Rgb| TerminalColor::rgb(color.r, color.g, color.b);
-        for palette in [OXIDETERM_DARK_THEME, light] {
+        for palette in [OXIDELAB_DARK_THEME, light] {
             let overrides = Colors::default();
             for (index, expected) in [
                 (1, palette.ansi[1]),
@@ -3579,7 +3579,7 @@ mod tests {
     #[test]
     fn minimum_contrast_uses_resolved_palette_background() {
         let overrides = Colors::default();
-        for palette in [OXIDETERM_DARK_THEME, solarized_light_palette()] {
+        for palette in [OXIDELAB_DARK_THEME, solarized_light_palette()] {
             // ANSI white is nearly invisible on a light background until contrast adjusts it.
             let (fg, bg) = style_colors_for_cell(
                 Color::Named(NamedColor::White),
@@ -3635,8 +3635,8 @@ mod tests {
             &Colors::default(),
         );
 
-        assert_eq!(fg, OXIDETERM_DARK_THEME.ansi[7]);
-        assert_eq!(bg, OXIDETERM_DARK_THEME.ansi[15]);
+        assert_eq!(fg, OXIDELAB_DARK_THEME.ansi[7]);
+        assert_eq!(bg, OXIDELAB_DARK_THEME.ansi[15]);
     }
 
 }

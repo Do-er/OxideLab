@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::hint::black_box;
@@ -56,16 +56,16 @@ fn benchmark_graphics_ingress(criterion: &mut Criterion) {
     let workloads = [
         (
             "plain",
-            repeated_payload(b"OxideTerm graphics ingress plain text 0123456789\r\n"),
+            repeated_payload(b"OxideLab graphics ingress plain text 0123456789\r\n"),
         ),
         (
             "ansi",
-            repeated_payload(b"\x1b[1;38;2;72;183;255mOxideTerm ANSI workload\x1b[0m\r\n"),
+            repeated_payload(b"\x1b[1;38;2;72;183;255mOxideLab ANSI workload\x1b[0m\r\n"),
         ),
         (
             "unicode",
             repeated_payload(
-                "OxideTerm Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀\r\n".as_bytes(),
+                "OxideLab Unicode workload: 中文 日本語 한국어 Δοκιμή 🚀\r\n".as_bytes(),
             ),
         ),
         (

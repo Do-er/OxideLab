@@ -1,8 +1,8 @@
 fn oxideterm_terminal_env(config: &LocalPtyConfig, _shell: &ShellInfo) -> HashMap<String, String> {
     let mut terminal_env = HashMap::from([
-        ("OXIDETERM_TERM".to_string(), "true".to_string()),
+        ("OXIDELAB_TERM".to_string(), "true".to_string()),
         ("TERM".to_string(), "xterm-256color".to_string()),
-        ("TERM_PROGRAM".to_string(), "oxideterm".to_string()),
+        ("TERM_PROGRAM".to_string(), "OxideLab".to_string()),
         (
             "TERM_PROGRAM_VERSION".to_string(),
             env!("CARGO_PKG_VERSION").to_string(),
@@ -46,7 +46,7 @@ fn oxideterm_terminal_env(config: &LocalPtyConfig, _shell: &ShellInfo) -> HashMa
     #[cfg(target_os = "windows")]
     {
         terminal_env.insert("PYTHONIOENCODING".to_string(), "utf-8".to_string());
-        terminal_env.insert("TERM_PROGRAM".to_string(), "OxideTerm".to_string());
+        terminal_env.insert("TERM_PROGRAM".to_string(), "OxideLab".to_string());
         if config.command.is_none() && _shell.id.starts_with("wsl") {
             terminal_env.insert("WSL_UTF8".to_string(), "1".to_string());
             let mut wslenv_vars = vec!["TERM", "COLORTERM", "TERM_PROGRAM", "TERM_PROGRAM_VERSION"];

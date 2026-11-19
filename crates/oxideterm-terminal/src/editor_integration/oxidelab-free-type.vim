@@ -1,11 +1,11 @@
-" OxideTerm Free Type Mode integration for Vim and Neovim.
+" OxideLab Free Type Mode integration for Vim and Neovim.
 " Source this file from vimrc/init.vim only for terminal sessions where the
-" editor should expose explicit mode and selection state to OxideTerm.
+" editor should expose explicit mode and selection state to OxideLab.
 
-if exists('g:loaded_oxideterm_free_type')
+if exists('g:loaded_oxidelab_free_type')
   finish
 endif
-let g:loaded_oxideterm_free_type = 1
+let g:loaded_oxidelab_free_type = 1
 
 let s:application = has('nvim') ? 'nvim' : 'vim'
 let s:last_state = ''
@@ -15,12 +15,12 @@ function! s:write_terminal(payload) abort
   " A shared multiplexer pane cannot route private OSC to one attached client.
   let l:term_program = tolower(exists('$TERM_PROGRAM') ? $TERM_PROGRAM : '')
   let l:lc_terminal = tolower(exists('$LC_TERMINAL') ? $LC_TERMINAL : '')
-  let l:private_osc = exists('$OXIDETERM_PRIVATE_OSC') ? $OXIDETERM_PRIVATE_OSC : ''
+  let l:private_osc = exists('$OXIDELAB_PRIVATE_OSC') ? $OXIDELAB_PRIVATE_OSC : ''
   let l:shared_multiplexer = (exists('$TMUX') && !empty($TMUX))
         \ || (exists('$STY') && !empty($STY))
         \ || (exists('$ZELLIJ') && !empty($ZELLIJ))
   if l:shared_multiplexer
-        \ || (l:private_osc !=# '1' && l:term_program !=# 'oxideterm' && l:lc_terminal !=# 'oxideterm')
+        \ || (l:private_osc !=# '1' && l:term_program !=# 'oxidelab' && l:lc_terminal !=# 'oxidelab')
     return
   endif
   try
@@ -166,7 +166,7 @@ nnoremap <silent> <F16> :call <SID>delete_selection(0)<CR>
 xnoremap <silent> <F16> :<C-U>call <SID>delete_selection(1)<CR>
 
 set mouse=a
-augroup oxideterm_free_type
+augroup oxidelab_free_type
   autocmd!
   autocmd VimEnter,ModeChanged,CursorMoved,CursorMovedI * call <SID>emit_state(0)
   autocmd VimLeavePre * call <SID>leave()

@@ -83,9 +83,9 @@ pub struct TerminalEditorClipboardEvent {
 }
 
 pub const VIM_FREE_TYPE_INTEGRATION_SOURCE: &str =
-    include_str!("editor_integration/oxideterm-free-type.vim");
+    include_str!("editor_integration/oxidelab-free-type.vim");
 pub const EMACS_FREE_TYPE_INTEGRATION_SOURCE: &str =
-    include_str!("editor_integration/oxideterm-free-type.el");
+    include_str!("editor_integration/oxidelab-free-type.el");
 
 pub(crate) enum TerminalEditorProtocolMessage {
     State(TerminalEditorIntegrationEvent),

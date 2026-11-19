@@ -21,10 +21,10 @@ function __oxideterm_install_command_prompt --on-event fish_prompt
         functions -c fish_prompt __oxideterm_original_command_prompt
         function fish_prompt
             set -l result $status
-            printf '\e]133;A;aid=oxideterm\a'
+            printf '\e]133;A;aid=oxidelab\a'
             __oxideterm_restore_status $result
             __oxideterm_original_command_prompt
-            printf '\e]133;B;aid=oxideterm\a'
+            printf '\e]133;B;aid=oxidelab\a'
         end
         set -g __oxideterm_command_enabled 1
     end
@@ -34,14 +34,14 @@ end
 function __oxideterm_command_start --on-event fish_preexec
     if test "$__oxideterm_command_enabled" = 1
         set -g __oxideterm_command_running 1
-        printf '\e]133;C;aid=oxideterm\a'
+        printf '\e]133;C;aid=oxidelab\a'
     end
 end
 
 function __oxideterm_command_end --on-event fish_postexec
     set -l result $status
     if test "$__oxideterm_command_running" = 1
-        printf '\e]133;D;%s;aid=oxideterm\a' $result
+        printf '\e]133;D;%s;aid=oxidelab\a' $result
         set -g __oxideterm_command_running 0
     end
     return $result

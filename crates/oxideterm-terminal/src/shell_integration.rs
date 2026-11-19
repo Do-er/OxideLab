@@ -16,7 +16,7 @@ const MAX_MARKS: usize = 2000;
 // Private editor clipboard responses can contain 64 KiB of percent-encoded
 // UTF-8 text, so the scanner must retain the same bounded protocol envelope.
 const OSC_LIMIT: usize = crate::editor_integration::EDITOR_PROTOCOL_PAYLOAD_LIMIT;
-const OXIDETERM_REMOTE_METADATA_OSC: &str = "7719";
+const OXIDELAB_REMOTE_METADATA_OSC: &str = "7719";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ShellIntegrationSource {
@@ -238,7 +238,7 @@ impl OscCapture {
 
     fn push_payload(&mut self, mut bytes: &[u8]) {
         // Identify the private prefix before copying a run into recordable bytes.
-        while self.payload.len() <= OXIDETERM_REMOTE_METADATA_OSC.len() && !bytes.is_empty() {
+        while self.payload.len() <= OXIDELAB_REMOTE_METADATA_OSC.len() && !bytes.is_empty() {
             self.push_payload_byte(bytes[0]);
             bytes = &bytes[1..];
         }
@@ -261,7 +261,7 @@ impl OscCapture {
 
 fn is_private_oxideterm_osc(payload: &[u8]) -> bool {
     payload
-        .strip_prefix(OXIDETERM_REMOTE_METADATA_OSC.as_bytes())
+        .strip_prefix(OXIDELAB_REMOTE_METADATA_OSC.as_bytes())
         .is_some_and(|remaining| remaining.first() == Some(&b';'))
 }
 
@@ -679,7 +679,7 @@ impl TerminalShellIntegration {
         let Some((code, data)) = text.split_once(';') else {
             return false;
         };
-        if code == OXIDETERM_REMOTE_METADATA_OSC {
+        if code == OXIDELAB_REMOTE_METADATA_OSC {
             match crate::editor_integration::parse_editor_protocol_message(data) {
                 Some(crate::editor_integration::TerminalEditorProtocolMessage::State(event)) => {
                     emit(crate::TerminalEvent::EditorIntegration(event));
@@ -695,7 +695,7 @@ impl TerminalShellIntegration {
                     }
                 }
             }
-            // OxideTerm private OSC payloads are control metadata and should
+            // OxideLab private OSC payloads are control metadata and should
             // never be rendered, even when a malformed payload is ignored.
             return true;
         }
@@ -731,7 +731,7 @@ impl TerminalShellIntegration {
             && data
                 .split(';')
                 .skip(1)
-                .any(|field| field == "aid=oxideterm");
+                .any(|field| field == "aid=oxidelab");
         let same_producer =
             self.state.integration_source == Some(source) && self.state.injected == injected;
         let position = cursor_position(term);

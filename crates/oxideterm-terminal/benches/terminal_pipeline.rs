@@ -126,18 +126,18 @@ fn terminal_input_corpora() -> Vec<(&'static str, Vec<u8>)> {
         (
             "plain",
             repeated_input(
-                b"oxideterm benchmark plain output cargo check completed successfully 0123456789\r\n",
+                b"oxidelab benchmark plain output cargo check completed successfully 0123456789\r\n",
             ),
         ),
         (
             "ansi",
             repeated_input(
-                b"\x1b[38;5;42moxideterm benchmark colored output\x1b[0m cargo check\r\n",
+                b"\x1b[38;5;42moxidelab benchmark colored output\x1b[0m cargo check\r\n",
             ),
         ),
         (
             "unicode",
-            repeated_input("OxideTerm 中文输出 e\u{301} Rust 🦀 终端基准测试\r\n".as_bytes()),
+            repeated_input("OxideLab 中文输出 e\u{301} Rust 🦀 终端基准测试\r\n".as_bytes()),
         ),
         (
             "mixed-log",
@@ -175,7 +175,7 @@ fn terminal_corpus(lines: usize) -> Vec<u8> {
     for line in 0..lines {
         corpus.extend_from_slice(
             format!(
-                "\x1b[38;5;{}moxideterm benchmark line {line} cargo check\x1b[0m\r\n",
+                "\x1b[38;5;{}moxidelab benchmark line {line} cargo check\x1b[0m\r\n",
                 line % 256
             )
             .as_bytes(),

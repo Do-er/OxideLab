@@ -251,10 +251,10 @@ fn ssh_palette_changes_rebuild_rows_and_answer_color_and_size_queries() {
     let settled = fixture.terminal.snapshot_incremental(&settled);
     assert_eq!(
         settled.lines[0].cells[0].bg,
-        crate::color::OXIDETERM_DARK_THEME.ansi[1]
+        crate::color::OXIDELAB_DARK_THEME.ansi[1]
     );
 
-    let mut ansi = crate::color::OXIDETERM_DARK_THEME.ansi;
+    let mut ansi = crate::color::OXIDELAB_DARK_THEME.ansi;
     ansi[1] = TerminalColor::rgb(0xdc, 0x32, 0x2f);
     let light = TerminalPalette::new(
         TerminalColor::rgb(0x65, 0x7b, 0x83),
@@ -330,14 +330,14 @@ fn ssh_color_scheme_reports_follow_theme_changes_only_while_subscribed() {
 
     fixture.send(b"\x1b[?2031h\x1b[?2031$p");
     expect_reply(b"\x1b[?2031;1$y");
-    let mut light = crate::color::OXIDETERM_DARK_THEME;
+    let mut light = crate::color::OXIDELAB_DARK_THEME;
     light.background = TerminalColor::rgb(0xfd, 0xf6, 0xe3);
     fixture.terminal.set_palette(light);
     expect_reply(b"\x1b[?997;2n");
 
     fixture
         .terminal
-        .set_palette(crate::color::OXIDETERM_DARK_THEME);
+        .set_palette(crate::color::OXIDELAB_DARK_THEME);
     expect_reply(b"\x1b[?997;1n");
     // An application-owned OSC change must not masquerade as a host theme change.
     fixture.send(b"\x1b]11;#ffffff\x07\x1b[?996n\x1b[5n");
@@ -896,7 +896,7 @@ fn ssh_trzsz_transfer_writes_wake_the_parser_without_ui_polling() {
 #[test]
 #[ignore = "manual release-profile SSH throughput and UI-drain benchmark"]
 fn ssh_background_performance() {
-    let mode = std::env::var("OXIDETERM_SSH_BENCH_MODE").unwrap_or_else(|_| "worker".into());
+    let mode = std::env::var("OXIDELAB_SSH_BENCH_MODE").unwrap_or_else(|_| "worker".into());
     match mode.as_str() {
         "worker" => measure_backend("worker", Fixture::new),
         "sync" => measure_backend("sync", || {
@@ -1654,7 +1654,7 @@ fn shell_ide_lease_isolates_protocol_and_restores_interactive_input() {
             .recv_timeout(Duration::from_secs(5))
             .unwrap()
             .0,
-        format!("\n#oxideterm-cancel-{token}\n").as_bytes(),
+        format!("\n#oxidelab-cancel-{token}\n").as_bytes(),
     );
     assert!(
         !*released.borrow(),

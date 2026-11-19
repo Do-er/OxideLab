@@ -35,7 +35,7 @@ pub fn import_external_scheme_document(
         return Err("The imported theme has no supported semantic colors".to_string());
     }
 
-    // External theme formats describe colors, not OxideTerm's runtime rules.
+    // External theme formats describe colors, not OxideLab's runtime rules.
     // Keep the balanced rules and map only scopes with a stable semantic meaning.
     let mut document = built_in_scheme_document(SemanticScheme::Balanced);
     document.id = "custom:imported".to_string();

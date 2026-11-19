@@ -480,7 +480,7 @@ impl MoshTerminalSession {
             PredictionReconciliation::None => {}
             PredictionReconciliation::Local(bytes) => self.feed_prediction_overlay(&bytes),
             PredictionReconciliation::Redraw => {
-                // Every displayed OxideTerm prediction is anchored with a cursor context.
+                // Every displayed OxideLab prediction is anchored with a cursor context.
                 debug_assert!(
                     false,
                     "contextual Mosh prediction unexpectedly required redraw"
