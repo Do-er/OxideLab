@@ -1,9 +1,9 @@
 ---
 name: oxideterm-node-session-ownership
-description: Apply OxideTerm's runtime ownership rules when implementing or reviewing SSH nodes, terminal panes, SFTP, port forwarding, reconnect, jump hosts, health checks, NodeRouter, or long-lived backend tasks.
+description: Apply OxideLab's runtime ownership rules when implementing or reviewing SSH nodes, terminal panes, SFTP, port forwarding, reconnect, jump hosts, health checks, NodeRouter, or long-lived backend tasks.
 ---
 
-# OxideTerm Node Session Ownership
+# OxideLab Node Session Ownership
 
 Use this skill whenever a change can alter which component creates, shares, closes, reconnects, or observes a remote session or background job.
 

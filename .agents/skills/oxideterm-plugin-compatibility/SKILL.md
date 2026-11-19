@@ -1,9 +1,9 @@
 ---
 name: oxideterm-plugin-compatibility
-description: Preserve OxideTerm plugin compatibility when changing host plugin APIs, runtime or grammar loading, catalog version selection, or installed-plugin checks. Also use when extracting built-in language support into plugins. Ordinary app version bumps or plugin-page styling alone do not require this workflow.
+description: Preserve OxideLab plugin compatibility when changing host plugin APIs, runtime or grammar loading, catalog version selection, or installed-plugin checks. Also use when extracting built-in language support into plugins. Ordinary app version bumps or plugin-page styling alone do not require this workflow.
 ---
 
-# OxideTerm Plugin Compatibility
+# OxideLab Plugin Compatibility
 
 Read the relevant implementation before assigning a compatibility boundary:
 

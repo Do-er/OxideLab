@@ -1,9 +1,9 @@
 ---
 name: oxideterm-secret-zeroize
-description: Apply OxideTerm's secret lifetime and redaction rules when code handles passwords, passphrases, private keys, tokens, authentication headers, proxy credentials, prompts, diagnostics, persistence, or async task capture.
+description: Apply OxideLab's secret lifetime and redaction rules when code handles passwords, passphrases, private keys, tokens, authentication headers, proxy credentials, prompts, diagnostics, persistence, or async task capture.
 ---
 
-# OxideTerm Secret Zeroize
+# OxideLab Secret Zeroize
 
 Use this skill before editing any path that receives, owns, transforms, persists, logs, reports, or asynchronously captures credential-like values.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the channel-specific Git range used to draft OxideTerm release notes."""
+"""Print the channel-specific Git range used to draft OxideLab release notes."""
 
 from __future__ import annotations
 

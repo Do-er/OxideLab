@@ -1,6 +1,8 @@
-# OxideTerm Agent Guidelines
+# OxideLab Agent Guidelines
 
 本文件适用于整个仓库。若子目录以后增加更具体的 `AGENTS.md`，则子目录规则优先。
+
+本项目已由 OxideTerm 更名为 OxideLab（2026-11）；crate 名与代码标识符仍沿用 `oxideterm-` 前缀。
 
 ## 基本原则
 

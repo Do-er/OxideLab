@@ -1,11 +1,11 @@
 ---
 name: oxideterm-release
-description: Prepare, publish, or recover canceled OxideTerm stable, beta, or GPUI preview releases by deriving changelog content from the previous tag, selecting the requested release-note detail level, running the repository version-bump script, validating channel-specific notes and fork ownership, committing, pushing, creating the correct annotated tag, and dispatching the main-scoped native package workflow. Use when the user asks to upgrade the OxideTerm version, prepare a release, write a release changelog, commit and push a release, create a release tag, republish the same version after its release workflow was canceled, or repair release assets from a completed Native Package run.
+description: Prepare, publish, or recover canceled OxideLab stable, beta, or GPUI preview releases by deriving changelog content from the previous tag, selecting the requested release-note detail level, running the repository version-bump script, validating channel-specific notes and fork ownership, committing, pushing, creating the correct annotated tag, and dispatching the main-scoped native package workflow. Use when the user asks to upgrade the OxideLab version, prepare a release, write a release changelog, commit and push a release, create a release tag, republish the same version after its release workflow was canceled, or repair release assets from a completed Native Package run.
 ---
 
-# OxideTerm Release
+# OxideLab Release
 
-Publish an OxideTerm release through the repository-owned automation. Treat the user's completed GUI run as the release gate and do not run Cargo tests by default.
+Publish an OxideLab release through the repository-owned automation. Treat the user's completed GUI run as the release gate and do not run Cargo tests by default.
 
 ## Required release input
 
@@ -32,7 +32,7 @@ Do not invent another tag prefix. The native package workflow receives the exist
 
 ### 1. Inspect repository state
 
-Work from the OxideTerm repository root. Read `AGENTS.md`, then inspect:
+Work from the OxideLab repository root. Read `AGENTS.md`, then inspect:
 
 ```bash
 git status --short --branch
@@ -123,7 +123,7 @@ For a fork release, each language block must clearly separate changes inherited 
 
 #### PR references and contributor thanks
 
-Follow the attribution pattern in [NyaTerm v1.2.12](https://github.com/nyakang/nyaterm/releases/tag/v1.2.12): PR references beside the changes they introduced, plus a dedicated contributor section. Derive the actual entries from OxideTerm's release range.
+Follow the attribution pattern in [NyaTerm v1.2.12](https://github.com/nyakang/nyaterm/releases/tag/v1.2.12): PR references beside the changes they introduced, plus a dedicated contributor section. Derive the actual entries from OxideLab's release range.
 
 - Append linked PR numbers to every release-note item introduced through a PR, including maintainer-authored PRs. Use `（PR [#<number>](<pr-url>)）` in Chinese and `(PR [#<number>](<pr-url>))` in English. Put the reference at the end of the relevant bullet or feature paragraph, rather than only in the contributor list or full-changelog link. Keep issue links distinct from PR links. Direct commits have no invented PR number.
 - When several PRs contributed to a grouped item, include all relevant PR numbers once in that item. Attribute only the outcome supported by each PR; separate a maintainer's independent follow-up change when grouping would credit the wrong author. For PRs from another repository, qualify the link label with `owner/repo#number`.
@@ -163,7 +163,7 @@ Treat the levels as coverage and grouping guidance, not fixed templates. Determi
 
 Apply channel-specific emphasis:
 
-- **Stable:** Summarize the complete delta since the previous stable tag. In each language block, start with one short release summary, then use only useful sections such as `#### ✨ Highlights` / `#### ✨ 重点更新`, `#### 🛠️ Fixes` / `#### 🛠️ 修复`, `#### 🔒 Security` / `#### 🔒 安全`, or `#### 🧰 Release Maintenance` / `#### 🧰 发布维护`. Emphasize user-visible behavior and compatibility. The composed GitHub Release body must begin with `[中文](#中文) | [English](#english)` navigation, followed by the complete `### 中文` block and then the matching `### English` block, omit both a product-major heading such as `# OxideTerm 2.0` and a repeated version heading such as `## 2.0.7`, then place `## 📥 Download for your system`, installation tips, and links after both language blocks.
+- **Stable:** Summarize the complete delta since the previous stable tag. In each language block, start with one short release summary, then use only useful sections such as `#### ✨ Highlights` / `#### ✨ 重点更新`, `#### 🛠️ Fixes` / `#### 🛠️ 修复`, `#### 🔒 Security` / `#### 🔒 安全`, or `#### 🧰 Release Maintenance` / `#### 🧰 发布维护`. Emphasize user-visible behavior and compatibility. The composed GitHub Release body must begin with `[中文](#中文) | [English](#english)` navigation, followed by the complete `### 中文` block and then the matching `### English` block, omit both a product-major heading such as `# OxideLab 2.0` and a repeated version heading such as `## 2.0.7`, then place `## 📥 Download for your system`, installation tips, and links after both language blocks.
 - **Beta:** Summarize the delta since the previous beta tag in complete English and Chinese blocks. State what is approaching stable, what changed, and which workflows need validation. Mention known limitations only when supported by the diff or issue context, and include them in both languages.
 - **GPUI preview:** Summarize the delta since the previous GPUI preview tag in complete English and Chinese blocks. Focus on newly testable native UI/runtime work, parity, rough edges, and concrete testing targets. Apply the selected detail level while keeping the writing test-oriented rather than turning preview notes into stable-release marketing.
 
@@ -216,7 +216,7 @@ git remote get-url origin
 
 For an official `AnalyseDeCircuit/oxideterm` release, keep the official links, updater endpoints, and About attribution. For a fork release, all three checks below are blocking:
 
-1. **Release-note ownership and provenance.** The notes must clearly state that the build is a community fork. In both language blocks, they must separately identify changes inherited from official upstream and changes implemented by the fork, following the provenance rules in the changelog-writing section. Compare the release range with official upstream history rather than inferring ownership from author names or commit-message wording. Support, documentation, issue, download, and changelog links must resolve to resources owned by the fork, not `AnalyseDeCircuit/oxideterm/issues`, the upstream changelog, upstream release downloads, or `oxideterm.app` documentation. The stable download composer currently derives upstream asset URLs from `.github/scripts/compose_release_notes.py`; a fork must redirect that source as well as the visible base-note links.
+1. **Release-note ownership and provenance.** The notes must clearly state that the build is a community fork. In both language blocks, they must separately identify changes inherited from official upstream and changes implemented by the fork, following the provenance rules in the changelog-writing section. Compare the release range with official upstream history rather than inferring ownership from author names or commit-message wording. Support, documentation, issue, download, and changelog links must resolve to resources owned by the fork, not `AnalyseDeCircuit/oxideterm/issues`, the upstream changelog, upstream release downloads, or `oxidelab.app` documentation. The stable download composer currently derives upstream asset URLs from `.github/scripts/compose_release_notes.py`; a fork must redirect that source as well as the visible base-note links.
 2. **In-app updater ownership.** Every update channel exposed by the forked application must resolve to a fork-owned signed manifest and fork-owned release assets. The compiled endpoints currently live in `crates/oxideterm-update/src/channel.rs`; they must not contain `github.com/AnalyseDeCircuit/oxideterm/releases`. A fork may instead disable an update channel, but then the application must not offer or contact that channel. Never ship a fork that can update itself to an official OxideTerm build.
 3. **Help & About attribution.** Keep the existing `Copyright © <year> AnalyseDeCircuit` attribution; a fork must not replace or remove it. Add an adjacent small, localized line that clearly identifies the application as a fork and names the fork maintainer or project. Render it in the Help & About legal footer and add the corresponding key to all 11 locale catalogs.
 
@@ -224,7 +224,7 @@ Why this rule exists: users cannot tell an official release from a fork build wh
 
 ```bash
 gh release list --repo <fork-owner>/oxideterm --limit 3
-rg -n 'AnalyseDeCircuit/oxideterm|oxideterm\.app' \
+rg -n 'AnalyseDeCircuit/oxideterm|oxidelab\.app' \
   <composed-release-notes> <base-notes> .github/scripts/compose_release_notes.py
 rg -n 'github\.com/AnalyseDeCircuit/oxideterm/releases' crates/oxideterm-update/src
 rg -n 'settings_view\.help\.copyright|AnalyseDeCircuit|fork' \
@@ -250,14 +250,14 @@ git diff --cached
 Use the established release commit style:
 
 ```bash
-git commit -m "Release OxideTerm <version>"
+git commit -m "Release OxideLab <version>"
 ```
 
 Push the branch before creating the tag. Then create an annotated tag on the verified release commit and push only that tag:
 
 ```bash
 git push origin <branch>
-git tag -a <tag> -m "OxideTerm <version>"
+git tag -a <tag> -m "OxideLab <version>"
 git push origin <tag>
 ```
 
@@ -312,7 +312,7 @@ Treat a missing GitHub Release as expected only when the packaging run was cance
 3. Recreate the annotated local tag on the verified release commit, then update the remote tag with a lease against the old annotated tag object, not the peeled commit:
 
 ```bash
-git tag -fa <tag> -m "OxideTerm <version>" <release-commit>
+git tag -fa <tag> -m "OxideLab <version>" <release-commit>
 git push --force-with-lease=refs/tags/<tag>:<old-tag-object> origin refs/tags/<tag>
 ```
 
@@ -342,7 +342,7 @@ Use this procedure when packaging failed on one or more platforms **after** a pr
 Prerequisites:
 
 - The target release exists (`gh release view <tag>` succeeds).
-- A `Native Package` workflow run produced `OxideTerm-*` artifacts for at least the platforms you want to repair. Main-scoped dispatches are the normal source.
+- A `Native Package` workflow run produced `OxideLab-*` artifacts for at least the platforms you want to repair. Main-scoped dispatches are the normal source.
 
 1. Find the completed run id for the artifacts to republish:
 
@@ -355,7 +355,7 @@ gh run list --repo <owner/repo> --workflow native-package.yml --limit 10
 - `tag`: the release tag to repair, for example `v2.0.15`.
 - `run_id`: the run id from step 1.
 
-3. The workflow validates the tag format, confirms the release exists, downloads `OxideTerm-*` artifacts from that run, re-signs every asset with the minisign key, regenerates `sha256sums.txt`, and uploads with `update_release: true` (overwrite in place).
+3. The workflow validates the tag format, confirms the release exists, downloads `OxideLab-*` artifacts from that run, re-signs every asset with the minisign key, regenerates `sha256sums.txt`, and uploads with `update_release: true` (overwrite in place).
 
 4. Verify the repaired assets on the release page or with:
 

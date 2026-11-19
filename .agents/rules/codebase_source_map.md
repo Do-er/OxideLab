@@ -4,9 +4,9 @@ glob:
 description:
 ---
 
-# OxideTerm Codebase Source Map & Architecture Index
+# OxideLab Codebase Source Map & Architecture Index
 
-本规则为 AI 提供 OxideTerm 全仓库（79 个 Crates）的**功能到源码直达索引地图**。
+本规则为 AI 提供 OxideLab 全仓库（79 个 Crates）的**功能到源码直达索引地图**。
 AI 在接收到用户的功能修改、Bug 修复、UI 调整或性能优化请求时，应优先查阅本地图，直接定位关键文件，严禁全仓库无序盲搜。
 
 ---
@@ -75,7 +75,7 @@ AI 在接收到用户的功能修改、Bug 修复、UI 调整或性能优化请�
 | **多终端分屏网格** | `crates/oxideterm-gpui-app/src/workspace/pane_tree.rs` | 左右分屏、上下分屏、焦点切换、尺寸拖拽 |
 | **全局主窗口装配根入口** | `crates/oxideterm-gpui-app/src/workspace/root/render.rs`<br>`crates/oxideterm-gpui-app/src/workspace/root/init.rs` | 整体视窗布局组装、事件总线分发 |
 | **快捷命令抽屉 (Quick Commands)** | `crates/oxideterm-gpui-app/src/workspace/quick_commands_view.rs` | 常用脚本库、分组抽屉、卡片悬停预览 |
-| **全局命令面板 (Ctrl+P)** | `crates/oxideterm-gpui-app/src/workspace/command_palette/` | 快速搜索、历史命令、快捷操作过滤 |
+| **全局命令面板 (Ctrl+K)** | `crates/oxideterm-gpui-app/src/workspace/command_palette/` | 快速搜索、历史命令、快捷操作过滤 |
 
 ### 2.5 文件管理与传输（File Manager & SFTP）
 | 需求场景 | 关键文件与路径 | 说明 |

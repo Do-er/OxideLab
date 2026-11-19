@@ -1,9 +1,9 @@
 ---
 name: oxideterm-test-audit
-description: Write, revise, or audit OxideTerm tests for observable behavior, credible regressions, and independent contracts. Use when diagnosing a failed test, reviewing test quality, or consolidating redundant coverage. Ordinary test changes use a focused check, not a repository-wide audit.
+description: Write, revise, or audit OxideLab tests for observable behavior, credible regressions, and independent contracts. Use when diagnosing a failed test, reviewing test quality, or consolidating redundant coverage. Ordinary test changes use a focused check, not a repository-wide audit.
 ---
 
-# OxideTerm Test Audit
+# OxideLab Test Audit
 
 Keep useful regression protection at the layer that owns the behavior. Use the smallest review that resolves the requested change; judge outcomes by the contracts preserved and errors detected, not test counts or deleted lines.
 
@@ -73,7 +73,7 @@ For production code removed with a test, also identify its non-test callers and 
 
 These are investigation signals, not automatic deletion rules. Preserve independent security defaults, protocol bytes, persistence and migration formats, plugin APIs, platform behavior, packaging, internationalization, and architecture constraints. Static inspection can be useful when it guards a real contract and survives irrelevant renaming. Slow execution alone does not make a test redundant.
 
-## OxideTerm Boundaries
+## OxideLab Boundaries
 
 | Behavior | Preferred verification boundary |
 | --- | --- |
@@ -101,4 +101,4 @@ Report the decision, the behavior still protected, checks actually run, and any 
 
 ## Source
 
-Adapted from the test-value and evidence principles in OpenClaw's [test-audit](https://github.com/openclaw/openclaw/blob/main/.agents/skills/test-audit/SKILL.md) and [campaign guidance](https://github.com/openclaw/openclaw/blob/main/.agents/skills/test-audit/CAMPAIGN.md). Execution, ownership, and validation here follow OxideTerm's repository rules.
+Adapted from the test-value and evidence principles in OpenClaw's [test-audit](https://github.com/openclaw/openclaw/blob/main/.agents/skills/test-audit/SKILL.md) and [campaign guidance](https://github.com/openclaw/openclaw/blob/main/.agents/skills/test-audit/CAMPAIGN.md). Execution, ownership, and validation here follow OxideLab's repository rules.

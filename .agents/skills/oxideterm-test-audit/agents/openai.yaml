@@ -1,4 +1,4 @@
 interface:
-  display_name: "OxideTerm Test Audit"
-  short_description: "Review OxideTerm tests by behavior and risk"
-  default_prompt: "Use $oxideterm-test-audit to review the requested OxideTerm tests, identify the behavior each protects, and make evidence-backed changes within the requested scope."
+  display_name: "OxideLab Test Audit"
+  short_description: "Review OxideLab tests by behavior and risk"
+  default_prompt: "Use $oxideterm-test-audit to review the requested OxideLab tests, identify the behavior each protects, and make evidence-backed changes within the requested scope."
