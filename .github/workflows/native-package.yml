@@ -355,7 +355,7 @@ jobs:
 
       - name: Package native app
         env:
-          OXIDETERM_VERSION: ${{ needs.validate-release-request.outputs.raw_version }}
+          OXIDELAB_VERSION: ${{ needs.validate-release-request.outputs.raw_version }}
           APPIMAGE_EXTRACT_AND_RUN: ${{ runner.os == 'Linux' && '1' || '' }}
         run: python scripts/release/package_native.py ${{ matrix.target }}
 
@@ -551,7 +551,7 @@ jobs:
 
           for asset in "${assets[@]}"; do
             sig="${asset}.sig"
-            trusted_comment="OxideTerm ${VERSION} $(basename "${asset}")"
+            trusted_comment="OxideLab ${VERSION} $(basename "${asset}")"
             if [[ -n "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD:-}" ]]; then
               printf '%s\n' "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" \
                 | minisign -S -s "${key_path}" -m "${asset}" -x "${sig}" -t "${trusted_comment}"
@@ -598,7 +598,7 @@ jobs:
             dist-release/sha256sums.txt
           tag_name: ${{ steps.release_meta.outputs.tag }}
           target_commitish: ${{ needs.validate-release-request.outputs.release_commit }}
-          name: OxideTerm Native ${{ steps.release_meta.outputs.version }}
+          name: OxideLab Native ${{ steps.release_meta.outputs.version }}
           prerelease: ${{ steps.release_meta.outputs.prerelease }}
           # Stable releases become Latest automatically; prereleases must never
           # displace the current stable release.
@@ -665,80 +665,80 @@ jobs:
             if (isStable) {
               await addAsset(
                 ['darwin-aarch64', 'darwin-aarch64-app', 'macos-aarch64', 'aarch64-apple-darwin'],
-                `OxideTerm_${version}_macos_arm64.app.tar.gz`,
+                `OxideLab_${version}_macos_arm64.app.tar.gz`,
               );
             } else {
               await addAsset(
                 ['darwin-aarch64', 'darwin-aarch64-app', 'macos-aarch64', 'aarch64-apple-darwin'],
-                `OxideTerm_${version}_macos_arm64.app.zip`,
+                `OxideLab_${version}_macos_arm64.app.zip`,
               );
             }
             await addAsset(
               ['darwin-aarch64-portable', 'macos-aarch64-portable', 'aarch64-apple-darwin-portable'],
-              `OxideTerm_${version}_macos_arm64_portable.tar.gz`,
+              `OxideLab_${version}_macos_arm64_portable.tar.gz`,
             );
             if (isStable) {
               await addAsset(
                 ['darwin-x86_64', 'darwin-x86_64-app', 'macos-x86_64', 'x86_64-apple-darwin'],
-                `OxideTerm_${version}_macos_x64.app.tar.gz`,
+                `OxideLab_${version}_macos_x64.app.tar.gz`,
               );
             } else {
               await addAsset(
                 ['darwin-x86_64', 'darwin-x86_64-app', 'macos-x86_64', 'x86_64-apple-darwin'],
-                `OxideTerm_${version}_macos_x64.app.zip`,
+                `OxideLab_${version}_macos_x64.app.zip`,
               );
             }
             await addAsset(
               ['darwin-x86_64-portable', 'macos-x86_64-portable', 'x86_64-apple-darwin-portable'],
-              `OxideTerm_${version}_macos_x64_portable.tar.gz`,
+              `OxideLab_${version}_macos_x64_portable.tar.gz`,
             );
             await addAsset(
               ['linux-aarch64', 'linux-aarch64-appimage', 'aarch64-unknown-linux-gnu'],
-              `OxideTerm_${version}_linux_arm64.AppImage`,
+              `OxideLab_${version}_linux_arm64.AppImage`,
             );
             await addAsset(
               ['linux-x86_64', 'linux-x86_64-appimage', 'x86_64-unknown-linux-gnu'],
-              `OxideTerm_${version}_linux_x64.AppImage`,
+              `OxideLab_${version}_linux_x64.AppImage`,
             );
             await addAsset(
               ['linux-aarch64-portable'],
-              `OxideTerm_${version}_linux_arm64_portable.tar.gz`,
+              `OxideLab_${version}_linux_arm64_portable.tar.gz`,
             );
             await addAsset(
               ['linux-x86_64-portable'],
-              `OxideTerm_${version}_linux_x64_portable.tar.gz`,
+              `OxideLab_${version}_linux_x64_portable.tar.gz`,
             );
             await addAsset(
               ['linux-aarch64-deb'],
-              `OxideTerm_${version}_linux_arm64.deb`,
+              `OxideLab_${version}_linux_arm64.deb`,
             );
             await addAsset(
               ['linux-x86_64-deb'],
-              `OxideTerm_${version}_linux_x64.deb`,
+              `OxideLab_${version}_linux_x64.deb`,
             );
             await addAsset(
               ['linux-aarch64-rpm'],
-              `OxideTerm_${version}_linux_arm64.rpm`,
+              `OxideLab_${version}_linux_arm64.rpm`,
             );
             await addAsset(
               ['linux-x86_64-rpm'],
-              `OxideTerm_${version}_linux_x64.rpm`,
+              `OxideLab_${version}_linux_x64.rpm`,
             );
             await addAsset(
               ['windows-aarch64', 'windows-aarch64-nsis', 'aarch64-pc-windows-msvc', 'aarch64-pc-windows-msvc-nsis'],
-              `OxideTerm_${version}_windows_arm64-setup.exe`,
+              `OxideLab_${version}_windows_arm64-setup.exe`,
             );
             await addAsset(
               ['windows-aarch64-portable'],
-              `OxideTerm_${version}_windows_arm64_portable.zip`,
+              `OxideLab_${version}_windows_arm64_portable.zip`,
             );
             await addAsset(
               ['windows-x86_64', 'windows-x86_64-nsis', 'x86_64-pc-windows-msvc', 'x86_64-pc-windows-msvc-nsis'],
-              `OxideTerm_${version}_windows_x64-setup.exe`,
+              `OxideLab_${version}_windows_x64-setup.exe`,
             );
             await addAsset(
               ['windows-x86_64-portable'],
-              `OxideTerm_${version}_windows_x64_portable.zip`,
+              `OxideLab_${version}_windows_x64_portable.zip`,
             );
 
             if (isStable) {
@@ -953,29 +953,29 @@ jobs:
             const expected = [
               'latest.json',
               'sha256sums.txt',
-              `OxideTerm_${version}_macos_arm64.app.zip`,
-              `OxideTerm_${version}_macos_arm64.dmg`,
-              `OxideTerm_${version}_macos_arm64_portable.tar.gz`,
-              `OxideTerm_${version}_macos_x64.app.zip`,
-              `OxideTerm_${version}_macos_x64.dmg`,
-              `OxideTerm_${version}_macos_x64_portable.tar.gz`,
-              `OxideTerm_${version}_linux_arm64.AppImage`,
-              `OxideTerm_${version}_linux_arm64.deb`,
-              `OxideTerm_${version}_linux_arm64.rpm`,
-              `OxideTerm_${version}_linux_arm64_portable.tar.gz`,
-              `OxideTerm_${version}_linux_x64.AppImage`,
-              `OxideTerm_${version}_linux_x64.deb`,
-              `OxideTerm_${version}_linux_x64.rpm`,
-              `OxideTerm_${version}_linux_x64_portable.tar.gz`,
-              `OxideTerm_${version}_windows_arm64-setup.exe`,
-              `OxideTerm_${version}_windows_arm64_portable.zip`,
-              `OxideTerm_${version}_windows_x64-setup.exe`,
-              `OxideTerm_${version}_windows_x64_portable.zip`,
+              `OxideLab_${version}_macos_arm64.app.zip`,
+              `OxideLab_${version}_macos_arm64.dmg`,
+              `OxideLab_${version}_macos_arm64_portable.tar.gz`,
+              `OxideLab_${version}_macos_x64.app.zip`,
+              `OxideLab_${version}_macos_x64.dmg`,
+              `OxideLab_${version}_macos_x64_portable.tar.gz`,
+              `OxideLab_${version}_linux_arm64.AppImage`,
+              `OxideLab_${version}_linux_arm64.deb`,
+              `OxideLab_${version}_linux_arm64.rpm`,
+              `OxideLab_${version}_linux_arm64_portable.tar.gz`,
+              `OxideLab_${version}_linux_x64.AppImage`,
+              `OxideLab_${version}_linux_x64.deb`,
+              `OxideLab_${version}_linux_x64.rpm`,
+              `OxideLab_${version}_linux_x64_portable.tar.gz`,
+              `OxideLab_${version}_windows_arm64-setup.exe`,
+              `OxideLab_${version}_windows_arm64_portable.zip`,
+              `OxideLab_${version}_windows_x64-setup.exe`,
+              `OxideLab_${version}_windows_x64_portable.zip`,
             ];
             if (!isGpuiPreview && !version.includes('-')) {
               expected.push(
-                `OxideTerm_${version}_macos_arm64.app.tar.gz`,
-                `OxideTerm_${version}_macos_x64.app.tar.gz`,
+                `OxideLab_${version}_macos_arm64.app.tar.gz`,
+                `OxideLab_${version}_macos_x64.app.tar.gz`,
               );
             }
 

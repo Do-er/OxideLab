@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template when OxideTerm **fails to connect or authenticate** but another SSH client (e.g. `ssh`, PuTTY) succeeds with the same credentials.
-        当 OxideTerm **无法连接或认证**，但其他 SSH 客户端（如 `ssh`、PuTTY）使用相同凭据可以成功时，请使用此模板。
+        Use this template when OxideLab **fails to connect or authenticate** but another SSH client (e.g. `ssh`, PuTTY) succeeds with the same credentials.
+        当 OxideLab **无法连接或认证**，但其他 SSH 客户端（如 `ssh`、PuTTY）使用相同凭据可以成功时，请使用此模板。
 
         **One issue per server config.** Do not combine multiple unrelated connection problems.
         **每个 Issue 只报一种服务端配置的问题。** 请勿合并多个不相关的连接故障。
@@ -15,7 +15,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: OxideTerm version / 版本
+      label: OxideLab version / 版本
       description: "e.g. `1.1.13` — from Settings → Help & About, or the title bar"
       placeholder: "1.1.13"
     validations:
@@ -42,8 +42,8 @@ body:
     id: install_source
     attributes:
       label: Installation source / 安装来源
-      description: How did you install OxideTerm? Some bugs are packaging-specific.
-        你是如何安装 OxideTerm 的？部分问题与安装包类型相关。
+      description: How did you install OxideLab? Some bugs are packaging-specific.
+        你是如何安装 OxideLab 的？部分问题与安装包类型相关。
       options:
         - GitHub Release (.dmg / .exe / .AppImage / .deb / .rpm)
         - Homebrew
@@ -87,8 +87,8 @@ body:
     attributes:
       label: Error message or behavior / 错误信息或现象
       description: |
-        Copy the exact error shown by OxideTerm. Include server-side sshd logs if available (`journalctl -u sshd`).
-        请复制 OxideTerm 显示的完整错误信息。如有服务端 sshd 日志（`journalctl -u sshd`），请一并提供。
+        Copy the exact error shown by OxideLab. Include server-side sshd logs if available (`journalctl -u sshd`).
+        请复制 OxideLab 显示的完整错误信息。如有服务端 sshd 日志（`journalctl -u sshd`），请一并提供。
     validations:
       required: true
 
@@ -107,7 +107,7 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: OxideTerm logs / OxideTerm 日志
+      label: OxideLab logs / OxideLab 日志
       description: |
         Paste relevant log output. Redact hostnames, IPs, and secrets.
         请粘贴相关日志输出。请隐去主机名、IP、密钥。

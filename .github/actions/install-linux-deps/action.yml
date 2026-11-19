@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# install-linux-deps — reusable composite action for OxideTerm CI workflows.
+# install-linux-deps — reusable composite action for OxideLab CI workflows.
 #
 # Installs every system library that GPUI, GStreamer, and the native Rust
 # crates need on Linux. Callers append extra packages via:
@@ -7,7 +7,7 @@
 #     EXTRA_PACKAGES: "patchelf curl file"
 # ---------------------------------------------------------------------------
 name: Install Linux system dependencies
-description: Install the native Linux libraries required by OxideTerm CI jobs
+description: Install the native Linux libraries required by OxideLab CI jobs
 
 inputs:
   extra_packages:

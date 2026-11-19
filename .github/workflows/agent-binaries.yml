@@ -47,16 +47,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -x crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-x86_64-linux-musl
-          test -x crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-aarch64-linux-musl
-          file crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-*-linux-musl
-          sha256sum crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-*-linux-musl
+          test -x crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-x86_64-linux-musl
+          test -x crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-aarch64-linux-musl
+          file crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-*-linux-musl
+          sha256sum crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-*-linux-musl
 
       - name: Upload bundled agents
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: oxideterm-agent-linux-musl
+          name: oxidelab-agent-linux-musl
           path: |
-            crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-x86_64-linux-musl
-            crates/oxideterm-gpui-app/resources/agents/oxideterm-agent-aarch64-linux-musl
+            crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-x86_64-linux-musl
+            crates/oxideterm-gpui-app/resources/agents/oxidelab-agent-aarch64-linux-musl
           if-no-files-found: error

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="600" viewBox="0 0 1100 600" role="img" aria-labelledby="title description">
-  <title id="title">OxideTerm terminal throughput across two optimization rounds</title>
+  <title id="title">OxideLab terminal throughput across two optimization rounds</title>
   <desc id="description">Grouped bars compare median process-to-PTY throughput before optimization, in 2.0.23, and in 2.0.24 for plain, ANSI, Unicode, and long CSI workloads.</desc>
   <style>
     text { fill: #1e293b; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }

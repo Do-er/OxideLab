@@ -1,12 +1,12 @@
-# OxideTerm Native Beta
+# OxideLab Native Beta
 
-This is a beta OxideTerm native desktop release.
+This is a beta OxideLab native desktop release.
 
 Use this channel when you want to test changes before they reach the stable channel. Beta builds may include packaging, updater, compatibility, and workflow changes that still need wider validation.
 
 ## What This Beta Is
 
-- A pre-stable OxideTerm desktop build.
+- A pre-stable OxideLab desktop build.
 - Intended for users who can tolerate small regressions and report issues with enough detail to reproduce them.
 - Published with updater metadata for the beta channel.
 - Less stable than the stable channel and intended for pre-release validation.
@@ -23,7 +23,7 @@ The v1 plugin marketplace is frozen. Its original URL, exact contents, and refer
 
 ## Beta Notes
 
-- Keep a stable build installed if OxideTerm is business-critical for your daily work.
+- Keep a stable build installed if OxideLab is business-critical for your daily work.
 - Report regressions with OS, CPU architecture, installed asset name, and steps to reproduce.
 - If a beta workflow behaves differently from the stable release, include both results in the issue.
 
@@ -35,9 +35,9 @@ The v1 plugin marketplace is frozen. Its original URL, exact contents, and refer
 Downloaded `.dmg` files may be quarantined by Gatekeeper. Run in Terminal:
 
 ```bash
-xattr -cr ~/Downloads/OxideTerm_*.dmg
+xattr -cr ~/Downloads/OxideLab_*.dmg
 # or after install / 或安装后
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -50,15 +50,15 @@ If SmartScreen warns, click **More info** -> **Run anyway**.
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian/Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 ```
 
 </details>
 
 ## Links
 
-- GitHub: https://github.com/Do-er/oxideterm
-- Changelog: https://github.com/Do-er/oxideterm/blob/dev/.github/release-notes/stable-changelog.md
+- GitHub: https://github.com/Do-er/OxideLab
+- Changelog: https://github.com/Do-er/OxideLab/blob/dev/.github/release-notes/stable-changelog.md

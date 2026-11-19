@@ -1,16 +1,16 @@
-# OxideTerm Native GPUI Preview
+# OxideLab Native GPUI Preview
 
-This is a GPUI/native preview build for testing the next-generation OxideTerm desktop app.
+This is a GPUI/native preview build for testing the next-generation OxideLab desktop app.
 
-If you just want the most stable daily-use OxideTerm release, do not download this preview yet. Use the current Tauri/WebView release instead. This preview exists so users can try the native UI early and report parity, packaging, terminal, SFTP, port forwarding, SSH, and AI workflow issues before it becomes the default app.
+If you just want the most stable daily-use OxideLab release, do not download this preview yet. Use the current Tauri/WebView release instead. This preview exists so users can try the native UI early and report parity, packaging, terminal, SFTP, port forwarding, SSH, and AI workflow issues before it becomes the default app.
 
-> **Final Preview notice:** This is the last GPUI Preview release. The supported upgrade path to the stable OxideTerm 2.0 release starts from an installed OxideTerm 1.x client. Preview builds will not be upgraded in place to stable 2.0. Keep or install the current 1.x client and use its upgrade flow when OxideTerm 2.0 is released.
+> **Final Preview notice:** This is the last GPUI Preview release. The supported upgrade path to the stable OxideLab 2.0 release starts from an installed OxideTerm 1.x client. Preview builds will not be upgraded in place to stable 2.0. Keep or install the current 1.x client and use its upgrade flow when OxideLab 2.0 is released.
 
 ## What This Preview Is
 
-- A native GPUI desktop build of OxideTerm.
+- A native GPUI desktop build of OxideLab.
 - A preview channel, not the recommended stable channel.
-- Built from the same product direction as OxideTerm: local-first remote server work over SSH, with terminal, SFTP, port forwarding, connection management, file workflows, and OxideSens AI context.
+- Built from the same product direction as OxideLab: local-first remote server work over SSH, with terminal, SFTP, port forwarding, connection management, file workflows, and OxideSens AI context.
 - Intended for users who are comfortable testing early builds and filing detailed issues.
 
 <!-- RELEASE_CHANGELOG -->
@@ -41,9 +41,9 @@ If you just want the most stable daily-use OxideTerm release, do not download th
 Downloaded `.dmg` files may be quarantined by Gatekeeper. Run in Terminal:
 
 ```bash
-xattr -cr ~/Downloads/OxideTerm_*.dmg
+xattr -cr ~/Downloads/OxideLab_*.dmg
 # or after install / 或安装后
-xattr -cr /Applications/OxideTerm.app
+xattr -cr /Applications/OxideLab.app
 ```
 
 ### Windows
@@ -56,10 +56,10 @@ If SmartScreen warns, click **More info** -> **Run anyway**.
 
 ```bash
 # AppImage
-chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+chmod +x OxideLab_*_linux_*.AppImage && ./OxideLab_*_linux_*.AppImage
 
 # Debian/Ubuntu
-sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+sudo dpkg -i OxideLab_*_linux_*.deb && sudo apt-get install -f
 ```
 
 </details>
@@ -70,7 +70,7 @@ Please include:
 
 - OS and CPU architecture.
 - The exact asset you installed.
-- Whether this is a fresh install or an update from another OxideTerm build.
+- Whether this is a fresh install or an update from another OxideLab build.
 - Steps to reproduce.
 - Screenshots or logs when useful.
 - Whether the same workflow works in the Tauri version.

@@ -2,12 +2,12 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1296pt" height="720pt" viewBox="0 0 1296 720" xmlns="http://www.w3.org/2000/svg" version="1.1">
- <title>OxideTerm 2.1.0 terminal throughput comparison</title>
+ <title>OxideLab 2.1.0 terminal throughput comparison</title>
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:title>OxideTerm 2.1.0 terminal throughput comparison</dc:title>
+    <dc:title>OxideLab 2.1.0 terminal throughput comparison</dc:title>
     <dc:date>2026-09-25T17:35:10Z</dc:date>
     <dc:description>Workload order: plain, ANSI, Unicode, long CSI. Historical published values from terminal-performance-2.0.28-comparison.svg; 2.1.0 run 20260925T173510Z-6747. Median process-to-PTY throughput in MiB/s; 16 MiB, 1 warm-up, 3 measured runs. {"Before optimization": [3.144, 7.33, 4.393, 10.191], "2.0.23": [69.031, 88.384, 68.711, 96.685], "2.0.24": [82.864, 91.609, 69.988, 99.644], "2.0.25": [89.959, 94.358, 77.642, 100.82], "2.0.28": [119.755, 100.111, 96.454, 104.029], "2.1.0": [144.009, 121.268, 109.188, 128.763]}</dc:description>
     <dc:format>image/svg+xml</dc:format>
@@ -2316,7 +2316,7 @@ z
    </g>
   </g>
   <g id="text_45">
-   <!-- OxideTerm 2.1.0 -->
+   <!-- OxideLab 2.1.0 -->
    <g style="fill: #edf2ed" transform="translate(84.24 59.04) scale(0.29 -0.29)">
     <defs>
      <path id="TeXGyrePagella-Bold-51" d="M 5037 2214

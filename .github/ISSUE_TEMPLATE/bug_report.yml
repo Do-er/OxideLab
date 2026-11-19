@@ -18,7 +18,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: OxideTerm version / 版本
+      label: OxideLab version / 版本
       description: e.g. `0.20.1` (from About or title bar)
       placeholder: "0.20.1"
     validations:
@@ -45,8 +45,8 @@ body:
     id: install_source
     attributes:
       label: Installation source / 安装来源
-      description: How did you install OxideTerm? Some bugs are packaging-specific.
-        你是如何安装 OxideTerm 的？部分问题与安装包类型相关。
+      description: How did you install OxideLab? Some bugs are packaging-specific.
+        你是如何安装 OxideLab 的？部分问题与安装包类型相关。
       options:
         - GitHub Release (.dmg / .exe / .AppImage / .deb / .rpm)
         - Homebrew
@@ -164,8 +164,8 @@ body:
         - label: This is one reproducible bug, not a usage question or feature request / 这是一个可复现的 bug，而不是使用问题或功能建议
           required: true
         - label: |
-            I provided the OxideTerm version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
-            我已提供 OxideTerm 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
+            I provided the OxideLab version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
+            我已提供 OxideLab 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
           required: true
         - label: |
             I removed passwords, private keys, and other secrets from this report.

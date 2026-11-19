@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="600" viewBox="0 0 1100 600" role="img" aria-labelledby="title description">
-  <title id="title">OxideTerm release-build terminal throughput before and after optimization</title>
+  <title id="title">OxideLab release-build terminal throughput before and after optimization</title>
   <desc id="description">Grouped bars compare median process-to-PTY throughput for plain, ANSI, Unicode, and long CSI workloads. Throughput increased from 3.144 to 69.031, 7.330 to 88.384, 4.393 to 68.711, and 10.191 to 96.685 MiB per second.</desc>
   <style>
     text { fill: #1e293b; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }

@@ -12,7 +12,7 @@ from urllib.parse import quote
 
 CHANGELOG_MARKER = "<!-- RELEASE_CHANGELOG -->"
 DOWNLOADS_MARKER = "<!-- RELEASE_DOWNLOADS -->"
-REPOSITORY_RELEASE_URL = "https://github.com/Do-er/oxideterm/releases/download"
+REPOSITORY_RELEASE_URL = "https://github.com/Do-er/OxideLab/releases/download"
 
 
 def normalize_leading_summary(section: str) -> str:
@@ -49,16 +49,16 @@ def release_asset_url(tag: str, filename: str) -> str:
 def stable_download_table(version: str, tag: str) -> str:
     """Render the recommended installer matrix without listing portable variants."""
     filenames = {
-        "windows_x64": f"OxideTerm_{version}_windows_x64-setup.exe",
-        "windows_arm64": f"OxideTerm_{version}_windows_arm64-setup.exe",
-        "macos_x64": f"OxideTerm_{version}_macos_x64.dmg",
-        "macos_arm64": f"OxideTerm_{version}_macos_arm64.dmg",
-        "linux_x64_appimage": f"OxideTerm_{version}_linux_x64.AppImage",
-        "linux_x64_deb": f"OxideTerm_{version}_linux_x64.deb",
-        "linux_x64_rpm": f"OxideTerm_{version}_linux_x64.rpm",
-        "linux_arm64_appimage": f"OxideTerm_{version}_linux_arm64.AppImage",
-        "linux_arm64_deb": f"OxideTerm_{version}_linux_arm64.deb",
-        "linux_arm64_rpm": f"OxideTerm_{version}_linux_arm64.rpm",
+        "windows_x64": f"OxideLab_{version}_windows_x64-setup.exe",
+        "windows_arm64": f"OxideLab_{version}_windows_arm64-setup.exe",
+        "macos_x64": f"OxideLab_{version}_macos_x64.dmg",
+        "macos_arm64": f"OxideLab_{version}_macos_arm64.dmg",
+        "linux_x64_appimage": f"OxideLab_{version}_linux_x64.AppImage",
+        "linux_x64_deb": f"OxideLab_{version}_linux_x64.deb",
+        "linux_x64_rpm": f"OxideLab_{version}_linux_x64.rpm",
+        "linux_arm64_appimage": f"OxideLab_{version}_linux_arm64.AppImage",
+        "linux_arm64_deb": f"OxideLab_{version}_linux_arm64.deb",
+        "linux_arm64_rpm": f"OxideLab_{version}_linux_arm64.rpm",
     }
 
     def link(label: str, key: str) -> str:

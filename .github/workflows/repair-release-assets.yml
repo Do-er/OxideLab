@@ -127,7 +127,7 @@ jobs:
 
           for asset in "${assets[@]}"; do
             sig="${asset}.sig"
-            trusted_comment="OxideTerm ${version} $(basename "${asset}")"
+            trusted_comment="OxideLab ${version} $(basename "${asset}")"
             if [[ -n "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD:-}" ]]; then
               printf '%s\n' "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" \
                 | minisign -S -s "${key_path}" -m "${asset}" -x "${sig}" -t "${trusted_comment}"

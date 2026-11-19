@@ -10,7 +10,7 @@ on:
         required: false
         type: number
       verify_app:
-        description: 'Verify the OxideTerm Maintainer GitHub App installation'
+        description: 'Verify the OxideLab Maintainer GitHub App installation'
         required: false
         default: false
         type: boolean
@@ -41,8 +41,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
-          client-id: ${{ vars.OXIDETERM_AUTOMATION_CLIENT_ID }}
-          private-key: ${{ secrets.OXIDETERM_AUTOMATION_PRIVATE_KEY }}
+          client-id: ${{ vars.OXIDELAB_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.OXIDELAB_AUTOMATION_PRIVATE_KEY }}
           permission-contents: read
 
       - name: Verify repository installation
@@ -73,7 +73,7 @@ jobs:
   shadow-triage:
     name: Shadow issue triage
     if: >-
-      vars.OXIDETERM_AUTOMATION_MODE != 'disabled'
+      vars.OXIDELAB_AUTOMATION_MODE != 'disabled'
       && !endsWith(github.actor, '[bot]')
       && (
         github.event_name == 'issues'

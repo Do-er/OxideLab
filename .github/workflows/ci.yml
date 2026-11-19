@@ -73,7 +73,7 @@ jobs:
         if: steps.scope.outputs.rust == 'true'
         env:
           # Cargo runs each package's tests from its crate directory.
-          OXIDETERM_AGENT_DIR: ${{ github.workspace }}/crates/oxideterm-gpui-app/resources/agents
+          OXIDELAB_AGENT_DIR: ${{ github.workspace }}/crates/oxideterm-gpui-app/resources/agents
         run: cargo test --workspace
 
       - name: XIM client protocol regression tests
