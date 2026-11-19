@@ -10,7 +10,7 @@ use oxideterm_secret_store::NativeSecretStore;
 #[ignore = "touches the current user's macOS keychain"]
 fn real_keychain_round_trip_preserves_multiline_secret() {
     let store = NativeSecretStore::new(format!(
-        "com.oxideterm.test.multiline.{}",
+        "com.oxidelab.test.multiline.{}",
         std::process::id()
     ));
     let account = "native-secret-store-multiline-round-trip";
@@ -37,7 +37,7 @@ fn real_keychain_round_trip_preserves_multiline_secret() {
 #[test]
 #[ignore = "touches the current user's macOS keychain"]
 fn real_keychain_round_trip_uses_preview_14_access() {
-    let store = NativeSecretStore::new(format!("com.oxideterm.test.{}", std::process::id()));
+    let store = NativeSecretStore::new(format!("com.oxidelab.test.{}", std::process::id()));
     let account = "native-secret-store-round-trip";
     let secret = "deadbeef0123";
 

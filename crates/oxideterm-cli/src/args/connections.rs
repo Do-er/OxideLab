@@ -10,7 +10,7 @@ use super::{JsonArgs, WriteArgs};
     long_about = "Inspect and manage saved SSH connections and groups. Export and diagnostics output omit credential values; write commands default to dry-run unless confirmed with --yes."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm connections list\n  oxideterm connections search prod --json\n  oxideterm connections open prod\n  oxideterm connections create --spec ./connection.json --dry-run\n  oxideterm connections rename prod production --yes\n  oxideterm connections export --format raw-safe --json"
+    after_help = "Examples:\n  oxidelab connections list\n  oxidelab connections search prod --json\n  oxidelab connections open prod\n  oxidelab connections create --spec ./connection.json --dry-run\n  oxidelab connections rename prod production --yes\n  oxidelab connections export --format raw-safe --json"
 )]
 pub struct ConnectionsCommand {
     #[command(subcommand)]

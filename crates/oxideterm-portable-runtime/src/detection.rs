@@ -217,7 +217,7 @@ fn is_portable_marker_file(marker_path: &Path) -> bool {
         return false;
     };
     // Regression guard for GitHub #143: Linux packages may install an unrelated
-    // executable named `portable` beside `oxideterm` under a shared bin dir.
+    // executable named `portable` beside `oxidelab` under a shared bin dir.
     // Only an intentionally-created empty marker enables portable mode.
     metadata.is_file() && metadata.len() == 0
 }
@@ -300,7 +300,7 @@ mod tests {
     #[test]
     fn marker_enables_portable_mode_for_executable_dir() {
         let temp = tempdir().unwrap();
-        let exe_path = temp.path().join("OxideTerm.exe");
+        let exe_path = temp.path().join("OxideLab.exe");
         std::fs::write(&exe_path, b"").unwrap();
         std::fs::write(temp.path().join(PORTABLE_MARKER_FILENAME), b"").unwrap();
 
@@ -322,7 +322,7 @@ mod tests {
     #[test]
     fn issue_143_portable_binary_name_does_not_enable_portable_mode() {
         let temp = tempdir().unwrap();
-        let exe_path = temp.path().join("oxideterm");
+        let exe_path = temp.path().join("oxidelab");
         std::fs::write(&exe_path, b"").unwrap();
         std::fs::write(temp.path().join(PORTABLE_MARKER_FILENAME), b"\x7fELF...").unwrap();
 
@@ -336,7 +336,7 @@ mod tests {
     #[test]
     fn portable_json_enables_portable_and_custom_data_dir() {
         let temp = tempdir().unwrap();
-        let exe_path = temp.path().join("OxideTerm");
+        let exe_path = temp.path().join("OxideLab");
         std::fs::write(&exe_path, b"").unwrap();
         std::fs::write(
             temp.path().join(PORTABLE_CONFIG_FILENAME),
@@ -360,7 +360,7 @@ mod tests {
     #[test]
     fn portable_json_rejects_parent_relative_data_dir() {
         let temp = tempdir().unwrap();
-        let exe_path = temp.path().join("OxideTerm");
+        let exe_path = temp.path().join("OxideLab");
         std::fs::write(&exe_path, b"").unwrap();
         std::fs::write(
             temp.path().join(PORTABLE_CONFIG_FILENAME),
@@ -376,7 +376,7 @@ mod tests {
     #[test]
     fn disabled_portable_json_takes_precedence_over_marker() {
         let temp = tempdir().unwrap();
-        let exe_path = temp.path().join("OxideTerm");
+        let exe_path = temp.path().join("OxideLab");
         std::fs::write(&exe_path, b"").unwrap();
         std::fs::write(temp.path().join(PORTABLE_MARKER_FILENAME), b"").unwrap();
         std::fs::write(

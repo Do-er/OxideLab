@@ -11,7 +11,7 @@ use super::{JsonArgs, WriteArgs};
     long_about = "Manage terminal Quick Commands independently from portable .oxide bundles."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm quick-commands list\n  oxideterm quick-commands create --name Uptime --command uptime --category system --yes\n  oxideterm quick-commands export --json"
+    after_help = "Examples:\n  oxidelab quick-commands list\n  oxidelab quick-commands create --name Uptime --command uptime --category system --yes\n  oxidelab quick-commands export --json"
 )]
 pub struct QuickCommandsCommand {
     #[command(subcommand)]

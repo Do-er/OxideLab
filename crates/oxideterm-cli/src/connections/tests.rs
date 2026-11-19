@@ -66,7 +66,7 @@ fn connection_specs_resolve_and_persist_totp_bindings() {
     }
     use clap::Parser;
     let cli = crate::args::Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "edit",
         &owner,
@@ -117,6 +117,7 @@ fn connection_specs_resolve_and_persist_totp_bindings() {
 pub(crate) fn sample_connection(id: &str, name: &str) -> ConnectionInfo {
     ConnectionInfo {
         totp_credential_id: None,
+        account_credential_id: None,
         empty_password: false,
         id: id.to_string(),
         name: name.to_string(),

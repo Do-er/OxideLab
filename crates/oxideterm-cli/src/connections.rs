@@ -142,7 +142,7 @@ fn open_connection(args: ConnectionOpenArgs) -> CliResult<i32> {
     // connection options, credential references, or runtime node identities.
     crate::ssh::launch_saved_connection(connection.id.clone()).map_err(|error| {
         // Preserve structured output for this command without changing the
-        // existing text-only `oxideterm ssh` launch surface.
+        // existing text-only `oxidelab ssh` launch surface.
         CliError::new(error.code, error.message, args.json)
     })?;
     match output::format_from_flag(args.json) {

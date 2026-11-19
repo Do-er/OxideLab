@@ -293,7 +293,7 @@ fn format_ssh_limitation_text(limitation: &SshCapabilityLimitation) -> String {
 fn format_ssh_capability_layer(layer: SshCapabilityLayer) -> &'static str {
     match layer {
         SshCapabilityLayer::RusshCore => "russh-core",
-        SshCapabilityLayer::OxideTermIntegration => "oxideterm-integration",
+        SshCapabilityLayer::OxideLabIntegration => "oxidelab-integration",
     }
 }
 
@@ -312,7 +312,7 @@ mod tests {
     #[test]
     fn missing_file_is_reported_without_error() {
         let path =
-            std::env::temp_dir().join(format!("oxideterm-cli-missing-{}", std::process::id()));
+            std::env::temp_dir().join(format!("oxidelab-cli-missing-{}", std::process::id()));
 
         let diagnostic = file_diagnostic("missing", &path);
 

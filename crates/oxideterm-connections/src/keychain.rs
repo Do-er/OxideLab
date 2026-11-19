@@ -10,7 +10,7 @@ use std::{
         atomic::{AtomicBool, Ordering},
     },
 };
-const SERVICE_NAME: &str = "com.oxideterm.ssh";
+const SERVICE_NAME: &str = "com.oxidelab.ssh";
 const PORTABLE_ACCOUNT_PREFIX: &str = "portable:v1:";
 const LEGACY_ACCOUNT_SEPARATOR: &str = "@";
 
@@ -294,7 +294,7 @@ fn legacy_portable_account_suffix(id: &str) -> String {
 
 fn portable_keychain_enabled() -> Result<bool> {
     oxideterm_portable_runtime::is_portable_mode()
-        .context("failed to determine OxideTerm portable mode")
+        .context("failed to determine OxideLab portable mode")
 }
 
 #[cfg(test)]
@@ -315,7 +315,7 @@ mod tests {
 
     #[test]
     fn batch_access_reuses_one_guard_for_multiple_secret_reads() {
-        let keychain = ConnectionKeychain::with_service("com.oxideterm.test.batch");
+        let keychain = ConnectionKeychain::with_service("com.oxidelab.test.batch");
         keychain.store("first", &SecretString::from("one")).unwrap();
         keychain
             .store("second", &SecretString::from("two"))

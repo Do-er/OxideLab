@@ -304,7 +304,7 @@ fn export_connections_to_oxide_inner(
 
     let metadata = OxideMetadata {
         exported_at: Utc::now(),
-        exported_by: format!("OxideTerm v{}", env!("CARGO_PKG_VERSION")),
+        exported_by: format!("OxideLab v{}", env!("CARGO_PKG_VERSION")),
         description: options.description,
         num_connections: payload.connections.len() + payload.plugin_profiles.len(),
         connection_names: payload

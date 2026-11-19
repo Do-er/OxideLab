@@ -137,7 +137,7 @@ mod tests {
 
     fn unique_temp_dir(name: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-conn-ssh-keys-{name}-{}-{}",
+            "oxidelab-conn-ssh-keys-{name}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -757,7 +757,7 @@ mod tests {
     #[test]
     fn saving_default_key_resolves_first_parseable_or_promptable_key_path() {
         let dir = std::env::temp_dir().join(format!(
-            "oxideterm-conn-default-key-{}-{}",
+            "oxidelab-conn-default-key-{}-{}",
             std::process::id(),
             Utc::now().timestamp_nanos_opt().unwrap_or_default()
         ));
@@ -781,7 +781,7 @@ mod tests {
     #[test]
     fn saving_default_key_can_return_encrypted_key_to_prompt_later() {
         let dir = std::env::temp_dir().join(format!(
-            "oxideterm-conn-default-key-encrypted-{}-{}",
+            "oxidelab-conn-default-key-encrypted-{}-{}",
             std::process::id(),
             Utc::now().timestamp_nanos_opt().unwrap_or_default()
         ));

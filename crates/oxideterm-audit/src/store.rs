@@ -118,7 +118,7 @@ impl AuditStore {
                         )
                         .map_err(|_| AuditError::Integrity)?,
                 );
-                if clear.as_slice() != b"oxideterm-audit-v1" {
+                if clear.as_slice() != b"oxidelab-audit-v1" {
                     return Err(AuditError::Integrity);
                 }
                 (id, cipher, key)
@@ -144,7 +144,7 @@ impl AuditStore {
                         .encrypt(
                             XNonce::from_slice(&nonce),
                             Payload {
-                                msg: b"oxideterm-audit-v1",
+                                msg: b"oxidelab-audit-v1",
                                 aad: id.as_bytes(),
                             },
                         )
@@ -596,7 +596,7 @@ impl AuditStore {
         // A keyed digest keeps caller-provided session identities out of SQLite indexes and WAL.
         let mut digest = Sha256::new();
         digest.update(&self.index_key);
-        digest.update(b"oxideterm-audit-session-v1\0");
+        digest.update(b"oxidelab-audit-session-v1\0");
         digest.update(id.as_bytes());
         format!("{:x}", digest.finalize())
     }

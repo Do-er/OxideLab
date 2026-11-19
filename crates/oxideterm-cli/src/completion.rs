@@ -38,7 +38,7 @@ fn generate_completion(shell: CompletionShell) -> CliResult<()> {
     let binary_name = command.get_name().to_string();
     let shell: Shell = shell.into();
     // Completion scripts are generated to stdout so shell installers and CI
-    // jobs can redirect them without touching OxideTerm state.
+    // jobs can redirect them without touching OxideLab state.
     generate(shell, &mut command, binary_name, &mut std::io::stdout());
     Ok(())
 }
@@ -71,7 +71,7 @@ fn install_completion(shell: CompletionShell, force: bool) -> CliResult<()> {
     let mut command = Cli::command();
     let mut bytes = Vec::new();
     let generator: Shell = shell.into();
-    generate(generator, &mut command, "oxideterm", &mut bytes);
+    generate(generator, &mut command, "oxidelab", &mut bytes);
     fs::write(&path, bytes).map_err(|error| {
         CliError::new(
             "completion_install_failed",
@@ -95,11 +95,11 @@ fn completion_path(shell: CompletionShell) -> CliResult<PathBuf> {
         )
     })?;
     Ok(match shell {
-        CompletionShell::Bash => home.join(".local/share/bash-completion/completions/oxideterm"),
-        CompletionShell::Elvish => home.join(".elvish/lib/oxideterm-completions.elv"),
-        CompletionShell::Fish => home.join(".config/fish/completions/oxideterm.fish"),
-        CompletionShell::PowerShell => home.join("Documents/PowerShell/Completions/oxideterm.ps1"),
-        CompletionShell::Zsh => home.join(".zfunc/_oxideterm"),
+        CompletionShell::Bash => home.join(".local/share/bash-completion/completions/oxidelab"),
+        CompletionShell::Elvish => home.join(".elvish/lib/oxidelab-completions.elv"),
+        CompletionShell::Fish => home.join(".config/fish/completions/oxidelab.fish"),
+        CompletionShell::PowerShell => home.join("Documents/PowerShell/Completions/oxidelab.ps1"),
+        CompletionShell::Zsh => home.join(".zfunc/_oxidelab"),
     })
 }
 
@@ -129,12 +129,12 @@ mod tests {
     #[test]
     fn completion_paths_use_shell_specific_file_names() {
         let zsh = completion_path(CompletionShell::Zsh).unwrap();
-        assert!(path_ends_with(&zsh, ".zfunc/_oxideterm"));
+        assert!(path_ends_with(&zsh, ".zfunc/_oxidelab"));
 
         let fish = completion_path(CompletionShell::Fish).unwrap();
         assert!(path_ends_with(
             &fish,
-            ".config/fish/completions/oxideterm.fish"
+            ".config/fish/completions/oxidelab.fish"
         ));
     }
 

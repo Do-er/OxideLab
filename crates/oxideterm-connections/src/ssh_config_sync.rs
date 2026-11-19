@@ -35,7 +35,7 @@ impl SshConfigSyncService {
         let (stop_tx, stop_rx) = mpsc::channel();
         let interval = interval.max(Duration::from_secs(1));
         let worker = thread::Builder::new()
-            .name("oxideterm-ssh-config-sync".to_string())
+            .name("oxidelab-ssh-config-sync".to_string())
             .spawn(move || {
                 let mut previous_hosts = None;
                 loop {
@@ -255,7 +255,7 @@ mod tests {
     use uuid::Uuid;
 
     fn temp_path(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!("oxideterm-ssh-sync-{name}-{}", Uuid::new_v4()))
+        std::env::temp_dir().join(format!("oxidelab-ssh-sync-{name}-{}", Uuid::new_v4()))
     }
 
     fn write_config(path: &Path, hostname: &str) {
@@ -318,12 +318,16 @@ mod tests {
 
         assert_eq!(outcome.updated, vec!["production"]);
         assert!(connection.options.agent_forwarding);
+        // Home expansion joins with platform separators, so normalize before
+        // asserting the OpenSSH-owned agent socket tail.
         assert!(
             connection
                 .options
                 .identity_agent
                 .as_deref()
-                .is_some_and(|path| path.ends_with("/.ssh/agent-b.sock"))
+                .is_some_and(|path| path
+                    .replace(std::path::MAIN_SEPARATOR, "/")
+                    .ends_with("/.ssh/agent-b.sock"))
         );
         let _ = std::fs::remove_dir_all(directory);
     }
@@ -393,6 +397,7 @@ mod tests {
         store
             .upsert(SaveConnectionRequest {
                 totp_credential_id: None,
+                account_credential_id: None,
                 id: None,
                 name: "production".to_string(),
                 group: None,

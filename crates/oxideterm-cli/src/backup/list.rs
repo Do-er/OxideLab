@@ -265,7 +265,7 @@ mod tests {
     #[test]
     fn inspect_summary_counts_sections_and_records() {
         let summary = inspect_summary(&json!({
-            "format": "oxideterm-cli-backup-v1",
+            "format": "oxidelab-cli-backup-v1",
             "createdAtMs": 1,
             "settings": { "sectionIds": ["general"] },
             "connections": { "records": [1, 2] },

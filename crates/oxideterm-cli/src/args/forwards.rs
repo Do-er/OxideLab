@@ -10,7 +10,7 @@ use super::{JsonArgs, WriteArgs};
     long_about = "Manage saved SSH port forwards independently from portable .oxide bundles. Write commands default to dry-run unless confirmed with --yes."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm forwards list\n  oxideterm forwards create --type local --bind-port 8080 --target-host localhost --target-port 80 --connection prod --yes\n  oxideterm forwards edit web --bind-port 8081 --yes\n  oxideterm forwards export --json"
+    after_help = "Examples:\n  oxidelab forwards list\n  oxidelab forwards create --type local --bind-port 8080 --target-host localhost --target-port 80 --connection prod --yes\n  oxidelab forwards edit web --bind-port 8081 --yes\n  oxidelab forwards export --json"
 )]
 pub struct ForwardsCommand {
     #[command(subcommand)]

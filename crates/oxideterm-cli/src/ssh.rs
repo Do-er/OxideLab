@@ -24,7 +24,7 @@ use crate::error::{CliError, CliResult};
     long_about = "Open a temporary SSH terminal in the native GPUI application. Passwords are accepted only from stdin so they do not appear in shell history or process lists."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm ssh user@example.com\n  oxideterm ssh user@example.com -p 2222\n  printf '%s' \"$SSH_PASSWORD\" | oxideterm ssh user@example.com --password-stdin"
+    after_help = "Examples:\n  oxidelab ssh user@example.com\n  oxidelab ssh user@example.com -p 2222\n  printf '%s' \"$SSH_PASSWORD\" | oxidelab ssh user@example.com --password-stdin"
 )]
 pub struct SshLaunchArgs {
     #[arg(help = "SSH target in user@host form")]
@@ -86,7 +86,7 @@ fn build_launch(args: SshLaunchArgs) -> CliResult<TemporarySshLaunch> {
         .map_err(|error| {
             CliError::new(
                 "invalid_ssh_target",
-                format!("{error}. Use user@host, for example: oxideterm ssh alice@example.com"),
+                format!("{error}. Use user@host, for example: oxidelab ssh alice@example.com"),
                 false,
             )
         })?;
@@ -166,7 +166,7 @@ fn unique_launch_path() -> PathBuf {
         .map(|duration| duration.as_nanos())
         .unwrap_or_default();
     env::temp_dir().join(format!(
-        "oxideterm-connection-launch-{}-{stamp}.json",
+        "oxidelab-connection-launch-{}-{stamp}.json",
         std::process::id()
     ))
 }
@@ -228,7 +228,7 @@ fn spawn_macos_bundle(request_path: &Path) -> CliResult<()> {
     Command::new("open")
         .args([
             "-b",
-            "com.analysecircuit.OxideTerm",
+            "com.oxidelab.app",
             "--args",
             "--connection-launch-file",
         ])

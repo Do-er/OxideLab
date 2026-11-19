@@ -17,13 +17,13 @@ use zeroize::Zeroizing;
 
 use crate::{PortableError, portable_keystore_file_path};
 
-const PORTABLE_KEYSTORE_FORMAT: &str = "oxideterm.portable.keystore";
+const PORTABLE_KEYSTORE_FORMAT: &str = "oxidelab.portable.keystore";
 const PORTABLE_KEYSTORE_VERSION: u32 = 1;
 const PORTABLE_KEYSTORE_NONCE_LEN: usize = 12;
 const PORTABLE_KEYSTORE_SALT_LEN: usize = 32;
 const PORTABLE_KEYSTORE_KDF_V1: u32 = 0x0001;
 const PORTABLE_KEYSTORE_CURRENT_KDF: u32 = PORTABLE_KEYSTORE_KDF_V1;
-const PORTABLE_AUTO_UNLOCK_SERVICE: &str = "com.oxideterm.portable-auto-unlock";
+const PORTABLE_AUTO_UNLOCK_SERVICE: &str = "com.oxidelab.portable-auto-unlock";
 
 static PORTABLE_KEYSTORE_SESSION: LazyLock<RwLock<Option<PortableKeystoreSession>>> =
     LazyLock::new(|| RwLock::new(None));

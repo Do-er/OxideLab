@@ -43,7 +43,7 @@ mod platform {
     use std::sync::mpsc;
 
     // LAPolicy.deviceOwnerAuthenticationWithBiometrics. The application password remains
-    // OxideTerm's fallback instead of asking macOS to substitute the account password.
+    // OxideLab's fallback instead of asking macOS to substitute the account password.
     const BIOMETRIC_POLICY: i64 = 1;
     const LA_ERROR_USER_CANCEL: isize = -2;
     const LA_ERROR_USER_FALLBACK: isize = -3;

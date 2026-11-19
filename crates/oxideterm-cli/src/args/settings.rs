@@ -7,10 +7,10 @@ use super::{JsonArgs, OutputArgs, WriteArgs};
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Read, validate, import, export, and edit OxideTerm settings without launching the GPUI app. Write commands default to dry-run unless confirmed with --yes."
+    long_about = "Read, validate, import, export, and edit OxideLab settings without launching the GPUI app. Write commands default to dry-run unless confirmed with --yes."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm settings validate --strict\n  oxideterm settings get ai.providers --json\n  oxideterm settings set terminal.fontSize 14 --dry-run\n  oxideterm settings import ./settings-snapshot.json --section appearance --yes\n  oxideterm settings export --section general --json"
+    after_help = "Examples:\n  oxidelab settings validate --strict\n  oxidelab settings get ai.providers --json\n  oxidelab settings set terminal.fontSize 14 --dry-run\n  oxidelab settings import ./settings-snapshot.json --section appearance --yes\n  oxidelab settings export --section general --json"
 )]
 pub struct SettingsCommand {
     #[command(subcommand)]

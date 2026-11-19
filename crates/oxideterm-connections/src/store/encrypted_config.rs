@@ -3,7 +3,7 @@ const ENCRYPTED_CONFIG_VERSION: u32 = 1;
 const ENCRYPTED_CONFIG_ALGORITHM: &str = "chacha20poly1305";
 const CONFIG_ENCRYPTION_KEY_LEN: usize = 32;
 const CONFIG_ENCRYPTION_NONCE_LEN: usize = 12;
-const CONFIG_KEYCHAIN_SERVICE: &str = "com.oxideterm.config";
+const CONFIG_KEYCHAIN_SERVICE: &str = "com.oxidelab.config";
 const CONFIG_KEYCHAIN_ID: &str = "local-config-master-key";
 const MANAGED_SSH_KEY_SECRET_DIR: &str = "managed-ssh-key-secrets";
 const MANAGED_SSH_KEY_SECRET_FILE_FORMAT: &str = "oxideterm.managed-ssh-key-secret.encrypted";
@@ -525,7 +525,7 @@ fn delete_config_key_secret() -> Result<()> {
 fn load_system_config_key_secret() -> Result<Option<zeroize::Zeroizing<String>>> {
     #[cfg(target_os = "macos")]
     oxideterm_secret_store::authenticate_device_owner(
-        "OxideTerm needs to unlock your encrypted connections",
+        "OxideLab needs to unlock your encrypted connections",
     )
     .context("failed to authenticate local config key access")?;
 

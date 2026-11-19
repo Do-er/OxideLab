@@ -7,10 +7,10 @@ use super::WriteArgs;
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Apply a multi-step OxideTerm CLI plan. The plan can combine settings import, connections snapshot import, and cloud-sync configuration in one dry-run or confirmed write."
+    long_about = "Apply a multi-step OxideLab CLI plan. The plan can combine settings import, connections snapshot import, and cloud-sync configuration in one dry-run or confirmed write."
 )]
 #[command(
-    after_help = "Example plan:\n  {\n    \"settings\": { \"path\": \"settings.json\", \"sections\": [\"appearance\"] },\n    \"connections\": { \"path\": \"connections.json\", \"strategy\": \"merge\" },\n    \"cloudSync\": { \"configure\": { \"backend\": \"webdav\", \"endpoint\": \"https://example.invalid/sync\" } }\n  }\n\nExamples:\n  oxideterm batch apply ./plan.json --dry-run\n  oxideterm batch apply ./plan.json --yes --json"
+    after_help = "Example plan:\n  {\n    \"settings\": { \"path\": \"settings.json\", \"sections\": [\"appearance\"] },\n    \"connections\": { \"path\": \"connections.json\", \"strategy\": \"merge\" },\n    \"cloudSync\": { \"configure\": { \"backend\": \"webdav\", \"endpoint\": \"https://example.invalid/sync\" } }\n  }\n\nExamples:\n  oxidelab batch apply ./plan.json --dry-run\n  oxidelab batch apply ./plan.json --yes --json"
 )]
 pub struct BatchCommand {
     #[command(subcommand)]

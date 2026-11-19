@@ -44,21 +44,21 @@ use crate::uri::ConnectionUriArgs;
 // Root CLI parsing stays UI-free. Domain-specific argument DTOs live in
 // sibling modules so each command surface owns its own schema.
 #[derive(Debug, Parser)]
-#[command(name = "oxideterm")]
-#[command(about = "OxideTerm headless management CLI")]
+#[command(name = "oxidelab")]
+#[command(about = "OxideLab headless management CLI")]
 #[command(
-    long_about = "OxideTerm headless management CLI for settings, saved connections, portable .oxide bundles, cloud sync, backups, and support diagnostics."
+    long_about = "OxideLab headless management CLI for settings, saved connections, portable .oxide bundles, cloud sync, backups, and support diagnostics."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm doctor --strict\n  oxideterm settings validate --strict --json\n  oxideterm connections search prod\n  oxideterm backup create --output ./oxideterm-backup.json --json\n  oxideterm oxide export ./profile.oxide --connection prod --password-stdin\n  oxideterm cloud-sync push --dry-run --json\n  oxideterm portable status --json\n  oxideterm completion zsh > ~/.zfunc/_oxideterm"
+    after_help = "Examples:\n  oxidelab doctor --strict\n  oxidelab settings validate --strict --json\n  oxidelab connections search prod\n  oxidelab backup create --output ./oxidelab-backup.json --json\n  oxidelab oxide export ./profile.oxide --connection prod --password-stdin\n  oxidelab cloud-sync push --dry-run --json\n  oxidelab portable status --json\n  oxidelab completion zsh > ~/.zfunc/_oxidelab"
 )]
 pub struct Cli {
     #[arg(
         long,
         global = true,
         value_name = "PATH",
-        env = "OXIDETERM_CONFIG_DIR",
-        help = "Use PATH as the OxideTerm config directory"
+        env = "OXIDELAB_CONFIG_DIR",
+        help = "Use PATH as the OxideLab config directory"
     )]
     pub config_dir: Option<PathBuf>,
     #[arg(
@@ -228,7 +228,7 @@ fn normalize_write_args(args: &mut WriteArgs) {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    #[command(about = "Read, validate, import, export, and edit OxideTerm settings")]
+    #[command(about = "Read, validate, import, export, and edit OxideLab settings")]
     Settings(SettingsCommand),
     #[command(about = "Inspect and manage saved SSH connections and groups")]
     Connections(ConnectionsCommand),
@@ -258,7 +258,7 @@ pub enum Command {
     CloudSync(CloudSyncCommand),
     #[command(about = "Connect external MCP clients to the running native app")]
     Mcp(McpCommand),
-    #[command(about = "Print resolved OxideTerm config and data paths")]
+    #[command(about = "Print resolved OxideLab config and data paths")]
     Paths(OutputArgs),
     #[command(about = "Print a read-only diagnostics snapshot")]
     Diagnose(OutputArgs),
@@ -278,7 +278,7 @@ pub enum Command {
 
 #[derive(Debug, Args)]
 #[command(long_about = "List stable CLI error codes for scripts and CI integrations.")]
-#[command(after_help = "Examples:\n  oxideterm errors --json\n  oxideterm errors")]
+#[command(after_help = "Examples:\n  oxidelab errors --json\n  oxidelab errors")]
 pub struct ErrorCatalogArgs {
     #[arg(long, help = "Print machine-readable JSON output")]
     pub json: bool,
@@ -286,10 +286,10 @@ pub struct ErrorCatalogArgs {
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Generate a shell completion script for OxideTerm. The script is printed to stdout so callers can redirect it to the location required by their shell."
+    long_about = "Generate a shell completion script for OxideLab. The script is printed to stdout so callers can redirect it to the location required by their shell."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm completion zsh > ~/.zfunc/_oxideterm\n  oxideterm completion bash > ~/.local/share/bash-completion/completions/oxideterm\n  oxideterm completion fish > ~/.config/fish/completions/oxideterm.fish"
+    after_help = "Examples:\n  oxidelab completion zsh > ~/.zfunc/_oxidelab\n  oxidelab completion bash > ~/.local/share/bash-completion/completions/oxidelab\n  oxidelab completion fish > ~/.config/fish/completions/oxidelab.fish"
 )]
 pub struct CompletionArgs {
     #[command(subcommand)]

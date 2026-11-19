@@ -6,7 +6,7 @@ use zeroize::Zeroizing;
 
 const SECURITY_TOOL_PATH: &str = "/usr/bin/security";
 const SECURITY_ITEM_NOT_FOUND_EXIT_CODE: i32 = 44;
-const VERSIONED_ACCOUNT_PREFIX: &str = "oxideterm-secret-v1:";
+const VERSIONED_ACCOUNT_PREFIX: &str = "oxidelab-secret-v1:";
 
 pub(super) fn store(service: &str, account: &str, secret: &str) -> Result<()> {
     let versioned_account = versioned_account(account);
@@ -224,7 +224,7 @@ mod tests {
         let secret = "line one\n密码";
         let encoded = STANDARD_NO_PAD.encode(secret.as_bytes());
 
-        assert_eq!(account, "oxideterm-secret-v1:connection-id");
+        assert_eq!(account, "oxidelab-secret-v1:connection-id");
         assert!(encoded.is_ascii());
         assert!(!encoded.contains('\n'));
         assert_eq!(decode_versioned_secret(&encoded).unwrap().as_str(), secret);

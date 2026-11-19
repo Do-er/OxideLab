@@ -5,10 +5,10 @@ use clap::{Args, Subcommand};
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Bridge MCP JSON-RPC on standard input/output to the running OxideTerm loopback endpoint. The bearer credential is read from an environment variable and is never accepted as a command-line argument."
+    long_about = "Bridge MCP JSON-RPC on standard input/output to the running OxideLab loopback endpoint. The bearer credential is read from an environment variable and is never accepted as a command-line argument."
 )]
 #[command(
-    after_help = "Example:\n  OXIDETERM_MCP_TOKEN=... oxideterm mcp bridge\n\nSet OXIDETERM_MCP_ENDPOINT only when automatic endpoint discovery is unavailable."
+    after_help = "Example:\n  OXIDELAB_MCP_TOKEN=... oxidelab mcp bridge\n\nSet OXIDELAB_MCP_ENDPOINT only when automatic endpoint discovery is unavailable."
 )]
 pub struct McpCommand {
     #[command(subcommand)]
@@ -17,7 +17,7 @@ pub struct McpCommand {
 
 #[derive(Debug, Subcommand)]
 pub enum McpAction {
-    #[command(about = "Bridge stdio MCP messages to the running OxideTerm app")]
+    #[command(about = "Bridge stdio MCP messages to the running OxideLab app")]
     Bridge(McpBridgeArgs),
 }
 
@@ -25,13 +25,13 @@ pub enum McpAction {
 pub struct McpBridgeArgs {
     #[arg(
         long,
-        env = "OXIDETERM_MCP_ENDPOINT",
+        env = "OXIDELAB_MCP_ENDPOINT",
         help = "Override the discovered loopback MCP endpoint"
     )]
     pub endpoint: Option<String>,
     #[arg(
         long,
-        default_value = "OXIDETERM_MCP_TOKEN",
+        default_value = "OXIDELAB_MCP_TOKEN",
         value_name = "NAME",
         help = "Read the bearer credential from environment variable NAME"
     )]

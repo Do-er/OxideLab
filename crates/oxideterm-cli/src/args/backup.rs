@@ -7,10 +7,10 @@ use super::{JsonArgs, WriteArgs};
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Create, inspect, verify, and restore local OxideTerm backups. Restore supports section-limited dry-runs and requires --yes for real writes."
+    long_about = "Create, inspect, verify, and restore local OxideLab backups. Restore supports section-limited dry-runs and requires --yes for real writes."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm backup preview --json\n  oxideterm backup create --output ./oxideterm-backup.json\n  oxideterm backup inspect oxideterm-backup-123 --summary\n  oxideterm backup inspect ./backup.json --section connections --json\n  oxideterm backup restore ./backup.json --section settings --dry-run"
+    after_help = "Examples:\n  oxidelab backup preview --json\n  oxidelab backup create --output ./oxidelab-backup.json\n  oxidelab backup inspect oxidelab-backup-123 --summary\n  oxidelab backup inspect ./backup.json --section connections --json\n  oxidelab backup restore ./backup.json --section settings --dry-run"
 )]
 pub struct BackupCommand {
     #[command(subcommand)]

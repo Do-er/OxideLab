@@ -1,4 +1,4 @@
-//! Native desktop presence integration for OxideTerm.
+//! Native desktop presence integration for OxideLab.
 //!
 //! This crate owns platform status-entry behavior: Windows notification-area
 //! icons and macOS menu-bar status items. The GPUI app remains responsible for

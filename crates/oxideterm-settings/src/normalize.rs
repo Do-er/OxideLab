@@ -290,7 +290,7 @@ fn migrate_acp_agent_presets(settings: &mut Value, warnings: &mut Vec<String>) {
             .map(|args| args.iter().filter_map(Value::as_str).collect::<Vec<&str>>())
             .unwrap_or_default();
 
-        let bundled_provider = matches!(command, "oxideterm-native" | "oxideterm")
+        let bundled_provider = matches!(command, "oxideterm-native" | "oxideterm" | "oxidelab")
             .then(|| args.strip_prefix(&["--acp-adapter"]))
             .flatten();
         let plugin = match (command, args.as_slice(), bundled_provider) {
@@ -330,7 +330,7 @@ fn acp_agent_preset_migration(
     args: &[&str],
 ) -> Option<(&'static str, Vec<&'static str>)> {
     match (command, args) {
-        // Copilot already exposes native ACP over stdio; undo older OxideTerm
+        // Copilot already exposes native ACP over stdio; undo older OxideLab
         // migrations that wrapped it as a text CLI adapter.
         ("oxideterm-native", ["--acp-adapter", "github-copilot"])
         | ("oxideterm", ["--acp-adapter", "github-copilot"]) => {

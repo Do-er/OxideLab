@@ -20,8 +20,8 @@ use crate::{
     settings,
 };
 
-pub(super) const BACKUP_FORMAT: &str = "oxideterm-cli-backup-v1";
-const BACKUP_FILE_PREFIX: &str = "oxideterm-backup-";
+pub(super) const BACKUP_FORMAT: &str = "oxidelab-cli-backup-v1";
+const BACKUP_FILE_PREFIX: &str = "oxidelab-backup-";
 const BACKUP_FILE_EXTENSION: &str = "json";
 
 #[derive(Clone, Debug, Serialize)]
@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn backup_names_are_recognized_by_prefix_and_extension() {
-        let path = PathBuf::from("oxideterm-backup-123.json");
+        let path = PathBuf::from("oxidelab-backup-123.json");
 
         assert!(is_backup_file(&path));
         assert!(!is_backup_file(Path::new("other.json")));
@@ -238,8 +238,8 @@ mod tests {
 
     #[test]
     fn inspect_query_resolves_plain_file_names_under_backup_dir() {
-        let path = resolve_backup_query("oxideterm-backup-123");
+        let path = resolve_backup_query("oxidelab-backup-123");
 
-        assert!(path.ends_with("oxideterm-backup-123.json"));
+        assert!(path.ends_with("oxidelab-backup-123.json"));
     }
 }

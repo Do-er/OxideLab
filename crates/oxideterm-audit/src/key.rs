@@ -5,7 +5,7 @@ use oxideterm_secret_store::NativeSecretStore;
 use rand::{RngCore, rngs::OsRng};
 use zeroize::Zeroizing;
 
-const SERVICE: &str = "com.oxideterm.audit";
+const SERVICE: &str = "com.oxidelab.audit";
 
 /// The caller serializes first-key creation with the database write transaction.
 pub trait AuditKeyProvider {

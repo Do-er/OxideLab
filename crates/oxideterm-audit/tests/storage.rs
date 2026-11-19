@@ -230,8 +230,8 @@ fn write_batch(path: &Path, prefix: &str) {
 #[ignore = "subprocess fixture invoked by independent_processes_preserve_every_written_event"]
 fn child_writer() {
     // This fixture runs in separate OS processes to exercise SQLite locking.
-    let path = std::env::var_os("OXIDETERM_AUDIT_TEST_DB").expect("subprocess database path");
-    let prefix = std::env::var("OXIDETERM_AUDIT_TEST_PREFIX").unwrap();
+    let path = std::env::var_os("OXIDELAB_AUDIT_TEST_DB").expect("subprocess database path");
+    let prefix = std::env::var("OXIDELAB_AUDIT_TEST_PREFIX").unwrap();
     write_batch(Path::new(&path), &prefix);
 }
 
@@ -244,8 +244,8 @@ fn independent_processes_preserve_every_written_event() {
         .map(|i| {
             Command::new(std::env::current_exe().unwrap())
                 .args(["--exact", "child_writer", "--ignored", "--nocapture"])
-                .env("OXIDETERM_AUDIT_TEST_DB", &path)
-                .env("OXIDETERM_AUDIT_TEST_PREFIX", format!("child{i}"))
+                .env("OXIDELAB_AUDIT_TEST_DB", &path)
+                .env("OXIDELAB_AUDIT_TEST_PREFIX", format!("child{i}"))
                 .stdout(std::process::Stdio::null())
                 .spawn()
                 .unwrap()
@@ -923,8 +923,8 @@ fn contexts_from_one_writer_share_an_instance_without_merging_operations() {
 #[test]
 #[ignore = "subprocess fixture invoked by recovery_distinguishes_crashed_and_live_writers"]
 fn child_live_audit_writer() {
-    let database = std::env::var_os("OXIDETERM_AUDIT_TEST_DB").unwrap();
-    let ready = std::env::var_os("OXIDETERM_AUDIT_TEST_READY").unwrap();
+    let database = std::env::var_os("OXIDELAB_AUDIT_TEST_DB").unwrap();
+    let ready = std::env::var_os("OXIDELAB_AUDIT_TEST_READY").unwrap();
     let service = enabled_service(database.into(), Keys(7)).unwrap();
     let mut context = AuditContext::new(service.client(), AuditSource::User);
     context.session_id = Some("child-session".into());
@@ -977,8 +977,8 @@ fn recovery_distinguishes_crashed_and_live_writers() {
             "--ignored",
             "--nocapture",
         ])
-        .env("OXIDETERM_AUDIT_TEST_DB", &path)
-        .env("OXIDETERM_AUDIT_TEST_READY", &ready)
+        .env("OXIDELAB_AUDIT_TEST_DB", &path)
+        .env("OXIDELAB_AUDIT_TEST_READY", &ready)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::null())
         .spawn()

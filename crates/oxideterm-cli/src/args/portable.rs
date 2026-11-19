@@ -4,9 +4,9 @@
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args)]
-#[command(long_about = "Inspect and manage OxideTerm's portable runtime keystore.")]
+#[command(long_about = "Inspect and manage OxideLab's portable runtime keystore.")]
 #[command(
-    after_help = "Examples:\n  oxideterm portable status --json\n  printf '%s' \"$PORTABLE_PASSWORD\" | oxideterm portable setup --password-stdin\n  oxideterm portable unlock --password-env OXIDETERM_PORTABLE_PASSWORD\n  oxideterm portable change-password --current-password-env OLD --new-password-env NEW"
+    after_help = "Examples:\n  oxidelab portable status --json\n  printf '%s' \"$PORTABLE_PASSWORD\" | oxidelab portable setup --password-stdin\n  oxidelab portable unlock --password-env OXIDELAB_PORTABLE_PASSWORD\n  oxidelab portable change-password --current-password-env OLD --new-password-env NEW"
 )]
 pub struct PortableCommand {
     #[command(subcommand)]

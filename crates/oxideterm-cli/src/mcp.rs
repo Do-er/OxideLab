@@ -151,7 +151,7 @@ async fn run_bridge(args: McpBridgeArgs) -> CliResult<()> {
         let mut response = request.body(body).send().await.map_err(|_| {
             CliError::new(
                 "mcp_endpoint_unavailable",
-                "The running OxideTerm MCP endpoint could not be reached",
+                "The running OxideLab MCP endpoint could not be reached",
                 false,
             )
         })?;
@@ -159,14 +159,14 @@ async fn run_bridge(args: McpBridgeArgs) -> CliResult<()> {
         if status == reqwest::StatusCode::UNAUTHORIZED {
             return Err(CliError::new(
                 "mcp_unauthorized",
-                "The MCP credential was rejected by OxideTerm",
+                "The MCP credential was rejected by OxideLab",
                 false,
             ));
         }
         if !status.is_success() {
             return Err(CliError::new(
                 "mcp_http_failed",
-                format!("The OxideTerm MCP endpoint returned HTTP {status}"),
+                format!("The OxideLab MCP endpoint returned HTTP {status}"),
                 false,
             ));
         }
@@ -174,7 +174,7 @@ async fn run_bridge(args: McpBridgeArgs) -> CliResult<()> {
         while let Some(chunk) = response.chunk().await.map_err(|_| {
             CliError::new(
                 "mcp_http_failed",
-                "The OxideTerm MCP response could not be read",
+                "The OxideLab MCP response could not be read",
                 false,
             )
         })? {
@@ -221,7 +221,7 @@ fn resolve_endpoint(override_endpoint: Option<String>) -> CliResult<Url> {
     let endpoint = Url::parse(&endpoint).map_err(|_| {
         CliError::new(
             "mcp_endpoint_invalid",
-            "The OxideTerm MCP endpoint URL is invalid",
+            "The OxideLab MCP endpoint URL is invalid",
             false,
         )
     })?;
@@ -253,21 +253,21 @@ fn discover_endpoint() -> CliResult<String> {
     let bytes = std::fs::read(&path).map_err(|_| {
         CliError::new(
             "mcp_endpoint_unavailable",
-            "Start OxideTerm and enable External MCP Control before launching the bridge",
+            "Start OxideLab and enable External MCP Control before launching the bridge",
             false,
         )
     })?;
     let state: EndpointState = serde_json::from_slice(&bytes).map_err(|_| {
         CliError::new(
             "mcp_endpoint_invalid",
-            "The OxideTerm MCP endpoint discovery record is invalid",
+            "The OxideLab MCP endpoint discovery record is invalid",
             false,
         )
     })?;
     if state.version != PUBLIC_MCP_ENDPOINT_VERSION || state.port == 0 {
         return Err(CliError::new(
             "mcp_endpoint_invalid",
-            "The OxideTerm MCP endpoint discovery record is unsupported",
+            "The OxideLab MCP endpoint discovery record is unsupported",
             false,
         ));
     }
@@ -297,7 +297,7 @@ fn read_credential(environment_name: &str) -> CliResult<Zeroizing<String>> {
     let credential = std::env::var(environment_name).map_err(|_| {
         CliError::new(
             "mcp_credential_missing",
-            format!("Set {environment_name} to the one-time credential shown by OxideTerm"),
+            format!("Set {environment_name} to the one-time credential shown by OxideLab"),
             false,
         )
     })?;

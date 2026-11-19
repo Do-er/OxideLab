@@ -1,6 +1,7 @@
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct GeneralSettings {
     pub language: Language,
+    #[serde(rename = "updateChannel", alias = "update_channel", default)]
     pub update_channel: UpdateChannel,
     #[serde(
         rename = "minimizeToTrayOnClose",
@@ -389,7 +390,7 @@ pub enum TerminalSessionLogFileMode {
 pub struct TerminalSessionLogSettings {
     // Automatic logging remains opt-in because terminal output may contain sensitive data.
     pub automatic: bool,
-    // None keeps logs under the active OxideTerm data directory.
+    // None keeps logs under the active OxideLab data directory.
     pub directory: Option<String>,
     // This relative template is resolved safely below the configured log directory.
     pub directory_template: String,

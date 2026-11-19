@@ -18,7 +18,7 @@ mod tests {
 
     fn temp_store(name: &str) -> ConnectionStore {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-oxide-file-{name}-{}.json",
+            "oxidelab-oxide-file-{name}-{}.json",
             Uuid::new_v4()
         ));
         ConnectionStore::load(path).unwrap()
@@ -363,7 +363,7 @@ mod tests {
 
     fn generated_private_key_text() -> String {
         let key_path =
-            std::env::temp_dir().join(format!("oxideterm-managed-key-{}.key", Uuid::new_v4()));
+            std::env::temp_dir().join(format!("oxidelab-managed-key-{}.key", Uuid::new_v4()));
         let mut rng = UnwrapErr(SysRng);
         let key = PrivateKey::random(&mut rng, Algorithm::Ed25519).unwrap();
         key.write_openssh_file(&key_path, LineEnding::LF).unwrap();
@@ -405,6 +405,7 @@ mod tests {
             proxy_command: None,
             options: ConnectionOptions {
                 totp_credential_id: None,
+                account_credential_id: None,
                 connect_timeout_seconds: Some(120),
                 keep_alive_interval: 30,
                 compression: true,
@@ -1560,7 +1561,12 @@ mod tests {
         let SavedAuth::Key { key_path, .. } = &imported.auth else {
             panic!("disabled managed key restore should extract a key file");
         };
-        assert!(key_path.contains(".ssh/imported"));
+        // Windows stores the extracted key under platform separators.
+        assert!(
+            key_path
+                .replace(std::path::MAIN_SEPARATOR, "/")
+                .contains(".ssh/imported")
+        );
         assert_eq!(fs::read_to_string(key_path).unwrap(), private_key);
         fs::remove_file(key_path).unwrap();
     }
@@ -1696,8 +1702,8 @@ mod tests {
             .unwrap();
 
         let payload = vec![
-            encrypted_agent_connection("Prod", "one.example.com"),
-            encrypted_agent_connection("Prod", "two.example.com"),
+            grouped_payload_connection("Prod", Some("Ops"), None),
+            grouped_payload_connection("Prod", Some("Ops"), None),
         ];
 
         let renamed = plan_import(&store, &payload[..1], ImportConflictStrategy::Rename);

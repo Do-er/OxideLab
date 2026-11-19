@@ -1373,7 +1373,7 @@ fn electerm_bookmark_to_draft(
     {
         ImportedConnectionAuthType::Agent
     } else {
-        // Secret-backed Electerm auth falls back to OxideTerm's normal credential prompt.
+        // Secret-backed Electerm auth falls back to OxideLab's normal credential prompt.
         ImportedConnectionAuthType::Password
     };
     let source_suffix = if bookmark.id.is_empty() {
@@ -2153,7 +2153,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let path = std::env::temp_dir().join(format!("oxideterm-import-{id}.{extension}"));
+        let path = std::env::temp_dir().join(format!("oxidelab-import-{id}.{extension}"));
         std::fs::write(&path, content).unwrap();
         path
     }
@@ -2412,7 +2412,7 @@ mod tests {
     #[test]
     fn xshell_preview_and_selected_imports_preserve_metadata_and_rename_conflicts() {
         let store_path = std::env::temp_dir().join(format!(
-            "oxideterm-connection-import-test-{}.json",
+            "oxidelab-connection-import-test-{}.json",
             Uuid::new_v4()
         ));
         let mut store = ConnectionStore::load(store_path).unwrap();

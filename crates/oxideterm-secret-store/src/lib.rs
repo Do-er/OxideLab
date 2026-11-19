@@ -12,7 +12,7 @@ use zeroize::Zeroizing;
 // A 1 KiB UTF-8 chunk remains below that limit for every Unicode scalar.
 const WINDOWS_SECRET_CHUNK_BYTES: usize = 1_024;
 #[cfg(target_os = "windows")]
-const WINDOWS_CHUNK_SERVICE_SUFFIX: &str = ".oxideterm-secret-chunks-v1";
+const WINDOWS_CHUNK_SERVICE_SUFFIX: &str = ".oxidelab-secret-chunks-v1";
 #[cfg(target_os = "windows")]
 const WINDOWS_CHUNK_MANIFEST_VERSION: &str = "v1";
 
@@ -293,7 +293,7 @@ impl NativeSecretStore {
             WindowsChunkManifestState::Valid(manifest) => Some(manifest),
             WindowsChunkManifestState::Invalid => None,
         };
-        // Remove the manifest even when it is malformed so a bad OxideTerm-only
+        // Remove the manifest even when it is malformed so a bad OxideLab-only
         // metadata entry cannot permanently block replacement or deletion.
         delete_entry_if_present(self.windows_chunk_entry(account)?)
             .context("failed to delete secret metadata from the OS credential manager")?;

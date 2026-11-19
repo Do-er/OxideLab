@@ -264,27 +264,27 @@ fn use_global_proxy_source(
 }
 
 fn env_upstream_proxy_source() -> Option<Value> {
-    let socks5 = env::var("OXIDETERM_SOCKS5_PROXY").ok();
+    let socks5 = env::var("OXIDELAB_SOCKS5_PROXY").ok();
     if let Some(value) = first_non_empty(socks5.as_deref()) {
         return Some(json!({
             "source": "env",
-            "variable": "OXIDETERM_SOCKS5_PROXY",
+            "variable": "OXIDELAB_SOCKS5_PROXY",
             "protocol": "socks5",
             "configured": true,
             "hasAuth": value.contains('@'),
-            "noProxyConfigured": first_non_empty(env::var("OXIDETERM_NO_PROXY").ok().as_deref()).is_some(),
+            "noProxyConfigured": first_non_empty(env::var("OXIDELAB_NO_PROXY").ok().as_deref()).is_some(),
         }));
     }
 
-    let http = env::var("OXIDETERM_HTTP_PROXY").ok();
+    let http = env::var("OXIDELAB_HTTP_PROXY").ok();
     first_non_empty(http.as_deref()).map(|value| {
         json!({
             "source": "env",
-            "variable": "OXIDETERM_HTTP_PROXY",
+            "variable": "OXIDELAB_HTTP_PROXY",
             "protocol": "http_connect",
             "configured": true,
             "hasAuth": value.contains('@'),
-            "noProxyConfigured": first_non_empty(env::var("OXIDETERM_NO_PROXY").ok().as_deref()).is_some(),
+            "noProxyConfigured": first_non_empty(env::var("OXIDELAB_NO_PROXY").ok().as_deref()).is_some(),
         })
     })
 }

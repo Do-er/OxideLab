@@ -27,8 +27,8 @@ use windows::{
 
 // Installer shortcuts are created as "<app name>.lnk" (optionally inside a
 // subfolder named after the app); keep this aligned with package_native.py.
-const SHORTCUT_FILE_NAME: &str = "OxideTerm.lnk";
-const START_MENU_SHORTCUT_SUBFOLDER: &str = "OxideTerm";
+const SHORTCUT_FILE_NAME: &str = "OxideLab.lnk";
+const START_MENU_SHORTCUT_SUBFOLDER: &str = "OxideLab";
 const PINNED_TASKBAR_SHORTCUT_SUBPATH: &str =
     r"Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar";
 
@@ -43,10 +43,10 @@ pub(super) fn schedule_shortcut_icon_update(icon_path: &Path, main_hwnd: Option<
     // UI thread never waits on the shell.
     let icon_path = icon_path.to_path_buf();
     let spawned = thread::Builder::new()
-        .name("oxideterm-shortcut-icons".to_string())
+        .name("oxidelab-shortcut-icons".to_string())
         .spawn(move || {
             if let Err(error) = rewrite_known_shortcuts(&icon_path) {
-                eprintln!("failed to update OxideTerm shortcut icons: {error:#}");
+                eprintln!("failed to update OxideLab shortcut icons: {error:#}");
                 return;
             }
 
@@ -57,7 +57,7 @@ pub(super) fn schedule_shortcut_icon_update(icon_path: &Path, main_hwnd: Option<
                 let hwnd = HWND(handle as _);
                 if unsafe { IsWindowVisible(hwnd).as_bool() } {
                     if let Err(error) = refresh_taskbar_tab(hwnd) {
-                        eprintln!("failed to refresh the OxideTerm taskbar tab: {error:#}");
+                        eprintln!("failed to refresh the OxideLab taskbar tab: {error:#}");
                     }
                 }
             }

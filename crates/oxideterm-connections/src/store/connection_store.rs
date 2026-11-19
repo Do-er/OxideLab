@@ -36,7 +36,7 @@ impl ConnectionStore {
         #[cfg(target_os = "macos")]
         let privilege_keychain = ConnectionKeychain::with_macos_device_owner_authentication(
             PRIVILEGE_CREDENTIAL_KEYCHAIN_SERVICE,
-            "OxideTerm needs to access your privilege helper credential",
+            "OxideLab needs to access your privilege helper credential",
         );
         #[cfg(not(target_os = "macos"))]
         let privilege_keychain =
@@ -4422,7 +4422,7 @@ mod persistence_safety_tests {
 
     fn persistence_test_path(name: &str) -> PathBuf {
         std::env::temp_dir().join(format!(
-            "oxideterm-persistence-{name}-{}.json",
+            "oxidelab-persistence-{name}-{}.json",
             Uuid::new_v4()
         ))
     }
@@ -4435,7 +4435,7 @@ mod persistence_safety_tests {
         .unwrap();
         for bytes in [b"{ not valid json".to_vec(), future] {
             let path =
-                std::env::temp_dir().join(format!("oxideterm-rejected-{}.json", uuid::Uuid::new_v4()));
+                std::env::temp_dir().join(format!("oxidelab-rejected-{}.json", uuid::Uuid::new_v4()));
             fs::write(&path, &bytes).unwrap();
             let result = ConnectionStore::load(&path);
             let preserved = fs::read(&path).unwrap();

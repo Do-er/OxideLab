@@ -9,7 +9,7 @@ mod tests {
 
     fn temp_store_path(name: &str) -> PathBuf {
         std::env::temp_dir().join(format!(
-            "oxideterm-connection-store-{name}-{}.json",
+            "oxidelab-connection-store-{name}-{}.json",
             Uuid::new_v4()
         ))
     }
@@ -17,6 +17,7 @@ mod tests {
     fn request(id: &str, auth: SavedAuth) -> SaveConnectionRequest {
         SaveConnectionRequest {
             totp_credential_id: None,
+            account_credential_id: None,
             id: Some(id.to_string()),
             name: "Home".to_string(),
             group: None,
@@ -3366,6 +3367,7 @@ mod tests {
         };
         source_connection.options = ConnectionOptions {
             totp_credential_id: None,
+            account_credential_id: None,
             connect_timeout_seconds: Some(180),
             keep_alive_interval: 37,
             compression: true,
@@ -3967,7 +3969,6 @@ mod tests {
                 keychain_id: None,
                 plaintext_password: Some(SecretString::from("hop-sync-fixture")),
             },
-            totp_credential_id: None,
             agent_forwarding: false,
             identity_agent: None,
             agent_forwarding_socket: None,
@@ -4110,7 +4111,7 @@ mod tests {
         let _config_key = with_config_encryption_key_for_tests([43u8; CONFIG_ENCRYPTION_KEY_LEN]);
         let mut store = load_empty_store("managed-key-large-rsa-fallback");
         store.managed_keychain =
-            ConnectionKeychain::with_max_secret_bytes_for_tests("com.oxideterm.managed-test", 256);
+            ConnectionKeychain::with_max_secret_bytes_for_tests("com.oxidelab.managed-test", 256);
         let private_key = generated_large_rsa_private_key_text();
 
         let info = store

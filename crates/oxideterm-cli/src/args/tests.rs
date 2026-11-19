@@ -7,7 +7,7 @@ use super::*;
 
 #[test]
 fn parses_temporary_ssh_launch() {
-    let cli = Cli::parse_from(["oxideterm", "ssh", "alice@example.com", "-p", "2222"]);
+    let cli = Cli::parse_from(["oxidelab", "ssh", "alice@example.com", "-p", "2222"]);
     let Command::Ssh(args) = cli.command else {
         panic!("expected ssh command");
     };
@@ -18,14 +18,14 @@ fn parses_temporary_ssh_launch() {
 
 #[test]
 fn parses_connection_uri_launch_without_exposing_it_in_debug_output() {
-    let cli = Cli::parse_from(["oxideterm", "open", "ssh://alice:uri-password@example.com"]);
+    let cli = Cli::parse_from(["oxidelab", "open", "ssh://alice:uri-password@example.com"]);
     let rendered = format!("{cli:?}");
 
     assert!(matches!(cli.command, Command::Open(_)));
     assert!(!rendered.contains("uri-password"));
 
     let ssh_cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "ssh",
         "ssh://alice:second-password@example.com",
     ]);
@@ -34,24 +34,24 @@ fn parses_connection_uri_launch_without_exposing_it_in_debug_output() {
 
 #[test]
 fn parses_json_only_commands() {
-    let cloud_sync_status = Cli::parse_from(["oxideterm", "cloud-sync", "status", "--json"]);
+    let cloud_sync_status = Cli::parse_from(["oxidelab", "cloud-sync", "status", "--json"]);
     assert!(matches!(
         cloud_sync_status.command,
         Command::CloudSync(command)
             if matches!(&command.action, CloudSyncAction::Status(args) if args.json)
     ));
 
-    let settings_sections = Cli::parse_from(["oxideterm", "settings", "sections", "--json"]);
+    let settings_sections = Cli::parse_from(["oxidelab", "settings", "sections", "--json"]);
     assert!(matches!(
         settings_sections.command,
         Command::Settings(command)
             if matches!(&command.action, SettingsAction::Sections(args) if args.json)
     ));
 
-    let diagnostics = Cli::parse_from(["oxideterm", "diagnose", "--json"]);
+    let diagnostics = Cli::parse_from(["oxidelab", "diagnose", "--json"]);
     assert!(matches!(diagnostics.command, Command::Diagnose(args) if args.json));
 
-    let backup_preview = Cli::parse_from(["oxideterm", "backup", "preview", "--json"]);
+    let backup_preview = Cli::parse_from(["oxidelab", "backup", "preview", "--json"]);
     assert!(matches!(
         backup_preview.command,
         Command::Backup(command)
@@ -62,7 +62,7 @@ fn parses_json_only_commands() {
 #[test]
 fn parses_cloud_sync_diff() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "diff",
         "--dirty-only",
@@ -87,7 +87,7 @@ fn parses_cloud_sync_diff() {
 #[test]
 fn parses_cloud_sync_state_get() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "state",
         "get",
@@ -110,7 +110,7 @@ fn parses_cloud_sync_state_get() {
 #[test]
 fn parses_settings_export_sections() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "settings",
         "export",
         "--section",
@@ -132,7 +132,7 @@ fn parses_settings_export_sections() {
 #[test]
 fn parses_connections_export_format() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "export",
         "--format",
@@ -152,7 +152,7 @@ fn parses_connections_export_format() {
 #[test]
 fn parses_connections_create_and_edit_specs() {
     let create = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "create",
         "--spec",
@@ -171,7 +171,7 @@ fn parses_connections_create_and_edit_specs() {
     assert!(args.write.json);
 
     let edit = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "edit",
         "prod",
@@ -195,7 +195,7 @@ fn parses_connections_create_and_edit_specs() {
 #[test]
 fn parses_connections_group_rename() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "group",
         "rename",
@@ -222,7 +222,7 @@ fn parses_connections_group_rename() {
 #[test]
 fn parses_connections_apply_snapshot_strategy() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "apply-snapshot",
         "connections.json",
@@ -246,7 +246,7 @@ fn parses_connections_apply_snapshot_strategy() {
 #[test]
 fn parses_oxide_preview_import() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "oxide",
         "preview-import",
         "bundle.oxide",
@@ -270,7 +270,7 @@ fn parses_oxide_preview_import() {
 #[test]
 fn parses_oxide_import_defaults_to_dry_run_until_yes() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "oxide",
         "import",
         "bundle.oxide",
@@ -306,7 +306,7 @@ fn parses_oxide_import_defaults_to_dry_run_until_yes() {
 #[test]
 fn parses_oxide_export() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "oxide",
         "export",
         "bundle.oxide",
@@ -331,7 +331,7 @@ fn parses_oxide_export() {
 #[test]
 fn parses_settings_unset_with_confirmation() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "settings",
         "unset",
         "ai.customSystemPrompt",
@@ -354,7 +354,7 @@ fn parses_settings_unset_with_confirmation() {
 #[test]
 fn parses_settings_import_sections() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "settings",
         "import",
         "snapshot.json",
@@ -378,18 +378,18 @@ fn parses_settings_import_sections() {
 #[test]
 fn parses_strict_validation_commands() {
     let connection_validation =
-        Cli::parse_from(["oxideterm", "connections", "validate", "--strict", "--json"]);
+        Cli::parse_from(["oxidelab", "connections", "validate", "--strict", "--json"]);
     assert!(matches!(
         connection_validation.command,
         Command::Connections(command)
             if matches!(&command.action, ConnectionsAction::Validate(args) if args.strict && args.json)
     ));
 
-    let doctor = Cli::parse_from(["oxideterm", "doctor", "--strict", "--json"]);
+    let doctor = Cli::parse_from(["oxidelab", "doctor", "--strict", "--json"]);
     assert!(matches!(doctor.command, Command::Doctor(args) if args.strict && args.json));
 
     let settings_validation =
-        Cli::parse_from(["oxideterm", "settings", "validate", "--strict", "--json"]);
+        Cli::parse_from(["oxidelab", "settings", "validate", "--strict", "--json"]);
     assert!(matches!(
         settings_validation.command,
         Command::Settings(command)
@@ -402,7 +402,7 @@ fn parses_backup_inspect() {
     // Full and section-scoped inspection share one backup parsing contract.
     for cli in [
         Cli::parse_from([
-            "oxideterm",
+            "oxidelab",
             "backup",
             "inspect",
             "backup.json",
@@ -410,7 +410,7 @@ fn parses_backup_inspect() {
             "--json",
         ]),
         Cli::parse_from([
-            "oxideterm",
+            "oxidelab",
             "backup",
             "inspect",
             "backup.json",
@@ -436,7 +436,7 @@ fn parses_backup_inspect() {
 
 #[test]
 fn parses_backup_verify() {
-    let cli = Cli::parse_from(["oxideterm", "backup", "verify", "backup.json", "--json"]);
+    let cli = Cli::parse_from(["oxidelab", "backup", "verify", "backup.json", "--json"]);
     let Command::Backup(BackupCommand {
         action: BackupAction::Verify(args),
     }) = cli.command
@@ -450,7 +450,7 @@ fn parses_backup_verify() {
 #[test]
 fn parses_backup_create_output() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "backup",
         "create",
         "--output",
@@ -470,7 +470,7 @@ fn parses_backup_create_output() {
 #[test]
 fn parses_backup_restore_defaults_to_dry_run_until_yes() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "backup",
         "restore",
         "backup.json",
@@ -493,7 +493,7 @@ fn parses_backup_restore_defaults_to_dry_run_until_yes() {
 #[test]
 fn parses_cloud_sync_history_failed_only() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "history",
         "--failed-only",
@@ -514,7 +514,7 @@ fn parses_cloud_sync_backend_settings_and_write_flags() {
     let cases = [
         (
             Cli::parse_from([
-                "oxideterm",
+                "oxidelab",
                 "cloud-sync",
                 "configure",
                 "--backend",
@@ -536,7 +536,7 @@ fn parses_cloud_sync_backend_settings_and_write_flags() {
         ),
         (
             Cli::parse_from([
-                "oxideterm",
+                "oxidelab",
                 "cloud-sync",
                 "configure",
                 "--backend",
@@ -573,7 +573,7 @@ fn parses_cloud_sync_backend_settings_and_write_flags() {
 #[test]
 fn parses_cloud_sync_apply_remote() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "apply",
         "--from",
@@ -598,7 +598,7 @@ fn parses_cloud_sync_apply_remote() {
 #[test]
 fn parses_cloud_sync_secrets_set_env() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "secrets",
         "set",
@@ -623,7 +623,7 @@ fn parses_cloud_sync_secrets_set_env() {
 
 #[test]
 fn parses_cloud_sync_secrets_status() {
-    let cli = Cli::parse_from(["oxideterm", "cloud-sync", "secrets", "status", "--json"]);
+    let cli = Cli::parse_from(["oxidelab", "cloud-sync", "secrets", "status", "--json"]);
     let Command::CloudSync(CloudSyncCommand {
         action:
             CloudSyncAction::Secrets(CloudSyncSecretsCommand {
@@ -639,7 +639,7 @@ fn parses_cloud_sync_secrets_status() {
 #[test]
 fn parses_connections_direct_create() {
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "connections",
         "create",
         "--name",
@@ -673,7 +673,7 @@ fn parses_connections_direct_create() {
 #[test]
 fn parses_forwards_quick_commands_plugins_and_secrets() {
     let forward = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "forwards",
         "create",
         "--type",
@@ -693,7 +693,7 @@ fn parses_forwards_quick_commands_plugins_and_secrets() {
     ));
 
     let quick = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "quick-commands",
         "create",
         "--name",
@@ -709,7 +709,7 @@ fn parses_forwards_quick_commands_plugins_and_secrets() {
     ));
 
     let plugin = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "plugins",
         "settings",
         "set",
@@ -725,7 +725,7 @@ fn parses_forwards_quick_commands_plugins_and_secrets() {
     ));
 
     let secret = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "secrets",
         "set",
         "--scope",
@@ -745,7 +745,7 @@ fn parses_forwards_quick_commands_plugins_and_secrets() {
 
 #[test]
 fn parses_portable_runtime_commands() {
-    let status = Cli::parse_from(["oxideterm", "portable", "status", "--json"]);
+    let status = Cli::parse_from(["oxidelab", "portable", "status", "--json"]);
     assert!(matches!(
         status.command,
         Command::Portable(PortableCommand {
@@ -753,7 +753,7 @@ fn parses_portable_runtime_commands() {
         })
     ));
 
-    let setup = Cli::parse_from(["oxideterm", "portable", "setup", "--password-stdin"]);
+    let setup = Cli::parse_from(["oxidelab", "portable", "setup", "--password-stdin"]);
     assert!(matches!(
         setup.command,
         Command::Portable(PortableCommand {
@@ -765,7 +765,7 @@ fn parses_portable_runtime_commands() {
     ));
 
     let change = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "portable",
         "change-password",
         "--current-password-env",
@@ -789,13 +789,13 @@ fn parses_portable_runtime_commands() {
 fn parses_cloud_sync_backend_configurations() {
     // Each backend must retain its backend-specific credential-free configuration fields.
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "backend",
         "s3",
         "configure",
         "--s3-bucket",
-        "oxideterm",
+        "oxidelab",
         "--s3-region",
         "us-east-1",
         "--dry-run",
@@ -805,7 +805,7 @@ fn parses_cloud_sync_backend_configurations() {
             CloudSyncAction::Backend(command) => match command.action {
                 CloudSyncBackendAction::S3(command) => match command.action {
                     CloudSyncBackendConfigureAction::Configure(args) => {
-                        assert_eq!(args.s3_bucket.as_deref(), Some("oxideterm"));
+                        assert_eq!(args.s3_bucket.as_deref(), Some("oxidelab"));
                         assert_eq!(args.s3_region.as_deref(), Some("us-east-1"));
                         assert!(args.write.dry_run);
                     }
@@ -818,7 +818,7 @@ fn parses_cloud_sync_backend_configurations() {
     }
 
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "backend",
         "onedrive",
@@ -844,7 +844,7 @@ fn parses_cloud_sync_backend_configurations() {
     }
 
     let cli = Cli::parse_from([
-        "oxideterm",
+        "oxidelab",
         "cloud-sync",
         "backend",
         "google-drive",

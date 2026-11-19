@@ -165,7 +165,7 @@ fn export_file(
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
     }
-    let temporary = path.with_file_name(format!(".oxideterm-audit-{}.tmp", uuid::Uuid::new_v4()));
+    let temporary = path.with_file_name(format!(".oxidelab-audit-{}.tmp", uuid::Uuid::new_v4()));
     let mut file = options.open(&temporary).map_err(|_| AuditError::Storage)?;
     let result = store
         .export_until_cancelled(query, format, details, &mut file, cancelled)

@@ -42,7 +42,7 @@ pub(crate) fn prepare_write(args: &WriteArgs, has_changes: bool) -> CliResult<Wr
     {
         return Err(CliError::new(
             "cloud_sync_recovery_required",
-            "An interrupted cloud sync needs recovery. Reopen OxideTerm or run cloud-sync sync --yes before editing saved data.",
+            "An interrupted cloud sync needs recovery. Reopen OxideLab or run cloud-sync sync --yes before editing saved data.",
             args.json,
         ));
     }

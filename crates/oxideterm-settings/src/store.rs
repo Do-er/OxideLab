@@ -131,12 +131,12 @@ pub fn default_settings_path() -> PathBuf {
 fn default_settings_dir() -> PathBuf {
     if cfg!(windows) {
         if let Some(config_home) = std::env::var_os("APPDATA") {
-            return PathBuf::from(config_home).join("OxideTerm");
+            return PathBuf::from(config_home).join("OxideLab");
         }
     }
 
     if let Some(home) = std::env::var_os("HOME") {
-        return PathBuf::from(home).join(".oxideterm");
+        return PathBuf::from(home).join(".oxidelab");
     }
 
     PathBuf::from(".")
@@ -765,14 +765,14 @@ mod tests {
     #[test]
     fn user_visible_data_dir_path_strips_windows_verbatim_prefixes() {
         let disk =
-            user_visible_data_dir_path(PathBuf::from(r"\\?\D:\DevSoftWare\Remote\OxideTerm\data"));
+            user_visible_data_dir_path(PathBuf::from(r"\\?\D:\DevSoftWare\Remote\OxideLab\data"));
         assert_eq!(
             disk.to_string_lossy(),
-            r"D:\DevSoftWare\Remote\OxideTerm\data"
+            r"D:\DevSoftWare\Remote\OxideLab\data"
         );
 
-        let unc = user_visible_data_dir_path(PathBuf::from(r"\\?\UNC\server\share\OxideTerm"));
-        assert_eq!(unc.to_string_lossy(), r"\\server\share\OxideTerm");
+        let unc = user_visible_data_dir_path(PathBuf::from(r"\\?\UNC\server\share\OxideLab"));
+        assert_eq!(unc.to_string_lossy(), r"\\server\share\OxideLab");
     }
 
     #[test]

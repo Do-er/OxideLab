@@ -11,7 +11,7 @@ use zeroize::{Zeroize, Zeroizing};
 
 #[derive(Args)]
 #[command(
-    after_help = "Examples:\n  oxideterm terminal --cwd ~/project\n  oxideterm terminal --cwd ~/project -- claude --resume SESSION_ID\n  oxideterm terminal --cwd ~/project -- /bin/zsh -lc 'echo hello'\n\nArguments after -- are passed literally. Shell syntax requires an explicit shell."
+    after_help = "Examples:\n  oxidelab terminal --cwd ~/project\n  oxidelab terminal --cwd ~/project -- claude --resume SESSION_ID\n  oxidelab terminal --cwd ~/project -- /bin/zsh -lc 'echo hello'\n\nArguments after -- are passed literally. Shell syntax requires an explicit shell."
 )]
 pub struct TerminalArgs {
     #[arg(
@@ -74,20 +74,20 @@ pub fn run(mut args: TerminalArgs) -> CliResult<i32> {
     candidates.push(PathBuf::from(crate::ssh::native_binary_name()));
     #[cfg(target_os = "macos")]
     {
-        candidates.push("/Applications/OxideTerm.app/Contents/MacOS/oxideterm-native".into());
+        candidates.push("/Applications/OxideLab.app/Contents/MacOS/oxideterm-native".into());
         if let Some(home) = std::env::var_os("HOME") {
             candidates.push(
                 PathBuf::from(home)
-                    .join("Applications/OxideTerm.app/Contents/MacOS/oxideterm-native"),
+                    .join("Applications/OxideLab.app/Contents/MacOS/oxideterm-native"),
             );
         }
     }
     #[cfg(windows)]
     {
         let product = if oxideterm_settings::is_prerelease_version(env!("CARGO_PKG_VERSION")) {
-            "OxideTerm Preview"
+            "OxideLab Preview"
         } else {
-            "OxideTerm"
+            "OxideLab"
         };
         if let Ok(output) = Command::new("reg")
             .args([
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn terminal_command_keeps_flags_empty_arguments_and_shell_metacharacters_literal() {
         let cli = Cli::try_parse_from([
-            "oxideterm",
+            "oxidelab",
             "terminal",
             "--cwd",
             "a directory",
@@ -207,10 +207,10 @@ mod tests {
     fn bundled_cli_finds_its_own_application_before_path() {
         assert_eq!(
             bundled_native_binary(Path::new(
-                "/custom/OxideTerm.app/Contents/Resources/cli-bin/aarch64-apple-darwin/oxideterm"
+                "/custom/OxideLab.app/Contents/Resources/cli-bin/aarch64-apple-darwin/oxideterm"
             )),
             Some(PathBuf::from(
-                "/custom/OxideTerm.app/Contents/MacOS/oxideterm-native"
+                "/custom/OxideLab.app/Contents/MacOS/oxideterm-native"
             ))
         );
         assert_eq!(

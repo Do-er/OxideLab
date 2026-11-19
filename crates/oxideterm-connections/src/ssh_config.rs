@@ -1514,7 +1514,7 @@ mod tests {
     #[test]
     fn resolved_alias_import_skips_duplicates_and_writes_once() {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-ssh-alias-import-{}-connections.json",
+            "oxidelab-ssh-alias-import-{}-connections.json",
             std::process::id()
         ));
         let _ = std::fs::remove_file(&path);
@@ -1744,7 +1744,7 @@ mod tests {
     #[test]
     fn include_is_parsed_in_the_active_host_context() {
         let directory = std::env::temp_dir().join(format!(
-            "oxideterm-ssh-config-include-{}-{}",
+            "oxidelab-ssh-config-include-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

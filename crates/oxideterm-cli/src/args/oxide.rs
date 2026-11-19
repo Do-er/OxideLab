@@ -10,7 +10,7 @@ use super::WriteArgs;
     long_about = "Validate, preview, import, and export portable .oxide bundles. Passwords can be supplied through stdin or an environment variable so they do not appear in shell history."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm oxide validate ./profile.oxide\n  oxideterm oxide preview-import ./profile.oxide --password-stdin --json\n  oxideterm oxide import ./profile.oxide --strategy merge --import-portable-secrets --yes\n  oxideterm oxide export ./profile.oxide --connection prod --include-portable-secrets --password-env OXIDE_PASSWORD\n  oxideterm oxide export ./profile.oxide --no-plugin-settings --overwrite"
+    after_help = "Examples:\n  oxidelab oxide validate ./profile.oxide\n  oxidelab oxide preview-import ./profile.oxide --password-stdin --json\n  oxidelab oxide import ./profile.oxide --strategy merge --import-portable-secrets --yes\n  oxidelab oxide export ./profile.oxide --connection prod --include-portable-secrets --password-env OXIDE_PASSWORD\n  oxidelab oxide export ./profile.oxide --no-plugin-settings --overwrite"
 )]
 pub struct OxideCommand {
     #[command(subcommand)]

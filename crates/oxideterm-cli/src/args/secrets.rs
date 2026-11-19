@@ -9,7 +9,7 @@ use serde::Deserialize;
     long_about = "Manage secret hints and keychain-backed secrets without printing secret values."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm secrets status --scope ai --id builtin-openai --json\n  oxideterm secrets set --scope ai --id provider-1 --stdin\n  oxideterm secrets set --scope plugin --plugin-id my.plugin --key token --env TOKEN\n  oxideterm secrets clear --scope cloud-sync --key token"
+    after_help = "Examples:\n  oxidelab secrets status --scope ai --id builtin-openai --json\n  oxidelab secrets set --scope ai --id provider-1 --stdin\n  oxidelab secrets set --scope plugin --plugin-id my.plugin --key token --env TOKEN\n  oxidelab secrets clear --scope cloud-sync --key token"
 )]
 pub struct SecretsCommand {
     #[command(subcommand)]

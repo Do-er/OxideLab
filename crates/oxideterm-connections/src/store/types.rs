@@ -286,7 +286,7 @@ pub const MAX_SSH_ALGORITHM_NAME_BYTES: usize = 128;
 
 /// Ordered SSH algorithm overrides for one endpoint.
 ///
-/// Empty categories inherit the effective OxideTerm preset. Non-empty categories
+/// Empty categories inherit the effective OxideLab preset. Non-empty categories
 /// replace that preset category in negotiation order.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SshAlgorithmPreferences {

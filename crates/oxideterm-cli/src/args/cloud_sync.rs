@@ -7,10 +7,10 @@ use super::{CliOutputFormat, JsonArgs, WriteArgs};
 
 #[derive(Debug, Args)]
 #[command(
-    long_about = "Inspect, configure, and operate OxideTerm cloud sync. Write operations default to dry-run unless confirmed with --yes, and secret commands print only hints/status."
+    long_about = "Inspect, configure, and operate OxideLab cloud sync. Write operations default to dry-run unless confirmed with --yes, and secret commands print only hints/status."
 )]
 #[command(
-    after_help = "Examples:\n  oxideterm cloud-sync status --json\n  oxideterm cloud-sync configure --backend webdav --endpoint https://example.invalid/sync --dry-run\n  oxideterm cloud-sync diff --dirty-only --format table\n  oxideterm cloud-sync push --dry-run --json\n  oxideterm cloud-sync apply --from remote --strategy merge --yes\n  oxideterm cloud-sync secrets set token --stdin"
+    after_help = "Examples:\n  oxidelab cloud-sync status --json\n  oxidelab cloud-sync configure --backend webdav --endpoint https://example.invalid/sync --dry-run\n  oxidelab cloud-sync diff --dirty-only --format table\n  oxidelab cloud-sync push --dry-run --json\n  oxidelab cloud-sync apply --from remote --strategy merge --yes\n  oxidelab cloud-sync secrets set token --stdin"
 )]
 pub struct CloudSyncCommand {
     #[command(subcommand)]
