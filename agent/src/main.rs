@@ -252,7 +252,7 @@ fn main() {
     }
     if env::args().any(|arg| arg == "--version" || arg == "-V") {
         println!(
-            "oxideterm-agent {} compat {}",
+            "oxidelab-agent {} compat {}",
             env!("CARGO_PKG_VERSION"),
             COMPATIBILITY_VERSION
         );
@@ -265,7 +265,7 @@ fn main() {
         let line = match line {
             Ok(line) => line,
             Err(error) => {
-                eprintln!("[oxideterm-agent] stdin read failed: {error}");
+                eprintln!("[oxidelab-agent] stdin read failed: {error}");
                 break;
             }
         };
@@ -1268,7 +1268,7 @@ mod tests {
     }
 
     fn test_root(name: &str) -> PathBuf {
-        let root = env::temp_dir().join(format!("oxideterm-agent-{name}-{}", std::process::id()));
+        let root = env::temp_dir().join(format!("oxidelab-agent-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         root
     }

@@ -1,4 +1,4 @@
-# Third-Party Notices (OxideTerm Agent)
+# Third-Party Notices (OxideLab Agent)
 
 This file lists third-party Rust crates and detected licenses, including transitive dependencies.
 It is generated from `cargo deny list -f json -l crate`.
@@ -47,6 +47,6 @@ Generated: 2026-07-09T18:49:19.896683Z
 
 ## Notes
 
-- Multi-license policy: where a crate offers multiple licenses, OxideTerm uses the most permissive compatible option available.
+- Multi-license policy: where a crate offers multiple licenses, OxideLab uses the most permissive compatible option available.
 - License data is generated from crate metadata through cargo-deny and may include multiple licenses per crate.
 - This notice list is for attribution and compliance tracking. It does not replace upstream license texts.

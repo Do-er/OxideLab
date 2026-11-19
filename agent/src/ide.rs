@@ -144,7 +144,7 @@ pub(super) fn write_file(params: IdeWriteParams) -> Result<WriteFileResult, RpcE
     static NEXT_SWAP: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let parent = path.parent().unwrap_or(Path::new("."));
     let swap = parent.join(format!(
-        ".oxideterm-shell-{}-{}.tmp",
+        ".oxidelab-shell-{}-{}.tmp",
         std::process::id(),
         NEXT_SWAP.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     ));
@@ -204,7 +204,7 @@ mod tests {
 
     #[test]
     fn save_temp_is_private_before_content_is_written() {
-        let root = env::temp_dir().join(format!("oxideterm-private-save-{}", std::process::id()));
+        let root = env::temp_dir().join(format!("oxidelab-private-save-{}", std::process::id()));
         fs::create_dir(&root).unwrap();
         let path = root.join("swap");
         let file = create_save_temp(&path).unwrap();

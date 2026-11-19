@@ -21,12 +21,12 @@ impl ShellAgent {
     fn new() -> Self {
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         let root = std::env::temp_dir().join(format!(
-            "oxideterm-shell-test-{}-{}",
+            "oxidelab-shell-test-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));
         fs::create_dir(&root).unwrap();
-        let mut process = Command::new(env!("CARGO_BIN_EXE_oxideterm-agent"))
+        let mut process = Command::new(env!("CARGO_BIN_EXE_oxidelab-agent"))
             .args(["--shell-session", SESSION])
             .current_dir(&root)
             .stdin(Stdio::piped())
