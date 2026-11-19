@@ -1,7 +1,42 @@
-# OxideTerm Stable Changelog
+# OxideLab Stable Changelog
 
 Stable releases are listed newest first. The release workflow uses each versioned
-section as the detailed changelog attached to the corresponding GitHub Release.
+section as the changelog attached to the corresponding GitHub Release.
+Sections up to `3.0.2` are the upstream OxideTerm release history, kept verbatim.
+
+## 3.0.3
+
+### 中文
+
+OxideLab 3.0.3 是社区分支（Do-er 维护）在 `v3.0.2` 之后的首个更名版本，定位为面向后端开发与嵌入式调试的原生工作台。
+
+#### 🔄 上游更新
+
+- 基于 `v3.0.2` 构建，未合入新的官方上游主线提交。
+
+#### 🧩 自有更新
+
+- **品牌更名**：对外名称、打包身份（Bundle ID `com.oxidelab.app`、安装包文件名 `OxideLab_*`、Linux 包名 `oxidelab`）、本地配置目录、钥匙串标识及远端 `.oxidelab` 助手目录统一调整为 **OxideLab**，与原版 OxideTerm 并存隔离；内部 `oxideterm-*` crate 名与插件 ID 保持不变。
+- **身份统一收尾**：CLI 伴侣二进制更名为 `oxidelab`（补全与安装路径、打包、Nix 全部同步），运行时应用 ID 与自启动桌面 ID 对齐 `com.oxidelab.app`，app-lock、audit、managed-ssh-keys、privilege-credentials、ssh、config 六个钥匙串服务名统一为 `com.oxidelab.*`。
+- **快捷键调整**：Windows / Linux 平台命令面板默认快捷键由 `Ctrl+P` 调整为 `Ctrl+K`（与 macOS `⌘K` 对齐）。
+- **全新图标**：替换主矢量标志与全平台图标，提供 12 套运行时配色变体。
+- **构建修复**：macOS 恢复 `runtime_shaders` 默认特性，仅装 Command Line Tools 即可编译运行。
+
+### English
+
+OxideLab 3.0.3 is the first rebranded release of the Do-er-maintained community fork after `v3.0.2`, a native workspace for backend and embedded development.
+
+#### 🔄 Upstream changes
+
+- Built on `v3.0.2`; no new official upstream commits were merged.
+
+#### 🧩 Fork-specific changes
+
+- **Rebrand**: Renamed the visible app identity, packaging (Bundle ID `com.oxidelab.app`, `OxideLab_*` artifacts, `oxidelab` Linux packages), local config directories, keychain service IDs, and remote `.oxidelab` helper paths to **OxideLab**, isolated from upstream OxideTerm; internal `oxideterm-*` crate names and plugin IDs stay unchanged.
+- **Identity unification wrap-up**: Renamed the CLI companion binary to `oxidelab` (completions, install paths, packaging, and Nix all aligned), aligned the runtime app ID and autostart desktop ID to `com.oxidelab.app`, and unified six keychain service IDs (`app-lock`, `audit`, `managed-ssh-keys`, `privilege-credentials`, `ssh`, `config`) to `com.oxidelab.*`.
+- **Keybinding update**: Changed the default Command Palette shortcut on Windows / Linux from `Ctrl+P` to `Ctrl+K` to match `⌘K` on macOS.
+- **New icon suite**: Replaced the vector mark and cross-platform icons with 12 runtime color variants.
+- **Build fix**: Restored the `runtime_shaders` default feature on macOS so builds run with Command Line Tools alone.
 
 ## 3.0.2
 
