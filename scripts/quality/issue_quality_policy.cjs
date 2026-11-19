@@ -27,7 +27,7 @@ const REQUIRED_SECTIONS = [
     titlePrefix: '[Bug]',
     signature: 'Steps to reproduce / 复现步骤',
     headings: [
-      'OxideTerm version / 版本',
+      'OxideLab version / 版本',
       'Platform / 平台',
       'Summary / 简述',
       'Steps to reproduce / 复现步骤',
@@ -37,7 +37,7 @@ const REQUIRED_SECTIONS = [
     checks: [
       'I tested with the latest release, can still reproduce the issue, and searched existing issues / 我已使用最新正式版测试，问题仍然存在，并已搜索过已有 Issue',
       'This is one reproducible bug, not a usage question or feature request / 这是一个可复现的 bug，而不是使用问题或功能建议',
-      'I provided the OxideTerm version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed. 我已提供 OxideTerm 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。',
+      'I provided the OxideLab version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed. 我已提供 OxideLab 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。',
       'I removed passwords, private keys, and other secrets from this report. 我已从本报告中删除密码、私钥及其他敏感信息。',
     ],
   },
@@ -46,7 +46,7 @@ const REQUIRED_SECTIONS = [
     titlePrefix: '[Feature]',
     signature: 'Problem or use case / 问题或使用场景',
     headings: [
-      'OxideTerm version / 版本',
+      'OxideLab version / 版本',
       'Problem or use case / 问题或使用场景',
       'Proposed solution / 期望方案',
       'Why is this important? / 为什么这个功能对你重要？',
@@ -54,7 +54,7 @@ const REQUIRED_SECTIONS = [
     checklistHeading: 'Checklist',
     checks: [
       'I am using the latest release, confirmed this feature does not already exist, and searched existing issues / 我正在使用最新正式版，已确认该功能尚不存在，并已搜索过已有 Issue',
-      "This is one focused request within OxideTerm's scope / 这是一个聚焦且属于 OxideTerm 范围内的请求",
+      "This is one focused request within OxideLab's scope / 这是一个聚焦且属于 OxideLab 范围内的请求",
       'I have described a concrete problem/use case and proposed solution; I understand feature requests are handled best-effort, and vague or inactive issues may be closed. 我已描述具体问题/使用场景和期望方案；我理解功能请求会尽力处理，描述模糊或长期无回复的 Issue 可能会被关闭。',
     ],
   },
@@ -63,7 +63,7 @@ const REQUIRED_SECTIONS = [
     titlePrefix: '[Compatibility]',
     signature: 'SSH server details / 服务端信息',
     headings: [
-      'OxideTerm version / 版本',
+      'OxideLab version / 版本',
       'Client platform / 客户端平台',
       'Authentication method / 认证方式',
       'SSH server details / 服务端信息',
@@ -80,7 +80,7 @@ const REQUIRED_SECTIONS = [
 ];
 
 const NON_NARRATIVE_HEADING_PREFIXES = [
-  'oxideterm version',
+  'oxidelab version',
   'platform',
   'client platform',
   'area',
@@ -195,7 +195,7 @@ function checkedItems(markdown) {
 
 function readSubmittedVersion(body) {
   const sections = parseSections(body);
-  const value = sections.get(normalizeHeading('OxideTerm version / 版本'));
+  const value = sections.get(normalizeHeading('OxideLab version / 版本'));
   if (!value) return null;
   const match = value.match(/(?:^|[^\w.+-])v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?)(?![\w.+-])/);
   return match?.[1] || null;

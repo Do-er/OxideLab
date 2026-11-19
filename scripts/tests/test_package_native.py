@@ -26,8 +26,8 @@ class RuntimeResourceTests(unittest.TestCase):
             resources = root / "resources"
             target = "aarch64-apple-darwin"
             for relative in [
-                "agents/oxideterm-agent-linux", "icons/app.png",
-                f"cli-bin/{target}/oxideterm", f"helpers/{target}/oxideterm-vnc-helper",
+                "agents/oxidelab-agent-linux", "icons/app.png",
+                f"cli-bin/{target}/oxidelab", f"helpers/{target}/oxideterm-vnc-helper",
                 f"helpers/{target}/oxideterm-rdp-helper",
             ]:
                 file = resources / relative
@@ -37,7 +37,7 @@ class RuntimeResourceTests(unittest.TestCase):
             with patch.object(package_native, "RESOURCE_DIR", resources):
                 package_native.copy_runtime_resources(destination, target)
             self.assertFalse((destination / "helpers").exists())
-            for relative in ["agents/oxideterm-agent-linux", "icons/app.png", f"cli-bin/{target}/oxideterm"]:
+            for relative in ["agents/oxidelab-agent-linux", "icons/app.png", f"cli-bin/{target}/oxidelab"]:
                 self.assertEqual((destination / relative).read_bytes(), relative.encode())
 
 
@@ -45,11 +45,11 @@ class WindowsInstallerScriptTests(unittest.TestCase):
     def identity(self) -> package_native.ReleaseIdentity:
         return package_native.ReleaseIdentity(
             channel="gpui-preview",
-            app_name="OxideTerm GPUI Preview",
+            app_name="OxideLab GPUI Preview",
             app_identifier="com.oxideterm.gpuiPreview",
-            windows_install_dir=r"$LOCALAPPDATA\Programs\OxideTerm GPUI Preview",
-            windows_registry_key="OxideTerm GPUI Preview",
-            windows_uninstall_key="OxideTerm GPUI Preview",
+            windows_install_dir=r"$LOCALAPPDATA\Programs\OxideLab GPUI Preview",
+            windows_registry_key="OxideLab GPUI Preview",
+            windows_uninstall_key="OxideLab GPUI Preview",
             linux_package_name="oxideterm-gpui-preview",
             linux_install_dir="oxideterm-gpui-preview",
             linux_desktop_id="com.oxideterm.gpuiPreview",
@@ -63,7 +63,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="1.2.0-gpui-preview.2",
             identity=identity,
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
 
@@ -73,7 +73,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
         self.assertIn("WriteRegStr HKCU", script)
         self.assertIn('VIProductVersion "1.2.0.0"', script)
         self.assertIn('"FileVersion" "1.2.0-gpui-preview.2"', script)
-        self.assertIn('"FileDescription" "OxideTerm GPUI Preview Installer"', script)
+        self.assertIn('"FileDescription" "OxideLab GPUI Preview Installer"', script)
         self.assertIn('"LegalCopyright" "Copyright (C) 2026 AnalyseDeCircuit"', script)
         self.assertIn('"ProductVersion" "1.2.0-gpui-preview.2"', script)
         self.assertIn("normal_install:", script)
@@ -97,7 +97,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="2.0.31",
             identity=self.identity(),
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
         preflight = script.split("Function EnsureApplicationClosed\n", 1)[1].split("FunctionEnd", 1)[0]
@@ -120,7 +120,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="2.0.31",
             identity=self.identity(),
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
         for language in (
@@ -131,7 +131,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
                 self.assertIn(f'!insertmacro MUI_LANGUAGE "{language}"', script)
                 self.assertIn(f'LangString CloseRunningApplication ${{LANG_{language.upper()}}}', script)
                 self.assertIn(f'LangString ApplicationCloseFailed ${{LANG_{language.upper()}}}', script)
-        self.assertIn("OxideTerm GPUI Preview 仍在运行", script)
+        self.assertIn("OxideLab GPUI Preview 仍在运行", script)
         self.assertNotIn("{{app}}", script)
         self.assertNotIn("{{path}}", script)
 
@@ -163,7 +163,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
 
             script_bytes, = compiler_inputs
             self.assertTrue(script_bytes.startswith(codecs.BOM_UTF8))
-            self.assertIn("OxideTerm GPUI Preview 仍在运行", script_bytes.decode("utf-8-sig"))
+            self.assertIn("OxideLab GPUI Preview 仍在运行", script_bytes.decode("utf-8-sig"))
 
     @unittest.skipUnless(shutil.which("makensis"), "NSIS compiler is not installed")
     def test_installer_compiles_with_localized_preflight(self) -> None:
@@ -196,11 +196,11 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="1.2.0-gpui-preview.2",
             identity=self.identity(),
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
 
-        self.assertIn('/OXIDETERM_UPDATE=1', script)
+        self.assertIn('/OXIDELAB_UPDATE=1', script)
         self.assertIn('SetSilent silent', script)
         self.assertIn('RMDir /r "$INSTDIR\\install"', script)
         self.assertIn('SetOutPath "$INSTDIR\\tools"', script)
@@ -211,7 +211,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
         self.assertIn('--app-exe "$INSTDIR\\oxideterm-native.exe" --launch', script)
         self.assertIn('StrCmp $IsOxideUpdate "1" start_menu_shortcut_done', script)
         self.assertIn('StrCmp $IsOxideUpdate "1" desktop_shortcut_done', script)
-        self.assertNotIn('$LOCALAPPDATA\\OxideTerm\\oxideterm.exe', script)
+        self.assertNotIn('$LOCALAPPDATA\\OxideLab\\oxidelab.exe', script)
         update_install = script.split("update_install:\n", 1)[1].split("install_done:\n", 1)[0]
         self.assertNotIn("Call EnsureApplicationClosed", update_install)
         helper_launch = update_install.split("legacy_shortcuts_done:\n", 1)[1]
@@ -228,7 +228,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="1.2.0-gpui-preview.2",
             identity=self.identity(),
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=icon_path,
         )
         resolved_icon = package_native.nsis_path(icon_path)
@@ -250,21 +250,21 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="2.0.0",
             identity=identity,
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
 
-        self.assertIn('$LOCALAPPDATA\\OxideTerm\\oxideterm.exe', script)
-        self.assertIn('StrCpy $INSTDIR "$LOCALAPPDATA\\OxideTerm"', script)
+        self.assertIn('$LOCALAPPDATA\\OxideLab\\oxidelab.exe', script)
+        self.assertIn('StrCpy $INSTDIR "$LOCALAPPDATA\\OxideLab"', script)
         self.assertIn('StrCpy $IsOxideUpdate "1"', script)
         self.assertIn('StrCpy $IsLegacyUpgrade "1"', script)
         self.assertIn('SetSilent silent', script)
         self.assertIn(
-            'CreateShortcut "$SMPROGRAMS\\OxideTerm\\OxideTerm.lnk" '
+            'CreateShortcut "$SMPROGRAMS\\OxideLab\\OxideLab.lnk" '
             '"$INSTDIR\\oxideterm-native.exe"',
             script,
         )
-        self.assertIn('IfFileExists "$DESKTOP\\OxideTerm.lnk"', script)
+        self.assertIn('IfFileExists "$DESKTOP\\OxideLab.lnk"', script)
 
     def test_installer_registers_connection_uri_capabilities_without_embedding_credentials(self) -> None:
         identity = self.identity()
@@ -273,7 +273,7 @@ class WindowsInstallerScriptTests(unittest.TestCase):
             version="2.0.23",
             identity=identity,
             installer_root=Path(r"C:\dist\nsis-windows_x64"),
-            installer_path=Path(r"C:\dist\OxideTerm_setup.exe"),
+            installer_path=Path(r"C:\dist\OxideLab_setup.exe"),
             icon_path=Path(r"C:\icons\icon.ico"),
         )
 
@@ -316,18 +316,18 @@ class MacosBridgeArchiveTests(unittest.TestCase):
     def test_tauri_bridge_archive_keeps_app_bundle_root(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            app = root / "OxideTerm.app"
+            app = root / "OxideLab.app"
             executable = app / "Contents" / "MacOS" / "oxideterm-native"
             executable.parent.mkdir(parents=True)
             executable.write_bytes(b"native")
             executable.chmod(0o755)
-            archive_path = root / "OxideTerm.app.tar.gz"
+            archive_path = root / "OxideLab.app.tar.gz"
 
             package_native.archive_macos_tauri_bundle(app, archive_path)
 
             with package_native.tarfile.open(archive_path, "r:gz") as archive:
                 member = archive.getmember(
-                    "OxideTerm.app/Contents/MacOS/oxideterm-native"
+                    "OxideLab.app/Contents/MacOS/oxideterm-native"
                 )
                 self.assertEqual(member.mode & 0o111, 0o111)
 
@@ -337,7 +337,7 @@ class MacosDmgCreateTests(unittest.TestCase):
         for notice, image_format in [(False, "UDZO"), (True, "UDRW")]:
             with self.subTest(image_format=image_format), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
-                image = root / "OxideTerm.dmg"
+                image = root / "OxideLab.dmg"
                 attempts = []
 
                 def run_command(command, **kwargs):
@@ -357,8 +357,8 @@ class MacosDmgCreateTests(unittest.TestCase):
                     patch.object(package_native.time, "sleep") as sleep,
                 ):
                     package_native.create_macos_dmg(root, image, package_native.release_identity("v2.0.30", "2.0.30"))
-                expected_image = root / ".OxideTerm.writable.dmg" if notice else image
-                expected = ["hdiutil", "create", "-volname", "OxideTerm", "-srcfolder", str(root), "-ov", "-format", image_format, str(expected_image)]
+                expected_image = root / ".OxideLab.writable.dmg" if notice else image
+                expected = ["hdiutil", "create", "-volname", "OxideLab", "-srcfolder", str(root), "-ov", "-format", image_format, str(expected_image)]
                 self.assertEqual(attempts, [expected, expected])
                 sleep.assert_called_once_with(2)
 
@@ -369,14 +369,14 @@ class MacosDmgCreateTests(unittest.TestCase):
             (1, "hdiutil: create failed - No space left on device\n", 1),
         ]:
             with self.subTest(code=code, diagnostic=diagnostic):
-                command = ["hdiutil", "create", "-volname", "OxideTerm", "-srcfolder", "/tmp/source", "-ov", "-format", "UDZO", "/tmp/output.dmg"]
+                command = ["hdiutil", "create", "-volname", "OxideLab", "-srcfolder", "/tmp/source", "-ov", "-format", "UDZO", "/tmp/output.dmg"]
                 error = subprocess.CalledProcessError(code, command, stderr=diagnostic)
                 with (
                     patch.object(package_native.subprocess, "run", side_effect=error) as run_mock,
                     patch.object(package_native.time, "sleep") as sleep,
                     self.assertRaises(subprocess.CalledProcessError) as raised,
                 ):
-                    package_native.create_macos_disk_image(Path("/tmp/source"), Path("/tmp/output.dmg"), "OxideTerm", "UDZO")
+                    package_native.create_macos_disk_image(Path("/tmp/source"), Path("/tmp/output.dmg"), "OxideLab", "UDZO")
                 self.assertIs(raised.exception, error)
                 self.assertEqual([args.args[0] for args in run_mock.call_args_list], [command] * expected_attempts)
                 self.assertEqual(sleep.call_args_list, [call(2)] * (expected_attempts - 1))
@@ -467,7 +467,7 @@ class ReleaseDocumentTests(unittest.TestCase):
 
         notice = (package_native.THIRD_PARTY_LICENSE_DIR / "DISTRO-ICONS-NOTICE.md").read_text()
         assets = re.findall(r"Bundled file: `([^`]+)`\.\n- SHA-256: `([0-9a-f]+)`", notice)
-        self.assertEqual([Path(path).stem for path, _ in assets], ["ubuntu", "archlinux", "debian", "gentoo", "nixos", "rocky", "linuxmint"])
+        self.assertEqual([Path(path).stem for path, _ in assets], ["ubuntu", "archlinux", "debian", "gentoo", "nixos", "rocky", "linuxmint", "openbmc"])
         asset_directory = package_native.ROOT_DIR / "crates/oxideterm-gpui-app/resources/distro-icons"
         self.assertEqual({Path(path).name for path, _ in assets}, {path.name for path in asset_directory.glob("*.svg")})
         for path, expected_hash in assets:
@@ -550,14 +550,14 @@ class LinuxDesktopEntryTests(unittest.TestCase):
     def test_desktop_entry_exposes_matching_startup_window_class(self) -> None:
         identity = package_native.release_identity("v2.0.0", "2.0.0")
         with tempfile.TemporaryDirectory() as directory:
-            desktop_file = Path(directory) / "com.oxideterm.app.desktop"
+            desktop_file = Path(directory) / "com.oxidelab.app.desktop"
 
             package_native.write_linux_desktop_file(
-                desktop_file, identity, "/opt/oxideterm/oxideterm-native"
+                desktop_file, identity, "/opt/oxidelab/oxideterm-native"
             )
 
             desktop_entry = desktop_file.read_text(encoding="utf-8")
-            self.assertIn("StartupWMClass=com.oxideterm.app", desktop_entry)
+            self.assertIn("StartupWMClass=com.oxidelab.app", desktop_entry)
             for scheme in package_native.CONNECTION_URI_SCHEMES:
                 self.assertIn(f"x-scheme-handler/{scheme}", desktop_entry)
 
@@ -565,16 +565,16 @@ class LinuxDesktopEntryTests(unittest.TestCase):
 class PlatformSigningTests(unittest.TestCase):
     def test_macos_signing_options_follow_the_selected_identity(self) -> None:
         for environment, identity, hardened in [
-            ({"MACOS_CODESIGN_IDENTITY": "Developer ID Application: OxideTerm"},
-             "Developer ID Application: OxideTerm", True),
+            ({"MACOS_CODESIGN_IDENTITY": "Developer ID Application: OxideLab"},
+             "Developer ID Application: OxideLab", True),
             ({}, "-", False),
         ]:
             with (
                 self.subTest(identity=identity),
                 patch.dict(package_native.os.environ, environment, clear=True),
             ):
-                command = package_native.macos_codesign_command("codesign", Path("OxideTerm.app"))
-                self.assertEqual(command[-3:], ["--sign", identity, "OxideTerm.app"])
+                command = package_native.macos_codesign_command("codesign", Path("OxideLab.app"))
+                self.assertEqual(command[-3:], ["--sign", identity, "OxideLab.app"])
                 if hardened:
                     self.assertEqual(command[3:6], ["--options", "runtime", "--timestamp"])
                 else:
@@ -584,7 +584,7 @@ class PlatformSigningTests(unittest.TestCase):
     def test_macos_notarization_is_optional_for_development_builds(self) -> None:
         with patch.dict(package_native.os.environ, {}, clear=True):
             submitted = package_native.notarize_macos_artifact(
-                Path("OxideTerm.app.zip"), staple=False
+                Path("OxideLab.app.zip"), staple=False
             )
 
         self.assertFalse(submitted)
@@ -592,7 +592,7 @@ class PlatformSigningTests(unittest.TestCase):
     def test_gatekeeper_artwork_is_copied_only_for_unsigned_stable_images(self) -> None:
         for tag, version, signer, expected in [
             ("v2.0.0", "2.0.0", "", True),
-            ("v2.0.0", "2.0.0", "Developer ID Application: OxideTerm", False),
+            ("v2.0.0", "2.0.0", "Developer ID Application: OxideLab", False),
             ("gpui-v2.0.0-gpui-preview.16", "2.0.0-gpui-preview.16", "", False),
         ]:
             with self.subTest(tag=tag, signer=signer), tempfile.TemporaryDirectory() as directory:
@@ -771,7 +771,7 @@ class LinuxPackagingTests(unittest.TestCase):
             target = package_native.host_triple()
             label = package_native.target_label(target)
             for relative_path in (
-                Path("cli-bin") / target / "oxideterm",
+                Path("cli-bin") / target / "oxidelab",
                 Path("helpers") / target / "oxideterm-rdp-helper",
                 Path("helpers") / target / "oxideterm-vnc-helper",
             ):
@@ -789,7 +789,7 @@ class LinuxPackagingTests(unittest.TestCase):
                     resource_dir
                     / package_native.AGENT_RESOURCE_DIR
                     / agent_target
-                    / "oxideterm-agent"
+                    / "oxidelab-agent"
                 )
                 agent_path.parent.mkdir(parents=True, exist_ok=True)
                 agent_path.write_bytes(b"synthetic agent")
@@ -826,20 +826,20 @@ class LinuxPackagingTests(unittest.TestCase):
                     identity,
                 )
 
-            artifact = dist_dir / f"OxideTerm_2.0.0_{label}.rpm"
+            artifact = dist_dir / f"OxideLab_2.0.0_{label}.rpm"
             self.assertTrue(artifact.is_file())
             package_listing = subprocess.check_output(
                 ["rpm", "-qpl", str(artifact)],
                 text=True,
             )
             self.assertIn("/opt/oxideterm/PACKAGE_KIND", package_listing)
-            self.assertIn("/opt/oxideterm/oxideterm-native", package_listing)
+            self.assertIn("/opt/oxidelab/oxideterm-native", package_listing)
             self.assertIn(
-                "/opt/oxideterm/resources/agents/x86_64-unknown-linux-musl/oxideterm-agent",
+                "/opt/oxideterm/resources/agents/x86_64-unknown-linux-musl/oxidelab-agent",
                 package_listing,
             )
             self.assertIn(
-                "/opt/oxideterm/resources/agents/aarch64-unknown-linux-musl/oxideterm-agent",
+                "/opt/oxideterm/resources/agents/aarch64-unknown-linux-musl/oxidelab-agent",
                 package_listing,
             )
             recommendations = subprocess.check_output(

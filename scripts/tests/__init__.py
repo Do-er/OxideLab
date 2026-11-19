@@ -1,1 +1,1 @@
-"""Tests for OxideTerm release and maintenance scripts."""
+"""Tests for OxideLab release and maintenance scripts."""

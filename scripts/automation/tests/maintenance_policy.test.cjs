@@ -15,8 +15,8 @@ function bugIssue({
   state = 'open',
   checklist = `- [x] I tested with the latest release, can still reproduce the issue, and searched existing issues / 我已使用最新正式版测试，问题仍然存在，并已搜索过已有 Issue
 - [x] This is one reproducible bug, not a usage question or feature request / 这是一个可复现的 bug，而不是使用问题或功能建议
-- [x] I provided the OxideTerm version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
-我已提供 OxideTerm 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
+- [x] I provided the OxideLab version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
+我已提供 OxideLab 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
 - [x] I removed passwords, private keys, and other secrets from this report.
 我已从本报告中删除密码、私钥及其他敏感信息。`,
 } = {}) {
@@ -26,7 +26,7 @@ function bugIssue({
     title,
     state,
     labels,
-    body: `### OxideTerm version / 版本
+    body: `### OxideLab version / 版本
 
 2.0.11
 
@@ -87,7 +87,7 @@ test('keeps feature decisions with the maintainer', () => {
   // Feature requests must satisfy their own template before policy routing begins.
   const issue = {
     ...bugIssue({ labels: ['enhancement'], title: '增加 SPICE 远程桌面支持' }),
-    body: `### OxideTerm version / 版本
+    body: `### OxideLab version / 版本
 
 2.0.11
 
@@ -106,7 +106,7 @@ VNC 无法满足虚拟机控制场景中的低延迟和设备共享需求。
 ### Checklist
 
 - [x] I am using the latest release, confirmed this feature does not already exist, and searched existing issues / 我正在使用最新正式版，已确认该功能尚不存在，并已搜索过已有 Issue
-- [x] This is one focused request within OxideTerm's scope / 这是一个聚焦且属于 OxideTerm 范围内的请求
+- [x] This is one focused request within OxideLab's scope / 这是一个聚焦且属于 OxideLab 范围内的请求
 - [x] I have described a concrete problem/use case and proposed solution; I understand feature requests are handled best-effort, and vague or inactive issues may be closed.
 我已描述具体问题/使用场景和期望方案；我理解功能请求会尽力处理，描述模糊或长期无回复的 Issue 可能会被关闭。
 `,

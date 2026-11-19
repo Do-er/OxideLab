@@ -17,14 +17,14 @@ export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER="${CARGO_TARGET_AARCH64_UN
 for pair in "${TARGETS[@]}"; do
   rust_target="${pair%%:*}"
   artifact_suffix="${pair##*:}"
-  echo "==> Building oxideterm-agent for $rust_target"
+  echo "==> Building oxidelab-agent for $rust_target"
   cargo build --manifest-path "$AGENT_MANIFEST" --release --target "$rust_target"
-  cp "$ROOT_DIR/agent/target/$rust_target/release/oxideterm-agent" \
-    "$OUT_DIR/oxideterm-agent-$artifact_suffix"
-  chmod +x "$OUT_DIR/oxideterm-agent-$artifact_suffix"
+  cp "$ROOT_DIR/agent/target/$rust_target/release/oxidelab-agent" \
+    "$OUT_DIR/oxidelab-agent-$artifact_suffix"
+  chmod +x "$OUT_DIR/oxidelab-agent-$artifact_suffix"
   if command -v llvm-strip >/dev/null 2>&1; then
     # llvm-strip handles both bundled Linux agent targets from one host runner.
-    llvm-strip "$OUT_DIR/oxideterm-agent-$artifact_suffix"
+    llvm-strip "$OUT_DIR/oxidelab-agent-$artifact_suffix"
   fi
 done
 

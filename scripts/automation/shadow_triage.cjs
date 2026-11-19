@@ -34,7 +34,7 @@ function markdownSummary(report) {
     ['Suggested labels', report.recommendedLabels.join(', ') || 'none'],
   ];
   return [
-    '## OxideTerm maintenance automation',
+    '## OxideLab maintenance automation',
     '',
     '| Field | Result |',
     '| --- | --- |',

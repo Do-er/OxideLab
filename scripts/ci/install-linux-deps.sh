@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# install-linux-deps.sh — Install Linux system dependencies for OxideTerm.
+# install-linux-deps.sh — Install Linux system dependencies for OxideLab.
 #
 # Shared by CI (check/build/test on Ubuntu) and native-package (cross-platform
 # packaging on Linux runners).  Callers can set EXTRA_PACKAGES to install

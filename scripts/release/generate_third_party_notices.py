@@ -96,7 +96,7 @@ def cargo_deny_license_data(cwd: Path) -> dict[str, dict[str, list[str]]]:
 
 def workspace_package_names(cwd: Path) -> set[str]:
     # `cargo deny list` includes local workspace packages. Third-party notices
-    # should describe external/vendor obligations, not OxideTerm's own GPL
+    # should describe external/vendor obligations, not OxideLab's own GPL
     # crates. Keep vendored workspace packages such as alacritty_terminal:
     # those are local paths, but still third-party attribution obligations.
     completed = subprocess.run(
@@ -308,7 +308,7 @@ def build_notices(args: argparse.Namespace) -> tuple[str, int, int]:
             [
                 "## Copyleft Notes",
                 "",
-                "Crates can be multi-licensed. When a crate lists both copyleft and permissive licenses, OxideTerm uses the most permissive compatible option available.",
+                "Crates can be multi-licensed. When a crate lists both copyleft and permissive licenses, OxideLab uses the most permissive compatible option available.",
                 "This section is a review prompt for binary distribution; it does not replace legal review.",
                 "",
             ]
@@ -335,7 +335,7 @@ def build_notices(args: argparse.Namespace) -> tuple[str, int, int]:
     output += "## Distribution Icon Assets\n\n"
     output += (cwd / "licenses/third-party/DISTRO-ICONS-NOTICE.md").read_text(encoding="utf-8") + "\n"
     output += "## Notes\n\n"
-    output += "- Multi-license policy: where a crate offers multiple licenses, OxideTerm uses the most permissive compatible option available.\n"
+    output += "- Multi-license policy: where a crate offers multiple licenses, OxideLab uses the most permissive compatible option available.\n"
     output += "- License data is generated from crate metadata through cargo-deny and may include multiple licenses per crate.\n"
     output += "- This notice list is for attribution and compliance tracking. It does not replace upstream license texts.\n"
     output += "- GPUI-CE's complete Apache-2.0 text is shipped as `GPUI-CE-LICENSE-APACHE`.\n"

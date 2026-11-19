@@ -36,7 +36,7 @@ class ProjectStatsTests(unittest.TestCase):
                 "crates/fernomade/wire/src/lib.rs": "pub fn wire() {}\n",
                 "crates/gpui-ce/gpui/Cargo.toml": '[package]\nname = "gpui"\n',
                 "crates/gpui-ce/gpui/src/lib.rs": "pub fn draw() {}\n",
-                "agent/Cargo.toml": '[package]\nname = "oxideterm-agent"\n',
+                "agent/Cargo.toml": '[package]\nname = "oxidelab-agent"\n',
                 "agent/src/main.rs": "fn main() {}\n",
                 "scripts/build/build-agent.sh": "echo build\n",
                 "scripts/local file.py": "print('local')\n",
@@ -66,7 +66,7 @@ class ProjectStatsTests(unittest.TestCase):
             )
             for relative, package in [
                 ("crates/fernomade/wire/src/lib.rs", "fernomade-wire"),
-                ("agent/src/main.rs", "oxideterm-agent"),
+                ("agent/src/main.rs", "oxidelab-agent"),
                 ("crates/gpui-ce/gpui/src/lib.rs", "gpui"),
             ]:
                 self.assertEqual(project_stats.crate_name(root, Path(relative), {}), package)

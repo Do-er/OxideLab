@@ -8,7 +8,7 @@ const gate = require('../issue_quality_policy.cjs');
 const featureChecklist = `### Checklist
 
 - [x] I am using the latest release, confirmed this feature does not already exist, and searched existing issues / 我正在使用最新正式版，已确认该功能尚不存在，并已搜索过已有 Issue
-- [x] This is one focused request within OxideTerm's scope / 这是一个聚焦且属于 OxideTerm 范围内的请求
+- [x] This is one focused request within OxideLab's scope / 这是一个聚焦且属于 OxideLab 范围内的请求
 - [x] I have described a concrete problem/use case and proposed solution; I understand feature requests are handled best-effort, and vague or inactive issues may be closed.
 我已描述具体问题/使用场景和期望方案；我理解功能请求会尽力处理，描述模糊或长期无回复的 Issue 可能会被关闭。
 `;
@@ -17,14 +17,14 @@ const bugChecklist = `### Checklist
 
 - [x] I tested with the latest release, can still reproduce the issue, and searched existing issues / 我已使用最新正式版测试，问题仍然存在，并已搜索过已有 Issue
 - [x] This is one reproducible bug, not a usage question or feature request / 这是一个可复现的 bug，而不是使用问题或功能建议
-- [x] I provided the OxideTerm version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
-我已提供 OxideTerm 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
+- [x] I provided the OxideLab version, platform, and steps to reproduce; I understand vague, incomplete, or inactive issues may be closed.
+我已提供 OxideLab 版本、平台及复现步骤；我理解描述模糊、信息不足或长期无回复的 Issue 可能会被关闭。
 - [x] I removed passwords, private keys, and other secrets from this report.
 我已从本报告中删除密码、私钥及其他敏感信息。
 `;
 
 function featureBody({ version = '2.0.5', problem = '会话录制文件无法被转换工具读取。', proposal = '让录制文件保持标准格式兼容。', importance = '团队每周导出多次录制用于审计。' } = {}) {
-  return `### OxideTerm version / 版本
+  return `### OxideLab version / 版本
 
 ${version}
 
@@ -45,7 +45,7 @@ ${featureChecklist}
 }
 
 function bugBody({ version = '2.0.5', reproduction = '打开应用，建立连接，然后点击终端录制按钮。' } = {}) {
-  return `### OxideTerm version / 版本
+  return `### OxideLab version / 版本
 
 ${version}
 
@@ -71,7 +71,7 @@ ${bugChecklist}
 
 test('requires each template acknowledgement even without issue labels', () => {
   const missing = featureBody().split('### Checklist')[0];
-  const requiredItem = "This is one focused request within OxideTerm's scope / 这是一个聚焦且属于 OxideTerm 范围内的请求";
+  const requiredItem = "This is one focused request within OxideLab's scope / 这是一个聚焦且属于 OxideLab 范围内的请求";
   for (const [name, body, expected] of [
     ['missing checklist', missing, [{ code: 'required_section_missing', heading: 'Checklist' }]],
     ['unchecked item', featureBody().replace(`- [x] ${requiredItem}`, `- [ ] ${requiredItem}`), [{ code: 'required_checkbox_unchecked', heading: 'Checklist', item: requiredItem }]],
@@ -104,7 +104,7 @@ test('checks compatibility and plugin API acknowledgements using their own templ
     {
       title: '[Compatibility] Cannot authenticate with test SSH server',
       labels: ['compatibility'],
-      body: `### OxideTerm version / 版本
+      body: `### OxideLab version / 版本
 2.2.0
 ### Client platform / 客户端平台
 Windows (x86_64)

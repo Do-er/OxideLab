@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bump the native OxideTerm workspace version and refresh Cargo.lock."""
+"""Bump the native OxideLab workspace version and refresh Cargo.lock."""
 
 from __future__ import annotations
 

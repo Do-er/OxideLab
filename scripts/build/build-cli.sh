@@ -4,11 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUT_ROOT="$ROOT_DIR/crates/oxideterm-gpui-app/resources/cli-bin"
 TARGET_TRIPLE="${1:-}"
-PROFILE="${OXIDETERM_CLI_PROFILE:-release}"
-BIN_NAME="oxideterm"
+PROFILE="${OXIDELAB_CLI_PROFILE:-release}"
+BIN_NAME="oxidelab"
 
 if [[ "$PROFILE" != "release" ]]; then
-  echo "Only release CLI packaging is supported; set OXIDETERM_CLI_PROFILE=release." >&2
+  echo "Only release CLI packaging is supported; set OXIDELAB_CLI_PROFILE=release." >&2
   exit 2
 fi
 
@@ -17,7 +17,7 @@ if [[ -n "$TARGET_TRIPLE" ]]; then
   build_args+=(--target "$TARGET_TRIPLE")
 fi
 
-echo "==> Building OxideTerm CLI${TARGET_TRIPLE:+ for $TARGET_TRIPLE}"
+echo "==> Building OxideLab CLI${TARGET_TRIPLE:+ for $TARGET_TRIPLE}"
 # Build the CLI as a standalone release artifact before GPUI app bundling.
 export CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-$ROOT_DIR/target/clang-module-cache}"
 mkdir -p "$CLANG_MODULE_CACHE_PATH"

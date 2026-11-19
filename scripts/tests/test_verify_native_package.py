@@ -29,25 +29,25 @@ class ArtifactNameTests(unittest.TestCase):
     def test_artifact_names_cover_platforms_and_stable_update_compatibility(self) -> None:
         for target, version, expected in [
             ("x86_64-pc-windows-msvc", "2.0.0", {
-                "OxideTerm_2.0.0_windows_x64-setup.exe",
-                "OxideTerm_2.0.0_windows_x64_portable.zip",
+                "OxideLab_2.0.0_windows_x64-setup.exe",
+                "OxideLab_2.0.0_windows_x64_portable.zip",
             }),
             ("aarch64-unknown-linux-gnu", "2.0.0", {
-                "OxideTerm_2.0.0_linux_arm64.AppImage",
-                "OxideTerm_2.0.0_linux_arm64.deb",
-                "OxideTerm_2.0.0_linux_arm64.rpm",
-                "OxideTerm_2.0.0_linux_arm64_portable.tar.gz",
+                "OxideLab_2.0.0_linux_arm64.AppImage",
+                "OxideLab_2.0.0_linux_arm64.deb",
+                "OxideLab_2.0.0_linux_arm64.rpm",
+                "OxideLab_2.0.0_linux_arm64_portable.tar.gz",
             }),
             ("aarch64-apple-darwin", "2.0.0", {
-                "OxideTerm_2.0.0_macos_arm64.app.zip",
-                "OxideTerm_2.0.0_macos_arm64.app.tar.gz",
-                "OxideTerm_2.0.0_macos_arm64.dmg",
-                "OxideTerm_2.0.0_macos_arm64_portable.tar.gz",
+                "OxideLab_2.0.0_macos_arm64.app.zip",
+                "OxideLab_2.0.0_macos_arm64.app.tar.gz",
+                "OxideLab_2.0.0_macos_arm64.dmg",
+                "OxideLab_2.0.0_macos_arm64_portable.tar.gz",
             }),
             ("aarch64-apple-darwin", "2.0.0-gpui-preview.15", {
-                "OxideTerm_2.0.0-gpui-preview.15_macos_arm64.app.zip",
-                "OxideTerm_2.0.0-gpui-preview.15_macos_arm64.dmg",
-                "OxideTerm_2.0.0-gpui-preview.15_macos_arm64_portable.tar.gz",
+                "OxideLab_2.0.0-gpui-preview.15_macos_arm64.app.zip",
+                "OxideLab_2.0.0-gpui-preview.15_macos_arm64.dmg",
+                "OxideLab_2.0.0-gpui-preview.15_macos_arm64_portable.tar.gz",
             }),
         ]:
             with self.subTest(target=target, version=version):
@@ -177,7 +177,7 @@ class PortableArchiveTests(unittest.TestCase):
             with self.subTest(case=name), tempfile.TemporaryDirectory() as directory:
                 path = Path(directory) / "portable.zip"
                 with zipfile.ZipFile(path, "w") as archive:
-                    for entry in self.required_entries("OxideTerm", "oxideterm-native.exe"):
+                    for entry in self.required_entries("OxideLab", "oxideterm-native.exe"):
                         if omitted and entry.endswith(omitted):
                             continue
                         content = self.entry_bytes(entry, "oxideterm-native.exe")
@@ -206,7 +206,7 @@ class PortableArchiveTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "root"
             root.mkdir()
-            for name in self.required_entries("OxideTerm", "oxideterm-native"):
+            for name in self.required_entries("OxideLab", "oxideterm-native"):
                 if name.endswith("AGENT_THIRD_PARTY_NOTICES.md"):
                     continue
                 path = root / name
@@ -217,7 +217,7 @@ class PortableArchiveTests(unittest.TestCase):
                     path.write_bytes(self.entry_bytes(name, "oxideterm-native"))
             archive_path = Path(directory) / "portable.tar.gz"
             with tarfile.open(archive_path, "w:gz") as archive:
-                archive.add(root / "OxideTerm", arcname="OxideTerm")
+                archive.add(root / "OxideLab", arcname="OxideLab")
 
             with self.assertRaisesRegex(RuntimeError, "AGENT_THIRD_PARTY_NOTICES"):
                 verify_native_package.verify_portable_archive(
@@ -230,7 +230,7 @@ class LinuxMetadataTests(unittest.TestCase):
         verify_native_package.require_metadata_values(
             "libegl1, libvulkan1",
             verify_native_package.LINUX_DEB_GRAPHICS_RECOMMENDS,
-            Path("OxideTerm.deb"),
+            Path("OxideLab.deb"),
             "Recommends field",
         )
 
@@ -238,7 +238,7 @@ class LinuxMetadataTests(unittest.TestCase):
             verify_native_package.require_metadata_values(
                 "libegl1, notlibvulkan1",
                 verify_native_package.LINUX_DEB_GRAPHICS_RECOMMENDS,
-                Path("OxideTerm.deb"),
+                Path("OxideLab.deb"),
                 "Recommends field",
             )
 

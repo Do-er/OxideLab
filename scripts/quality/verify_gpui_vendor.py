@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify OxideTerm's six local gpui-pre patches and their source licenses."""
+"""Verify OxideLab's six local gpui-pre patches and their source licenses."""
 
 from __future__ import annotations
 

@@ -6,7 +6,7 @@ const test = require('node:test');
 const policy = require('../issue_version_policy.cjs');
 
 function issueBody(version) {
-  return `### OxideTerm version / 版本
+  return `### OxideLab version / 版本
 
 ${version}
 
@@ -29,7 +29,7 @@ function release(tagName, options = {}) {
 test('reads only unambiguous stable versions from the dedicated form field', () => {
   for (const [version, expected] of [
     ['v2.0.9', '2.0.9'],
-    ['OxideTerm 2.0.9 (stable)', '2.0.9'],
+    ['OxideLab 2.0.9 (stable)', '2.0.9'],
     ['2.0.9+package.1', '2.0.9'],
     ['2.1.0-beta.1', null],
     ['2.1.0 beta', null],

@@ -4,7 +4,7 @@ const { parseSections } = require('./issue_quality_policy.cjs');
 
 const VERSION_REMINDER_MARKER = '<!-- oxideterm-stable-version-reminder:v1 -->';
 const OBSOLETE_VERSION_NOTICE_MARKER = '<!-- oxideterm-obsolete-version-notice:v1 -->';
-const VERSION_SECTION_HEADING = 'oxideterm version / 版本';
+const VERSION_SECTION_HEADING = 'oxidelab version / 版本';
 const NON_STABLE_CHANNEL_PATTERN = /\b(?:alpha|beta|nightly|preview|rc|gpui|native|rustnative)\b/iu;
 const REPORTED_VERSION_PATTERN = /(?:^|[^0-9A-Za-z.-])v?(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z][0-9A-Za-z.-]*)?(?:\+[0-9A-Za-z][0-9A-Za-z.-]*)?(?=$|[^0-9A-Za-z.+-])/gu;
 const STABLE_RELEASE_TAG_PATTERN = /^v(\d+)\.(\d+)\.(\d+)$/u;

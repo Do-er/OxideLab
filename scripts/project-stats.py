@@ -183,7 +183,7 @@ def main() -> int:
         print(f"project-stats: {error}", file=sys.stderr)
         return 1
 
-    print(f"OxideTerm project statistics: {root}")
+    print(f"OxideLab project statistics: {root}")
     print("Scope: tracked and non-ignored local files; generated files and asset directories excluded.")
     print("Line-based estimates; inline comments count as code. Test code is included, not estimated separately.")
     print_table("Project source", languages)

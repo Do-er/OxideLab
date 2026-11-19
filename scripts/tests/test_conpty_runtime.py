@@ -42,8 +42,8 @@ class ConptyRuntimeTests(unittest.TestCase):
                 self.assertEqual((installer / "resources/conpty/conpty.dll").read_bytes(), b"DLL fixture")
                 self.assertEqual((installer / "resources/conpty/x64/OpenConsole.exe").read_bytes(), b"host fixture")
                 package_native.create_portable_package(binary, helper, target, "2.1.0", "windows_x64")
-                with zipfile.ZipFile(root / "dist/OxideTerm_2.1.0_windows_x64_portable.zip") as archive:
-                    prefix = "OxideTerm_2.1.0_windows_x64_portable/resources/conpty/"
+                with zipfile.ZipFile(root / "dist/OxideLab_2.1.0_windows_x64_portable.zip") as archive:
+                    prefix = "OxideLab_2.1.0_windows_x64_portable/resources/conpty/"
                     self.assertEqual(archive.read(prefix + "conpty.dll"), b"DLL fixture")
                     self.assertEqual(archive.read(prefix + "x64/OpenConsole.exe"), b"host fixture")
 

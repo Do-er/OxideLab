@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build native OxideTerm release artifacts without assuming a Unix shell."""
+"""Build native OxideLab release artifacts without assuming a Unix shell."""
 
 from __future__ import annotations
 
@@ -45,16 +45,16 @@ DIST_DIR = ROOT_DIR / "dist"
 BASE_APP_NAME = "OxideLab"
 STABLE_APP_IDENTIFIER = "com.oxidelab.app"
 APP_BIN = "oxideterm-native"
-CLI_BIN = "oxideterm"
+CLI_BIN = "oxidelab"
 CONNECTION_URI_SCHEMES = ("ssh", "telnet", "mosh", "rdp", "vnc")
 UPDATE_HELPER_PACKAGE = "oxideterm-update"
 UPDATE_HELPER_BIN = "oxideterm-update-helper"
 AGENT_RESOURCE_DIR = "agents"
-AGENT_BINARY_PREFIX = "oxideterm-agent-"
+AGENT_BINARY_PREFIX = "oxidelab-agent-"
 ENCODED_AGENT_SUFFIX = ".b64"
 UPDATE_HELPER_DIR = "tools"
 WINDOWS_UPDATE_STAGING_DIR = "install"
-WINDOWS_UPDATE_FLAG = "OXIDETERM_UPDATE"
+WINDOWS_UPDATE_FLAG = "OXIDELAB_UPDATE"
 PORTABLE_MARKER_FILENAME = "portable"
 PORTABLE_DATA_DIR = "data"
 PORTABLE_PLUGINS_DIR = "plugins"
@@ -277,7 +277,7 @@ def workspace_version() -> str:
 
 
 def raw_release_version() -> str:
-    return os.environ.get("OXIDETERM_VERSION") or workspace_version()
+    return os.environ.get("OXIDELAB_VERSION") or workspace_version()
 
 
 def normalized_version(raw: str) -> str:
@@ -1076,7 +1076,7 @@ def create_windows_installer(
 def windows_protocol_registration_script(
     identity: ReleaseIdentity, binary_name: str
 ) -> str:
-    # Capabilities make OxideTerm an available handler without replacing the
+    # Capabilities make OxideLab an available handler without replacing the
     # user's current default for any registered scheme.
     capabilities_key = f"Software\\{identity.windows_registry_key}\\Capabilities"
     lines = [
@@ -1150,8 +1150,8 @@ def windows_installer_script(
     if identity.channel == "stable":
         legacy_upgrade_init = rf"""
   ${{If}} $IsOxideUpdate == "0"
-  ${{AndIf}} ${{FileExists}} "$LOCALAPPDATA\OxideTerm\oxideterm.exe"
-    StrCpy $INSTDIR "$LOCALAPPDATA\OxideTerm"
+  ${{AndIf}} ${{FileExists}} "$LOCALAPPDATA\OxideLab\oxidelab.exe"
+    StrCpy $INSTDIR "$LOCALAPPDATA\OxideLab"
     StrCpy $IsOxideUpdate "1"
     StrCpy $IsLegacyUpgrade "1"
     SetSilent silent
@@ -1435,7 +1435,7 @@ def linux_deb_dependencies(binary: Path, scratch_dir: Path) -> str:
     debian_dir = scratch_dir / "debian"
     debian_dir.mkdir(parents=True, exist_ok=True)
     (debian_dir / "control").write_text(
-        "Source: oxideterm\nPackage: oxideterm\nArchitecture: any\nDescription: OxideTerm\n",
+        "Source: oxidelab\nPackage: oxidelab\nArchitecture: any\nDescription: OxideLab\n",
         encoding="utf-8",
     )
     output = subprocess.check_output(
@@ -1564,7 +1564,7 @@ def copy_linux_appimage_kerberos_libraries(binary: Path, appdir: Path) -> None:
         if name.startswith(("libgssapi_krb5.so", "libgssapi.so"))
     ]
     if not pending:
-        raise RuntimeError("OxideTerm binary does not expose its Kerberos runtime dependency")
+        raise RuntimeError("OxideLab binary does not expose its Kerberos runtime dependency")
 
     libraries: dict[str, Path] = {}
     while pending:
@@ -1722,7 +1722,7 @@ def create_linux_appimage(
                 'export GST_PLUGIN_SYSTEM_PATH_1_0="$APPDIR/usr/lib/gstreamer-1.0"',
                 'export GST_PLUGIN_SCANNER="$APPDIR/usr/libexec/gst-plugin-scanner"',
                 'export GST_PLUGIN_SCANNER_1_0="$APPDIR/usr/libexec/gst-plugin-scanner"',
-                'export GST_REGISTRY_1_0="${XDG_CACHE_HOME:-$HOME/.cache}/oxideterm/gstreamer-appimage.bin"',
+                'export GST_REGISTRY_1_0="${XDG_CACHE_HOME:-$HOME/.cache}/oxidelab/gstreamer-appimage.bin"',
                 f'exec "$APPDIR/usr/bin/{APP_BIN}" "$@"',
                 "",
             ]
@@ -1782,7 +1782,7 @@ Version: {linux_deb_version(version)}
 Section: utils
 Priority: optional
 Architecture: {linux_deb_arch(target)}
-Maintainer: AnalyseDeCircuit <noreply@oxideterm.app>
+Maintainer: AnalyseDeCircuit <noreply@oxidelab.app>
 Depends: {dependencies}
 Recommends: {linux_deb_graphics_recommends()}
 Description: OxideLab native terminal & embedded debugging workbench
