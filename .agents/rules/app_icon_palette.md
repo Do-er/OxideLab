@@ -12,8 +12,10 @@ description: OxideLab 应用图标色板、圆角底板规范与变体文件映�
 - 画布与圆角底板（macOS Squircle）：
   - 画布：`1024 × 1024`（透明背景，四角 `alpha = 0`）
   - 底板：`x="88" y="88" width="848" height="848" rx="192"`
-  - 主图形比例：按实际包围盒居中缩放到圆角底板的 **65%**（约 `551 px`）
-- 渲染工具：macOS 上使用 `AppKit / CoreSVG`（禁止使用 `qlmanage`，否则四角会被填充不透明白底），再用 `iconutil` 生成 `icon.icns`、`sips` 生成各尺寸 PNG 及多分辨率 `.ico`。
+  - 主图形比例：按实际包围盒居中缩放到圆角底板的 **65%**（默认 `848` 底板下约 `551 px`）
+  - 全局底板：`generate_icons.py --plate <边长>`（默认 `848`，作用于所有输出）；调大（如 `960` ≈ 94% 覆盖）可整体恢复旧版 Windows 任务栏观感
+  - ICO 覆盖：`--ico-plate <边长>` / `--ico-ratio <比例>`（可选，默认分别继承 `--plate` / `--ratio`，仅影响 `icon.ico` 与 `variants/*.ico`）；如 `--plate 848 --ico-plate 960` 保持 PNG/ICNS 规范底板、只恢复 Windows 尺寸
+- 渲染工具：macOS 上使用 `AppKit / CoreSVG`（禁止使用 `qlmanage`，否则四角会被填充不透明白底），再用 `iconutil` 生成 `icon.icns`、`sips` 生成各尺寸 PNG 及多分辨率 `.ico`。Windows/Linux 上使用 `resvg` + `Pillow`：每个 PNG 按目标尺寸直接矢量渲染（无降采样），`.ico`/`.icns` 容器由脚本纯 Python 封装，构图语义与 macOS 路径一致。
 
 ## 2. 颜色色板（Palette）
 
