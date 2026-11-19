@@ -77,7 +77,7 @@ struct FontKey {
     font_fallbacks: Option<FontFallbacks>,
 }
 
-// OxideTerm: Glyph IDs belong to the face selected by CoreText, not its name.
+// OxideLab: Glyph IDs belong to the face selected by CoreText, not its name.
 // CGFont identity excludes the layout size, so resizing can reuse the raster font.
 struct RasterFace(CGFont);
 
@@ -843,7 +843,7 @@ mod tests {
             ])
             .unwrap();
         let first = fonts
-            .font_id(&gpui::font("OxideTerm Font Collision Fixture"))
+            .font_id(&gpui::font("OxideLab Font Collision Fixture"))
             .unwrap();
         assert_eq!(fonts.glyph_for_char(first, '扩'), Some(GlyphId(3)));
 

@@ -1,4 +1,4 @@
-// OxideTerm modification: benchmark reports include platform presentation and scene-cost metrics.
+// OxideLab modification: benchmark reports include platform presentation and scene-cost metrics.
 use std::{
     cell::{OnceCell, RefCell},
     collections::BTreeMap,

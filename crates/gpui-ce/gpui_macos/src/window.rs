@@ -3240,7 +3240,7 @@ extern "C" fn window_did_fail_to_exit_fullscreen(this: &AnyObject, _: Sel, _: *m
     lock.restore_traffic_light();
     let native_window = lock.native_window;
     drop(lock);
-    // OxideTerm: notify deferred window owners after releasing the native state lock.
+    // OxideLab: notify deferred window owners after releasing the native state lock.
     unsafe {
         let center: *mut AnyObject = msg_send![class!(NSNotificationCenter), defaultCenter];
         let name = ns_string(gpui::MACOS_WINDOW_DID_FAIL_TO_EXIT_FULLSCREEN_NOTIFICATION);

@@ -1,4 +1,4 @@
-# OxideTerm patches for russh-sftp 3.0.0
+# OxideLab patches for russh-sftp 3.0.0
 
 This directory is a vendored fork, not a plain crates.io copy. The upstream
 baseline is the published 3.0.0 archive, commit
@@ -22,7 +22,7 @@ limits.
 
 The following upstream changes are deliberately not used:
 
-- Ordinary `AsyncRead` remains single-request. OxideTerm uses the separate
+- Ordinary `AsyncRead` remains single-request. OxideLab uses the separate
   range-aware pipeline below for bulk transfers, rather than adding upstream's
   second prefetch state machine. There is no `Config::max_concurrent_reads`;
   bulk request and byte caps belong to each downloader.
@@ -39,7 +39,7 @@ The following upstream changes are deliberately not used:
 - DATA remains backed by `Bytes`, not upstream's `Vec<u8>`.
 
 These are intentional product differences, not promises of identical upstream
-stream throughput. Do not cite upstream README benchmark numbers as OxideTerm
+stream throughput. Do not cite upstream README benchmark numbers as OxideLab
 measurements.
 
 ## Bounded bulk transfers
@@ -86,7 +86,7 @@ reader/writer tasks, and cancellation token for one SFTP session.
 - Best-effort CLOSE detaches only after admission. If capacity is full, a retry
   remains tied to the live session instead of silently losing handle cleanup.
 
-`OwnedSftpWriter` accepts an owned `Bytes` frame. OxideTerm's russh adapter
+`OwnedSftpWriter` accepts an owned `Bytes` frame. OxideLab's russh adapter
 passes it to `ChannelStreamWriter::write_bytes`, preserving the allocation
 across SSH channel fragmentation. `new_owned_with_config` initializes the same
 extensions and limits as the ordinary stream constructor.

@@ -1,4 +1,4 @@
-// OxideTerm vendor modification: expose virtual-adapter classification to product policy.
+// OxideLab vendor modification: expose virtual-adapter classification to product policy.
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 #![allow(clippy::type_complexity)] // Not useful, GPUI makes heavy use of callbacks
@@ -129,7 +129,7 @@ pub use color::*;
 pub use element::*;
 pub use elements::*;
 pub use executor::*;
-/// OxideTerm compatibility alias for the pre-vendor anchored-element API.
+/// OxideLab compatibility alias for the pre-vendor anchored-element API.
 pub use geometry::Anchor as Corner;
 pub use geometry::*;
 pub use gestures::*;
@@ -151,7 +151,7 @@ pub use profiler::*;
 pub use refineable::*;
 pub use scene::*;
 pub use shared_uri::*;
-/// OxideTerm compatibility re-export for existing detached task delays.
+/// OxideLab compatibility re-export for existing detached task delays.
 pub use smol::Timer;
 pub use spring::*;
 pub use style::*;

@@ -1,4 +1,4 @@
-// OxideTerm modification: preserve scene batch constants across DirectX blur passes.
+// OxideLab modification: preserve scene batch constants across DirectX blur passes.
 use std::{
     slice,
     sync::{Arc, OnceLock},

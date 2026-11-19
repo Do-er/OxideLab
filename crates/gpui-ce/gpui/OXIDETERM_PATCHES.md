@@ -1,8 +1,8 @@
-# OxideTerm GPUI Vendor Ledger
+# OxideLab GPUI Vendor Ledger
 
-OxideTerm uses Longbridge's crates.io `gpui-pre` 0.3.12 publication, the version
+OxideLab uses Longbridge's crates.io `gpui-pre` 0.3.12 publication, the version
 pinned by GPUI Kit v0.9.1. The six locally patched packages retain
-OxideTerm framework changes and selected capabilities inherited from GPUI-CE.
+OxideLab framework changes and selected capabilities inherited from GPUI-CE.
 This is not an unmodified Zed tree.
 
 The authoritative provenance record is [`UPSTREAM_BASELINE.toml`](./UPSTREAM_BASELINE.toml).
@@ -13,12 +13,12 @@ and revision. The recorded Zed revision is
 
 The previous hybrid inputs remain historical provenance:
 Zed `0969b0dba3f3411592fce801d00f8d81b8dcf902`, GPUI-CE
-`9949f8b2d27bb1d6dbc1efe90be039634cf1fb6b`, and OxideTerm import parent
+`9949f8b2d27bb1d6dbc1efe90be039634cf1fb6b`, and OxideLab import parent
 `f462f86a7bcbc5d2803b55b118f6763a3b7c89b6`. Preserve the GPUI-CE root
 license and packaged Apache license because community-derived code remains.
 
 Registry checksums describe pristine publication archives; they are not hashes
-of OxideTerm's modified directories. Cargo.lock records the complete resolved
+of OxideLab's modified directories. Cargo.lock records the complete resolved
 dependency graph; this ledger does not equate a set of downloaded research
 samples with that graph.
 
@@ -146,7 +146,7 @@ hide and permit a later close attempt. AppKit's successful-exit notification rem
 the only path that hides a window after leaving its fullscreen Space. The failure
 event does not hide, close, or retry the window itself.
 
-Every source file changed by OxideTerm should retain an English modification
+Every source file changed by OxideLab should retain an English modification
 notice near the top. The sections below define the behavior to preserve; line
 numbers are intentionally omitted because upstream refreshes move code.
 
@@ -280,7 +280,7 @@ border regions before inserting them into the scene:
 - an existing ancestor content mask is intersected with every edge mask, and empty
   intersections are omitted.
 
-OxideTerm has many large bordered panels. Rendering one transparent quad for each panel would
+OxideLab has many large bordered panels. Rendering one transparent quad for each panel would
 run the quad fragment shader across its entire transparent interior. Preserving the geometry
 while excluding that interior reduces GPU overdraw without changing layout or border appearance.
 The behavior is covered by tests for transparent and opaque quads and is an independent
@@ -299,7 +299,7 @@ of in-draw animation wakeups, and propagation of the quit code to the main loop.
 
 The gpui-pre 0.3.7 source already uses the native Win32 thread-pool APIs and
 priority mapping. Its failed-submission path permits a raw runnable leak;
-OxideTerm's explicit failed-submission and failed-timer cleanup remains a
+OxideLab's explicit failed-submission and failed-timer cleanup remains a
 local ownership patch rather than an upstream-equivalent replacement.
 
 `crates/gpui-ce/gpui_windows/src/dispatcher.rs` schedules background work with the native
@@ -324,7 +324,7 @@ during vendor refreshes. The behavior is an independent implementation informed 
 
 Windows can synchronously re-enter its window procedure while GPUI is drawing, including through
 cross-thread messages and nested COM/OLE loops used by clipboard and drag-and-drop operations.
-OxideTerm therefore carries one coordinated draw-lifetime patch across the generic GPUI and
+OxideLab therefore carries one coordinated draw-lifetime patch across the generic GPUI and
 Windows platform layers:
 
 - `crates/gpui-ce/gpui/src/arena.rs` counts active draw scopes. `clear` defers while any
@@ -436,7 +436,7 @@ do not explicitly compose styles.
 
 ### Nested scroll ownership
 
-OxideTerm contains nested ordinary overflow regions and virtual lists. Preserve the event
+OxideLab contains nested ordinary overflow regions and virtual lists. Preserve the event
 ownership rules in `crates/gpui-ce/gpui/src/elements/div.rs` and
 `crates/gpui-ce/gpui/src/elements/list.rs`:
 
@@ -541,12 +541,12 @@ The pristine gpui-pre 0.3.7 source already contains mutable callback-pointer
 provenance, null-aware glyph-array conversion, and staging-texture unmapping.
 Those parts use upstream equivalents. Its font-face cache still stores only
 the resolved font ID under a pointer-address key; retaining the callback COM
-face identity remains an OxideTerm local patch. Check these parts separately
+face identity remains an OxideLab local patch. Check these parts separately
 when refreshing instead of treating the entire category as already upstream.
 
 ### DynamicTexture and renderer resource generations
 
-OxideTerm remote desktop requires one stable mutable BGRA framebuffer instead
+OxideLab remote desktop requires one stable mutable BGRA framebuffer instead
 of rebuilding many immutable `RenderImage` tiles.
 
 Core changes:
@@ -607,13 +607,13 @@ generation of zero.
 
 ### WGPU backend selection and recovery
 
-The locally patched WGPU path carries OxideTerm-specific VM and recovery behavior:
+The locally patched WGPU path carries OxideLab-specific VM and recovery behavior:
 
 - `crates/gpui-ce/gpui_wgpu/src/wgpu_context.rs`
   - recognizes the case-insensitive
-    `OXIDETERM_GPU_BACKEND=auto|vulkan|opengl` contract and safely falls back
+    `OXIDELAB_GPU_BACKEND=auto|vulkan|opengl` contract and safely falls back
     to auto after warning about an invalid value;
-  - recognizes `OXIDETERM_GPU_DEVICE_ID` as an optional four-digit hexadecimal
+  - recognizes `OXIDELAB_GPU_DEVICE_ID` as an optional four-digit hexadecimal
     PCI device override and ignores an invalid value after reporting it;
   - keeps auto mode ordered across Vulkan and GL and permits CPU adapters as
     the final fallback;
@@ -635,7 +635,7 @@ The locally patched WGPU path carries OxideTerm-specific VM and recovery behavio
   `crates/gpui-ce/gpui_linux/src/linux/x11/client.rs`, and
   `crates/gpui-ce/gpui_windows/src/window.rs`
   - initialize the shared WGPU context and recovery state through the
-    OxideTerm recovery-aware context wrapper;
+    OxideLab recovery-aware context wrapper;
 - `crates/gpui-ce/gpui_linux/src/linux/wayland/window.rs` and
   `crates/gpui-ce/gpui_linux/src/linux/x11/window.rs`
   - request another frame after recovered or deferred attempts and stop the
@@ -645,13 +645,13 @@ The locally patched WGPU path carries OxideTerm-specific VM and recovery behavio
     WGPU resources are cleared or replaced.
 
 Do not restore the old hard-coded `ZED_DEVICE_ID` environment-variable
-contract. The product-facing names are intentionally scoped to OxideTerm.
+contract. The product-facing names are intentionally scoped to OxideLab.
 
 Inherited diagnostic controls were not all product-renamed in the previous
 source. Both that source and the migration target retain `ZED_HEADLESS`,
 `ZED_MEASUREMENTS`, and `ZED_ALLOW_ROOT`. Keep the implemented names;
-do not add OxideTerm aliases or remove inherited behavior merely to match the
-previous ledger's inaccurate description. Renderer-specific OxideTerm GPU
+do not add OxideLab aliases or remove inherited behavior merely to match the
+previous ledger's inaccurate description. Renderer-specific OxideLab GPU
 selection and font support overrides remain separate local contracts.
 
 ### Linux display-backend startup selection
@@ -705,7 +705,7 @@ remote cursor. Preserve `CursorStyle::None` across the full platform split:
 
 ### Virtual GPU metadata
 
-OxideTerm render policy must distinguish virtual adapters from CPU software
+OxideLab render policy must distinguish virtual adapters from CPU software
 rasterizers and physical GPUs.
 
 - `crates/gpui-ce/gpui/src/gpui.rs` adds the serde-defaulted
@@ -739,12 +739,12 @@ list's ownership of scrolling.
 - `geometry::Anchor` as `gpui::Corner` for existing anchored overlays.
 
 These aliases are migration compatibility layers, not new GPUI abstractions.
-Remove either alias only after all OxideTerm call sites have moved to the
+Remove either alias only after all OxideLab call sites have moved to the
 gpui-pre API and the full workspace builds without it.
 
 ## Product-Owned Remote Desktop Integration
 
-Remote desktop behavior belongs to OxideTerm product crates and must not be
+Remote desktop behavior belongs to OxideLab product crates and must not be
 moved into the vendored GPUI crates:
 
 - `crates/oxideterm-gpui-remote-desktop/src/state.rs`

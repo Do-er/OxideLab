@@ -1,4 +1,4 @@
-// OxideTerm modification: preserve quit messages consumed by the foreground task pump.
+// OxideLab modification: preserve quit messages consumed by the foreground task pump.
 use std::{
     cell::{Cell, RefCell},
     ffi::{OsStr, OsString},

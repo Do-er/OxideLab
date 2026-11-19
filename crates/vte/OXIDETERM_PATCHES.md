@@ -1,8 +1,8 @@
-# OxideTerm VTE Vendor Patches
+# OxideLab VTE Vendor Patches
 
 This directory is a minimally modified copy of the crates.io `vte` 0.15.0
 package. Keep upstream formatting intact so future upgrades can distinguish
-OxideTerm's behavioral changes from the imported source.
+OxideLab's behavioral changes from the imported source.
 
 ## Exact Upstream Baseline
 

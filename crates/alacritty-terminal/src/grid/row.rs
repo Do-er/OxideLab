@@ -1,5 +1,5 @@
 //! Terminal rows with dense writable cells and lossless repeated-tail history storage.
-// OxideTerm modification: read-only access never materializes compact history.
+// OxideLab modification: read-only access never materializes compact history.
 
 use std::cmp::{max, min};
 use std::sync::atomic::{AtomicUsize, Ordering};

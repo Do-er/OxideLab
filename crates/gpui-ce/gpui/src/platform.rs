@@ -4,7 +4,7 @@ mod keystroke;
 mod platform_info;
 use image::AnimationDecoder;
 
-// OxideTerm: AppKit exposes fullscreen failure only through its window delegate.
+// OxideLab: AppKit exposes fullscreen failure only through its window delegate.
 /// Window-scoped notification emitted by the macOS backend when leaving native fullscreen fails.
 pub const MACOS_WINDOW_DID_FAIL_TO_EXIT_FULLSCREEN_NOTIFICATION: &str =
     "GPUIWindowDidFailToExitFullScreenNotification";

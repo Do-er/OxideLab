@@ -400,9 +400,9 @@ mod tests {
     #[test]
     fn custom_environment_block_is_sorted_and_overrides_parent_path() {
         let custom_env = HashMap::from([
-            ("ZZ_OXIDETERM_SORT_PROBE".to_string(), "last".to_string()),
-            ("AA_OXIDETERM_SORT_PROBE".to_string(), "first".to_string()),
-            ("PaTh".to_string(), "oxideterm-path-probe".to_string()),
+            ("ZZ_OXIDELAB_SORT_PROBE".to_string(), "last".to_string()),
+            ("AA_OXIDELAB_SORT_PROBE".to_string(), "first".to_string()),
+            ("PaTh".to_string(), "oxidelab-path-probe".to_string()),
         ]);
         let block = convert_custom_env(&custom_env, &[]).expect("custom environment block");
         let entries = block
@@ -435,12 +435,12 @@ mod tests {
                     .then(|| String::from_utf16_lossy(entries[index]))
             })
             .collect::<Vec<_>>();
-        assert_eq!(path_entries, ["PaTh=oxideterm-path-probe"]);
+        assert_eq!(path_entries, ["PaTh=oxidelab-path-probe"]);
     }
 
     #[test]
     fn removed_environment_keys_are_omitted_from_the_block() {
-        let key = "OXIDETERM_ENV_REMOVE_PROBE";
+        let key = "OXIDELAB_ENV_REMOVE_PROBE";
         // SAFETY: the probe key is unique to this test and no other test reads it.
         unsafe { std::env::set_var(key, "1") };
         let block = convert_custom_env(&HashMap::new(), &[key.to_string()])

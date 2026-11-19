@@ -1,4 +1,4 @@
-# OxideTerm reviews this fork as an upstream patch set, so workspace formatting
+# OxideLab reviews this fork as an upstream patch set, so workspace formatting
 # must not rewrite the imported source.
 disable_all_formatting = true
 format_code_in_doc_comments = true

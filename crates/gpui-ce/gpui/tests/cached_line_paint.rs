@@ -308,7 +308,7 @@ fn native_cached_decorations_match_reference_glyphs() {
                             assert_eq!(actual.$field.iter().map(|s| ($(s.$member,)+)).collect::<Vec<_>>(), reference.$field.iter().map(|s| ($(s.$member,)+)).collect::<Vec<_>>(), "{}: {text}, italic={italic}, scale={scale}, segmented={segmented}", stringify!($field));
                         };
                     }
-                                compare!(monochrome; order, pad, bounds, content_mask, color, tile, transformation);
+                                compare!(monochrome; order, enhance_glyph_edges, bounds, content_mask, color, tile, transformation);
                                 compare!(subpixel; order, pad, bounds, content_mask, color, tile, transformation);
                                 compare!(polychrome; order, corner_shape, bounds, content_mask, opacity, grayscale, corner_radii, tile);
                                 compare!(underlines; order, pad, bounds, content_mask, color, thickness, wavy);

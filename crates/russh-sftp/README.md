@@ -1,6 +1,6 @@
 # Russh SFTP
 
-This is OxideTerm's patched russh-sftp 3.0.0. See
+This is OxideLab's patched russh-sftp 3.0.0. See
 [OXIDETERM_PATCHES.md](OXIDETERM_PATCHES.md) for the upstream baseline,
 retained transport contracts, and deliberate differences from upstream defaults.
 
