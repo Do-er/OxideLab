@@ -164,7 +164,7 @@ mod path_auth_tests {
 
     fn unique_temp_dir(name: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-ssh-auth-{name}-{}-{}",
+            "oxidelab-ssh-auth-{name}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

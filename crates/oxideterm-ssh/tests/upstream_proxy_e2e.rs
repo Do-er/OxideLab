@@ -19,8 +19,7 @@ use oxideterm_sftp::{
 use oxideterm_ssh::{
     AuthMethod, ConnectionConsumer, ConnectionPoolConfig, ProxyHopConfig, SshConfig,
     SshConnectionRegistry, SshTransportClient, SshTransportCommand, UpstreamProxyAuth,
-    UpstreamProxyConfig, UpstreamProxyProtocol, X11ForwardPolicy, X11ForwardingFailure,
-    X11ForwardingStatus, upstream_proxy_from_env,
+    UpstreamProxyConfig, UpstreamProxyProtocol, upstream_proxy_from_env,
 };
 use rand10::{RngExt, SeedableRng};
 use tokio::{
@@ -55,12 +54,12 @@ async fn local_sshd_upstream_proxy_e2e_matrix() {
             .with_upstream_proxy(http.config()),
     )
     .await;
-    let _socks_env = EnvVarGuard::set("OXIDETERM_SOCKS5_PROXY", String::new());
+    let _socks_env = EnvVarGuard::set("OXIDELAB_SOCKS5_PROXY", String::new());
     let _http_env = EnvVarGuard::set(
-        "OXIDETERM_HTTP_PROXY",
+        "OXIDELAB_HTTP_PROXY",
         format!("http://{}:{}", http.addr.ip(), http.addr.port()),
     );
-    let _no_proxy_env = EnvVarGuard::set("OXIDETERM_NO_PROXY", String::new());
+    let _no_proxy_env = EnvVarGuard::set("OXIDELAB_NO_PROXY", String::new());
     connect_shell(
         target_config(&sshd).with_upstream_proxy(
             upstream_proxy_from_env()
@@ -94,6 +93,10 @@ async fn local_sshd_upstream_proxy_e2e_matrix() {
 #[tokio::test]
 #[ignore = "requires local sshd, ssh-keygen and xauth; run with --test-threads=1"]
 async fn local_sshd_x11_reports_fallback_and_server_assigned_display() {
+    // The X11 assertions only exist in this unix-only test, so their imports
+    // live here to keep non-unix builds free of unused-import warnings.
+    use oxideterm_ssh::{X11ForwardPolicy, X11ForwardingFailure, X11ForwardingStatus};
+
     let rejected = SshdFixture::start();
     let accepted = SshdFixture::with_x11(10, true);
     let authority = accepted.dir.join("local.authority");
@@ -197,7 +200,7 @@ async fn local_sshd_legacy_scp_file_and_directory_round_trip() {
     let upload_source = sshd.dir.join("upload-source.txt");
     let uploaded_file = sshd.dir.join("uploaded-file.txt");
     let downloaded_file = sshd.dir.join("downloaded-file.txt");
-    fs::write(&upload_source, b"OxideTerm SCP file round trip\n").expect("write upload source");
+    fs::write(&upload_source, b"OxideLab SCP file round trip\n").expect("write upload source");
     fs::write(&uploaded_file, b"stale").expect("seed existing remote file");
     scp_upload_file(
         &connection,
@@ -1278,7 +1281,7 @@ fn unique_temp_dir() -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .expect("system clock")
         .as_nanos();
-    env::temp_dir().join(format!("oxideterm-ssh-e2e-{nanos}"))
+    env::temp_dir().join(format!("oxidelab-ssh-e2e-{nanos}"))
 }
 
 fn free_port() -> u16 {

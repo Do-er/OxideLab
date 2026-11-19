@@ -964,14 +964,17 @@ mod tests {
             .unwrap();
         let port = listener.local_addr().unwrap().port();
 
+        // Mirrors create_forward_with_health_check's production timeout. Windows
+        // loopback returns RST for a closed port only after ~2s (SYN retransmit),
+        // so shorter timeouts would report Timeout instead of ConnectionRefused.
         assert!(
-            check_local_port_available("127.0.0.1", port, 1_000)
+            check_local_port_available("127.0.0.1", port, 3_000)
                 .await
                 .unwrap()
         );
         drop(listener);
         assert!(
-            !check_local_port_available("127.0.0.1", port, 1_000)
+            !check_local_port_available("127.0.0.1", port, 3_000)
                 .await
                 .unwrap()
         );

@@ -217,17 +217,17 @@ pub async fn probe_upstream_proxy_route(
 
 pub fn socks5_proxy_from_env() -> Result<Option<UpstreamProxyConfig>, TcpProxyError> {
     upstream_proxy_from_env_values(
-        env::var("OXIDETERM_SOCKS5_PROXY").ok().as_deref(),
+        env::var("OXIDELAB_SOCKS5_PROXY").ok().as_deref(),
         None,
-        env::var("OXIDETERM_NO_PROXY").ok().as_deref(),
+        env::var("OXIDELAB_NO_PROXY").ok().as_deref(),
     )
 }
 
 pub fn upstream_proxy_from_env() -> Result<Option<UpstreamProxyConfig>, TcpProxyError> {
     upstream_proxy_from_env_values(
-        env::var("OXIDETERM_SOCKS5_PROXY").ok().as_deref(),
-        env::var("OXIDETERM_HTTP_PROXY").ok().as_deref(),
-        env::var("OXIDETERM_NO_PROXY").ok().as_deref(),
+        env::var("OXIDELAB_SOCKS5_PROXY").ok().as_deref(),
+        env::var("OXIDELAB_HTTP_PROXY").ok().as_deref(),
+        env::var("OXIDELAB_NO_PROXY").ok().as_deref(),
     )
 }
 
@@ -254,7 +254,7 @@ pub fn parse_socks5_proxy_value(value: &str) -> Result<UpstreamProxyConfig, TcpP
     } else if let Some(rest) = trimmed.strip_prefix("socks5://") {
         (false, rest)
     } else {
-        // OxideTerm's saved proxy default is proxy-side DNS; keep bare env
+        // OxideLab's saved proxy default is proxy-side DNS; keep bare env
         // values aligned with that app default.
         (true, trimmed)
     };

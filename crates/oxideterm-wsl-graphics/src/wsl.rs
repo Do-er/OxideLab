@@ -396,14 +396,14 @@ pub fn build_desktop_bootstrap_script(
 
     format!(
         r#"#!/bin/bash
-# OxideTerm desktop bootstrap script - auto-generated, do not edit
+# OxideLab desktop bootstrap script - auto-generated, do not edit
 set -e
 
 # Clear WSLg environment to avoid Weston interference
 unset WAYLAND_DISPLAY XDG_SESSION_TYPE
 
 export DISPLAY={display}
-export XDG_RUNTIME_DIR="/tmp/oxideterm-xdg-$$"
+export XDG_RUNTIME_DIR="/tmp/oxidelab-xdg-$$"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 
@@ -442,7 +442,7 @@ unset LD_PRELOAD LD_LIBRARY_PATH PYTHONPATH PYTHONSTARTUP NODE_OPTIONS
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$HOME/.local/bin"
 
 export DISPLAY={display}
-export XDG_RUNTIME_DIR="/tmp/oxideterm-app-xdg-$$"
+export XDG_RUNTIME_DIR="/tmp/oxidelab-app-xdg-$$"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 
@@ -452,10 +452,10 @@ if command -v openbox-session &>/dev/null; then
     sleep 0.3
 fi
 
-echo $$ > /tmp/oxideterm-app-$$.pid
+echo $$ > /tmp/oxidelab-app-$$.pid
 
 cleanup() {{
-    rm -f /tmp/oxideterm-app-$$.pid
+    rm -f /tmp/oxidelab-app-$$.pid
     rm -rf "$XDG_RUNTIME_DIR"
 }}
 trap cleanup EXIT
@@ -467,7 +467,7 @@ exec "$@"
     )
 }
 
-const PID_FILE: &str = "/tmp/oxideterm-desktop.pid";
+const PID_FILE: &str = "/tmp/oxidelab-desktop.pid";
 
 #[cfg(target_os = "windows")]
 async fn wsl_has_command_async(distro: &str, command_name: &str) -> bool {
@@ -665,10 +665,10 @@ if [ -f {pid} ]; then
     fi
     rm -f {pid}
 fi
-rm -rf /tmp/oxideterm-xdg-* 2>/dev/null || true
-rm -rf /tmp/oxideterm-app-xdg-* 2>/dev/null || true
+rm -rf /tmp/oxidelab-xdg-* 2>/dev/null || true
+rm -rf /tmp/oxidelab-app-xdg-* 2>/dev/null || true
 
-for pidfile in /tmp/oxideterm-app-*.pid; do
+for pidfile in /tmp/oxidelab-app-*.pid; do
     [ -f "$pidfile" ] || continue
     APP_PID=$(cat "$pidfile" 2>/dev/null) || continue
     if kill -0 "$APP_PID" 2>/dev/null; then
@@ -711,7 +711,7 @@ mod tests {
                 [
                     "unset WAYLAND_DISPLAY XDG_SESSION_TYPE",
                     "export DISPLAY=:10",
-                    "echo $$ > /tmp/oxideterm-desktop.pid",
+                    "echo $$ > /tmp/oxidelab-desktop.pid",
                     "exec dbus-run-session xfce4-session",
                 ],
             ),

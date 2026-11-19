@@ -1,7 +1,7 @@
 const AGENT_FORWARDING_RESPONSE_TIMEOUT: Duration = Duration::from_secs(5);
 const X11_FORWARDING_RESPONSE_TIMEOUT: Duration = Duration::from_secs(5);
-const OXIDETERM_PRIVATE_OSC_SESSION_ENV: &str = "LC_OXIDETERM_SESSION";
-const OXIDETERM_PRIVATE_OSC_SESSION_VALUE: &str = "1";
+const OXIDELAB_PRIVATE_OSC_SESSION_ENV: &str = "LC_OXIDELAB_SESSION";
+const OXIDELAB_PRIVATE_OSC_SESSION_VALUE: &str = "1";
 const CHILD_CONNECTION_RETIRED_DURING_CONNECT: &str =
     "child connection was retired while its SSH transport was connecting";
 
@@ -358,8 +358,8 @@ async fn open_plain_shell(
     if channel
         .set_env(
             false,
-            OXIDETERM_PRIVATE_OSC_SESSION_ENV,
-            OXIDETERM_PRIVATE_OSC_SESSION_VALUE,
+            OXIDELAB_PRIVATE_OSC_SESSION_ENV,
+            OXIDELAB_PRIVATE_OSC_SESSION_VALUE,
         )
         .await
         .is_err()

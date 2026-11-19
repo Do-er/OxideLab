@@ -748,7 +748,7 @@ mod tests {
     #[test]
     fn accepted_host_key_cache_does_not_skip_the_live_server_probe() {
         let executable = std::env::current_exe().unwrap();
-        let fixture_key = "OXIDETERM_HOST_KEY_TEST_DIR";
+        let fixture_key = "OXIDELAB_HOST_KEY_TEST_DIR";
         let Some(fixture_dir) = std::env::var_os(fixture_key) else {
             // Portable runtime paths are process-wide; never write the user's trust file.
             let directory = tempfile::tempdir_in(executable.parent().unwrap()).unwrap();

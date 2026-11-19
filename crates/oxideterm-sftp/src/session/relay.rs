@@ -21,14 +21,14 @@ fn minimum_advertised_handle_limit(source: Option<u64>, destination: Option<u64>
 }
 
 fn relay_sibling_path(target_path: &str, role: &str, suffix: &str) -> String {
-    format!("{target_path}.oxideterm-relay-{suffix}.{role}")
+    format!("{target_path}.oxidelab-relay-{suffix}.{role}")
 }
 
 fn is_owned_relay_sibling_path(target_path: &str, sibling_path: &Path, role: &str) -> bool {
     let Some(sibling_path) = sibling_path.to_str() else {
         return false;
     };
-    let prefix = format!("{target_path}.oxideterm-relay-");
+    let prefix = format!("{target_path}.oxidelab-relay-");
     let suffix = format!(".{role}");
     let Some(token) = sibling_path
         .strip_prefix(&prefix)
@@ -1157,24 +1157,24 @@ mod relay_tests {
     fn relay_resume_accepts_only_its_owned_staging_sibling() {
         assert_eq!(
             relay_sibling_path("/srv/data", "part", "0123456789abcdef0123456789abcdef"),
-            "/srv/data.oxideterm-relay-0123456789abcdef0123456789abcdef.part"
+            "/srv/data.oxidelab-relay-0123456789abcdef0123456789abcdef.part"
         );
         assert!(is_owned_relay_staging_path(
             "/srv/data",
-            Path::new("/srv/data.oxideterm-relay-0123456789abcdef0123456789abcdef.part")
+            Path::new("/srv/data.oxidelab-relay-0123456789abcdef0123456789abcdef.part")
         ));
         assert!(is_owned_relay_sibling_path(
             "/srv/data",
-            Path::new("/srv/data.oxideterm-relay-0123456789abcdef0123456789abcdef.backup"),
+            Path::new("/srv/data.oxidelab-relay-0123456789abcdef0123456789abcdef.backup"),
             "backup"
         ));
         assert!(!is_owned_relay_staging_path(
             "/srv/data",
-            Path::new("/srv/other.oxideterm-relay-0123456789abcdef0123456789abcdef.part")
+            Path::new("/srv/other.oxidelab-relay-0123456789abcdef0123456789abcdef.part")
         ));
         assert!(!is_owned_relay_staging_path(
             "/srv/data",
-            Path::new("/srv/data.oxideterm-relay-not-a-transfer.part")
+            Path::new("/srv/data.oxidelab-relay-not-a-transfer.part")
         ));
     }
 

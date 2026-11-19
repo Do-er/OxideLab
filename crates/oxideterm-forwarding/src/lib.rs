@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! SSH port forwarding runtime for native OxideTerm.
+//! SSH port forwarding runtime for native OxideLab.
 //!
 //! The shape mirrors the Tauri runtime: a registry owns per-session managers,
 //! managers own active and stopped rules, and the concrete forward runners keep

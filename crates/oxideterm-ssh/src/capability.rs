@@ -45,8 +45,8 @@ pub struct SshCapabilityLimitation {
 #[serde(rename_all = "kebab-case")]
 pub enum SshCapabilityLayer {
     RusshCore,
-    #[serde(rename = "oxideterm-integration")]
-    OxideTermIntegration,
+    #[serde(rename = "oxidelab-integration")]
+    OxideLabIntegration,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -120,7 +120,7 @@ fn known_limitations() -> Vec<SshCapabilityLimitation> {
             capability: "hostbased",
             layer: SshCapabilityLayer::RusshCore,
             status: SshCapabilityStatus::Partial,
-            note: "The method name is represented, but OxideTerm has no usable client auth flow.",
+            note: "The method name is represented, but OxideLab has no usable client auth flow.",
         },
         SshCapabilityLimitation {
             capability: "umac",
@@ -130,19 +130,19 @@ fn known_limitations() -> Vec<SshCapabilityLimitation> {
         },
         SshCapabilityLimitation {
             capability: "direct-fido-security-key",
-            layer: SshCapabilityLayer::OxideTermIntegration,
+            layer: SshCapabilityLayer::OxideLabIntegration,
             status: SshCapabilityStatus::Partial,
             note: "Direct ed25519-sk and ecdsa-sk signing requires the enabled FIDO Security Key plugin and a native prompt handler; SSH-agent signing remains available.",
         },
         SshCapabilityLimitation {
             capability: "legacy-ssh-algorithms",
-            layer: SshCapabilityLayer::OxideTermIntegration,
+            layer: SshCapabilityLayer::OxideLabIntegration,
             status: SshCapabilityStatus::OptIn,
             note: "Legacy SHA-1 DH, CBC ciphers, and SHA-1 MACs require the per-connection compatibility option.",
         },
         SshCapabilityLimitation {
             capability: "openssh-hostkey-rotation",
-            layer: SshCapabilityLayer::OxideTermIntegration,
+            layer: SshCapabilityLayer::OxideLabIntegration,
             status: SshCapabilityStatus::Partial,
             note: "hostkeys-00 reception exists, but full host-key rotation parity is not proven.",
         },

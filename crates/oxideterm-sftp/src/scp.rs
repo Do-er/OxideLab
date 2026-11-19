@@ -898,11 +898,11 @@ mod tests {
     #[test]
     fn builds_generated_temporary_paths_as_siblings() {
         let remote = remote_temporary_path("/srv/data/report.txt").unwrap();
-        assert!(remote.starts_with("/srv/data/.report.txt.oxideterm-"));
+        assert!(remote.starts_with("/srv/data/.report.txt.oxidelab-"));
         assert!(remote.ends_with(".part"));
 
         let remote_directory = remote_temporary_directory_path("/srv/data/project").unwrap();
-        assert!(remote_directory.starts_with("/srv/data/.project.oxideterm-"));
+        assert!(remote_directory.starts_with("/srv/data/.project.oxidelab-"));
         assert!(remote_directory.ends_with(".part-dir"));
 
         let local = local_temporary_path(Path::new("/tmp/report.txt")).unwrap();
@@ -912,7 +912,7 @@ mod tests {
                 .file_name()
                 .unwrap()
                 .to_string_lossy()
-                .starts_with(".report.txt.oxideterm-")
+                .starts_with(".report.txt.oxidelab-")
         );
     }
 }

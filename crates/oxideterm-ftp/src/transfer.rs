@@ -213,7 +213,7 @@ impl FtpSession {
             let parent = parent.to_owned();
             let (file, temporary) = tokio::task::spawn_blocking(move || {
                 tempfile::Builder::new()
-                    .prefix(".oxideterm-")
+                    .prefix(".oxidelab-")
                     .suffix(".part")
                     .tempfile_in(parent)
                     .map(|file| file.into_parts())
@@ -401,6 +401,6 @@ fn finish_file_transfer_audit(
 
 fn remote_temporary_path(path: &str) -> String {
     let parent = path.rsplit_once('/').map(|(parent, _)| parent);
-    let filename = format!(".oxideterm-{}.part", uuid::Uuid::new_v4());
+    let filename = format!(".oxidelab-{}.part", uuid::Uuid::new_v4());
     parent.map_or(filename.clone(), |parent| format!("{parent}/{filename}"))
 }

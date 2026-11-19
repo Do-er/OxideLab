@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! OxideTerm-owned Mosh bootstrap and plugin process lifecycle.
+//! OxideLab-owned Mosh bootstrap and plugin process lifecycle.
 //!
 //! Mosh is intentionally a separate connection type. SSH is used only as an
 //! authenticated, dedicated bootstrap transport and is released before this

@@ -1,22 +1,24 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-use oxideterm_mosh::MoshSessionKey;
-use oxideterm_mosh::{
-    MoshIpFamily, MoshPluginSessions, MoshSessionConfig, MoshSessionEvent, start_mosh_session,
-};
-use std::{
-    path::PathBuf,
-    sync::Arc,
-    time::{Duration, Instant},
-};
-use zeroize::Zeroizing;
-
 // Requires a built plugin and a local mosh-server, not a remote account.
 #[tokio::test]
 #[cfg(unix)]
 #[ignore = "set MOSH_TEST_HELPER and install mosh-server"]
 async fn native_plugin_exchanges_real_udp_terminal_data_and_reaps_on_disable() {
+    // The whole scenario is unix-only, so its imports live inside the test to
+    // keep non-unix builds free of unused-import warnings.
+    use oxideterm_mosh::MoshSessionKey;
+    use oxideterm_mosh::{
+        MoshIpFamily, MoshPluginSessions, MoshSessionConfig, MoshSessionEvent, start_mosh_session,
+    };
+    use std::{
+        path::PathBuf,
+        sync::Arc,
+        time::{Duration, Instant},
+    };
+    use zeroize::Zeroizing;
+
     let helper =
         PathBuf::from(std::env::var("MOSH_TEST_HELPER").expect("MOSH_TEST_HELPER is required"));
     let helper_name = helper.file_name().unwrap().to_string_lossy().into_owned();

@@ -76,7 +76,7 @@ pub(super) fn remote_backup_directory_path(remote_path: &str) -> Result<String, 
 fn remote_generated_sibling(remote_path: &str, suffix: &str) -> Result<String, SftpError> {
     let name = safe_local_file_name(Path::new(remote_path))?;
     let parent = remote_parent_path(remote_path);
-    let temporary_name = format!(".{name}.oxideterm-{}.{suffix}", Uuid::new_v4());
+    let temporary_name = format!(".{name}.oxidelab-{}.{suffix}", Uuid::new_v4());
     Ok(if parent == "/" {
         format!("/{temporary_name}")
     } else if parent == "." {
@@ -115,12 +115,12 @@ where
 
 pub(super) fn local_temporary_path(local_path: &Path) -> Result<PathBuf, SftpError> {
     let name = safe_local_file_name(local_path)?;
-    Ok(local_path.with_file_name(format!(".{name}.oxideterm-{}.part", Uuid::new_v4())))
+    Ok(local_path.with_file_name(format!(".{name}.oxidelab-{}.part", Uuid::new_v4())))
 }
 
 pub(super) fn local_directory_temporary_path(local_path: &Path) -> Result<PathBuf, SftpError> {
     let name = safe_local_file_name(local_path)?;
-    Ok(local_path.with_file_name(format!(".{name}.oxideterm-{}.part-dir", Uuid::new_v4())))
+    Ok(local_path.with_file_name(format!(".{name}.oxidelab-{}.part-dir", Uuid::new_v4())))
 }
 
 pub(super) async fn replace_local_path(source: &Path, destination: &Path) -> Result<(), SftpError> {
@@ -148,7 +148,12 @@ pub(super) async fn install_local_download(
             tokio::task::spawn_blocking(move || {
                 // A hard link provides an atomic create-if-absent operation for the
                 // staged sibling and cannot replace a file that appeared mid-transfer.
-                std::fs::File::open(&source)?.sync_all()?;
+                // Windows FlushFileBuffers rejects read-only handles, so the staged
+                // file must be reopened with write access before syncing.
+                std::fs::OpenOptions::new()
+                    .write(true)
+                    .open(&source)?
+                    .sync_all()?;
                 std::fs::hard_link(&source, &destination)?;
                 std::fs::remove_file(&source)
             })
@@ -172,7 +177,7 @@ pub(super) async fn replace_local_directory(
         .map_err(SftpError::IoError)?;
     let backup = destination_exists.then(|| {
         destination.with_file_name(format!(
-            ".{}.oxideterm-{}.backup-dir",
+            ".{}.oxidelab-{}.backup-dir",
             destination
                 .file_name()
                 .and_then(|name| name.to_str())

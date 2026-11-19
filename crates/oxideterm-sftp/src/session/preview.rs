@@ -349,7 +349,7 @@ mod preview_tests {
         drop(owner);
         for (path, mime) in [
             ("/bundle.pem", "application/pkix-cert"),
-            ("/executable", "application/x-oxideterm-binary"),
+            ("/executable", "application/x-oxidelab-binary"),
         ] {
             let content = session.preview(path).await.unwrap();
             assert!(matches!(

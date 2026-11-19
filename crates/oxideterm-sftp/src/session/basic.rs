@@ -377,8 +377,8 @@ impl SftpSession {
                 Err(error) => return Err(self.map_sftp_error(error, &canonical_path)),
             };
             let suffix = uuid::Uuid::new_v4().simple().to_string();
-            let swap_path = format!("{canonical_path}.oxideterm-{suffix}.tmp");
-            let backup_path = format!("{canonical_path}.oxideterm-{suffix}.bak");
+            let swap_path = format!("{canonical_path}.oxidelab-{suffix}.tmp");
+            let backup_path = format!("{canonical_path}.oxidelab-{suffix}.bak");
 
             self.write_swap(&swap_path, content).await?;
             if config_replacement {

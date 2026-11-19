@@ -164,7 +164,7 @@ impl SftpSession {
             .extension()
             .and_then(|extension| extension.to_str())
             .unwrap_or("bin");
-        let temp_dir = std::env::temp_dir().join("oxideterm-sftp-preview");
+        let temp_dir = std::env::temp_dir().join("oxidelab-sftp-preview");
         tokio::fs::create_dir_all(&temp_dir)
             .await
             .map_err(SftpError::IoError)?;

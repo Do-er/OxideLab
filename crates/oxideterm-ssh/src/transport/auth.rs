@@ -832,7 +832,7 @@ mod private_key_auth_error_tests {
 
     fn generated_key_text(passphrase: Option<&str>) -> String {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-ssh-auth-error-{}-{}.key",
+            "oxidelab-ssh-auth-error-{}-{}.key",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -227,7 +227,7 @@ mod tests {
             },
             core::PCWSTR,
         };
-        let name = format!(r"\\.\pipe\oxideterm-agent-probe-{}", std::process::id());
+        let name = format!(r"\\.\pipe\oxidelab-agent-probe-{}", std::process::id());
         let wide = name.encode_utf16().chain(Some(0)).collect::<Vec<_>>();
         let handle = unsafe {
             CreateNamedPipeW(
@@ -273,7 +273,7 @@ mod tests {
     #[test]
     fn missing_explicit_socket_does_not_fall_back_to_default_agent() {
         let missing =
-            std::env::temp_dir().join(format!("oxideterm-missing-agent-{}", std::process::id()));
+            std::env::temp_dir().join(format!("oxidelab-missing-agent-{}", std::process::id()));
 
         let error =
             resolve_ssh_agent_endpoint(missing.to_str()).expect_err("missing socket must fail");

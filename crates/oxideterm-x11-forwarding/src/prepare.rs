@@ -123,7 +123,7 @@ async fn prepare_untrusted_plan(config: X11ForwardConfig) -> X11Result<X11Forwar
 
 fn secure_xauth_temp_dir() -> X11Result<TempDir> {
     tempfile::Builder::new()
-        .prefix("oxideterm-x11-")
+        .prefix("oxidelab-x11-")
         .tempdir()
         .map_err(|error| X11ForwardingError::AuthorityFileUnavailable(error.to_string()))
 }

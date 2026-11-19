@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Real SFTP protocol/session layer for native OxideTerm.
+//! Real SFTP protocol/session layer for native OxideLab.
 //!
 //! The SSH crate owns node connections; this crate owns SFTP protocol state and
 //! transfer semantics. Keeping that boundary explicit mirrors the Tauri backend

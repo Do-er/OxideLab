@@ -837,7 +837,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("system clock should be after unix epoch")
             .as_nanos();
-        std::env::temp_dir().join(format!("oxideterm-sftp-{name}-{nonce}.redb"))
+        std::env::temp_dir().join(format!("oxidelab-sftp-{name}-{nonce}.redb"))
     }
 
     #[test]
