@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 //! Trusted Git CWD selection and local Git control-directory inspection.
@@ -192,7 +192,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         let root = std::env::temp_dir().join(format!(
-            "oxideterm-environment-git-operation-{}-{unique}",
+            "oxidelab-environment-git-operation-{}-{unique}",
             std::process::id()
         ));
         fs::create_dir_all(&root).unwrap();

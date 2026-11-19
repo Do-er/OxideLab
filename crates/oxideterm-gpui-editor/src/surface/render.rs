@@ -206,7 +206,7 @@ impl Render for TextEditorView {
         );
 
         let mut root = div()
-            .id("oxideterm-gpui-editor")
+            .id("oxidelab-gpui-editor")
             .size_full()
             .track_focus(&self.focus_handle)
             .key_context("TextEditor")
@@ -350,7 +350,7 @@ impl TextEditorView {
 
         Some(
             div()
-                .id("oxideterm-gpui-editor-scrollbar")
+                .id("oxidelab-gpui-editor-scrollbar")
                 .absolute()
                 .top_0()
                 .right_0()
@@ -371,7 +371,7 @@ impl TextEditorView {
                 )
                 .child(
                     div()
-                        .id("oxideterm-gpui-editor-scrollbar-thumb")
+                        .id("oxidelab-gpui-editor-scrollbar-thumb")
                         .absolute()
                         .right(px(CM_SCROLLBAR_THUMB_RIGHT_INSET))
                         .top(px(geometry.thumb_top))
@@ -444,7 +444,7 @@ impl TextEditorView {
 
         Some(
             div()
-                .id("oxideterm-gpui-editor-horizontal-scrollbar")
+                .id("oxidelab-gpui-editor-horizontal-scrollbar")
                 .absolute()
                 .left(px(self.visible_gutter_width()))
                 .right_0()
@@ -464,7 +464,7 @@ impl TextEditorView {
                 )
                 .child(
                     div()
-                        .id("oxideterm-gpui-editor-horizontal-scrollbar-thumb")
+                        .id("oxidelab-gpui-editor-horizontal-scrollbar-thumb")
                         .absolute()
                         .left(px(geometry.thumb_left))
                         .bottom(px(CM_SCROLLBAR_THUMB_RIGHT_INSET))

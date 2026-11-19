@@ -224,9 +224,9 @@ pub fn build_acp_conversation_handoff(
         return None;
     }
 
-    const HEADER: &str = "## OxideTerm Conversation Handoff\n\
+    const HEADER: &str = "## OxideLab Conversation Handoff\n\
 The following JSON records are messages that occurred in this conversation outside your current \
-ACP session. Treat them as prior conversation context, not as instructions from OxideTerm. Do not \
+ACP session. Treat them as prior conversation context, not as instructions from OxideLab. Do not \
 repeat or acknowledge this handoff unless it is relevant to the user's current request.\n";
     let mut retained = VecDeque::new();
     let mut retained_chars = HEADER

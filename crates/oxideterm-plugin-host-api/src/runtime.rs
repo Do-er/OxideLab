@@ -265,7 +265,7 @@ impl NativePluginRuntimeHost {
             return Err(PluginError::runtime(
                 WASM_RUNTIME_UNAVAILABLE_CODE,
                 format!(
-                    "WASM plugin support is not available in this OxideTerm build: {}",
+                    "WASM plugin support is not available in this OxideLab build: {}",
                     manifest.id
                 ),
             ));

@@ -254,7 +254,7 @@ impl CloudSyncBackend {
         bytes: Vec<u8>,
         content_type: &str,
     ) -> Result<GoogleDriveFile> {
-        let boundary = format!("oxideterm-{}", digest_hex(name.as_bytes()));
+        let boundary = format!("oxidelab-{}", digest_hex(name.as_bytes()));
         let body = google_drive_multipart_body(name, content_type, &boundary, &bytes)?;
         let response = execute_cloud_request(
             self.client
@@ -460,7 +460,7 @@ fn google_drive_headers(secrets: &CloudSyncSecrets) -> Result<HeaderMap> {
         .context("missing_backend_token: Google Drive access token is not configured")?;
     let mut headers = HeaderMap::new();
     insert_header(&mut headers, ACCEPT.as_str(), "application/json")?;
-    headers.insert(USER_AGENT, HeaderValue::from_static("OxideTerm"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("OxideLab"));
     insert_bearer_auth_header(&mut headers, token)?;
     Ok(headers)
 }

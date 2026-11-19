@@ -671,12 +671,12 @@ impl ServerHandler for PublicMcpService {
         ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
             .with_protocol_version(ProtocolVersion::V_2026_07_28)
             .with_server_info(
-                Implementation::new("oxideterm-public-mcp", env!("CARGO_PKG_VERSION"))
-                    .with_title("OxideTerm Public MCP")
-                    .with_description("Authorized automation for the active OxideTerm workspace"),
+                Implementation::new("oxidelab-public-mcp", env!("CARGO_PKG_VERSION"))
+                    .with_title("OxideLab Public MCP")
+                    .with_description("Authorized automation for the active OxideLab workspace"),
             )
             .with_instructions(
-                "Use only opaque public references. Mutating tools may require approval in OxideTerm before mcp_commit_action succeeds.",
+                "Use only opaque public references. Mutating tools may require approval in OxideLab before mcp_commit_action succeeds.",
             )
     }
 
@@ -730,7 +730,7 @@ impl ServerHandler for PublicMcpService {
                     ClientApprovalMode::Unattended => "unattended_for_enabled_groups",
                 };
                 CallToolResult::structured(json!({
-                    "server": "OxideTerm Public MCP",
+                    "server": "OxideLab Public MCP",
                     "protocol": ProtocolVersion::V_2026_07_28.to_string(),
                     "approval_policy": approval_policy,
                     "enabled_tool_groups": client.tool_groups,
@@ -1566,7 +1566,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
     vec![
         define_tool::<EmptyArgs>(
             "mcp_overview",
-            "Describe the OxideTerm public MCP endpoint and its authorization model.",
+            "Describe the OxideLab public MCP endpoint and its authorization model.",
             ToolGroup::Basic,
             true,
             false,
@@ -1620,7 +1620,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         ),
         define_tool::<CommitActionArgs>(
             "mcp_commit_action",
-            "Commit an action that the user already approved in OxideTerm.",
+            "Commit an action that the user already approved in OxideLab.",
             ToolGroup::Basic,
             false,
             false,
@@ -1662,7 +1662,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         ),
         define_tool::<StoreCredentialSchema>(
             "credentials_store",
-            "Store a new credential directly in OxideTerm's protected backend without exposing existing values.",
+            "Store a new credential directly in OxideLab's protected backend without exposing existing values.",
             ToolGroup::CredentialManage,
             false,
             true,
@@ -1711,7 +1711,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         ),
         define_tool::<ConnectNodeArgs>(
             "nodes_connect",
-            "Connect or acquire a physical SSH node through OxideTerm's NodeRouter.",
+            "Connect or acquire a physical SSH node through OxideLab's NodeRouter.",
             ToolGroup::NodeSession,
             false,
             true,
@@ -1824,7 +1824,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         .with_additional_groups(&[ToolGroup::ArtifactTransfer]),
         define_tool::<OpenDesktopArgs>(
             "desktops_open",
-            "Open a real saved RDP or VNC profile in a visible OxideTerm tab.",
+            "Open a real saved RDP or VNC profile in a visible OxideLab tab.",
             ToolGroup::DesktopSession,
             false,
             true,
@@ -1916,7 +1916,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         ),
         define_tool::<StageArtifactSchema>(
             "artifacts_stage",
-            "Stage bounded content in OxideTerm's client-scoped temporary artifact store.",
+            "Stage bounded content in OxideLab's client-scoped temporary artifact store.",
             ToolGroup::ArtifactTransfer,
             false,
             false,
@@ -2071,7 +2071,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
         .with_additional_groups(&[ToolGroup::ArtifactTransfer]),
         define_tool::<AddonsSetEnabledArgs>(
             "addons_set_enabled",
-            "Enable or disable an installed addon through OxideTerm's managed lifecycle.",
+            "Enable or disable an installed addon through OxideLab's managed lifecycle.",
             ToolGroup::AddonManage,
             false,
             true,

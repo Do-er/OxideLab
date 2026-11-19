@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 //! Local filesystem behavior for terminal current-directory awareness.
@@ -103,7 +103,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "oxideterm-environment-{name}-{}-{nonce}",
+            "oxidelab-environment-{name}-{}-{nonce}",
             std::process::id()
         ))
     }

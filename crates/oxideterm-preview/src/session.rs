@@ -639,7 +639,7 @@ mod tests {
             (
                 "executable",
                 b"\x7fELF\x02\x01".as_slice(),
-                "application/x-oxideterm-binary",
+                "application/x-oxidelab-binary",
             ),
         ] {
             let path = directory.path().join(name);

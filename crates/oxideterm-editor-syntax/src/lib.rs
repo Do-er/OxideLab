@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Syntax data layer for OxideTerm's native editor.
+//! Syntax data layer for OxideLab's native editor.
 //!
 //! This crate owns tree-sitter parsers and returns byte-range metadata. It does
 //! not paint GPUI elements and does not mutate editor buffers.

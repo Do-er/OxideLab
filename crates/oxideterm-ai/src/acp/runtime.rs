@@ -852,7 +852,7 @@ async fn run_connection_commands(
                                 let _ = event_tx.send(AcpManagedEvent::Diagnostic {
                                     agent_id: agent_id.clone(),
                                     connection_id,
-                                    message: "The ACP agent does not advertise the transport required by an OxideTerm MCP server.".to_string(),
+                                    message: "The ACP agent does not advertise the transport required by an OxideLab MCP server.".to_string(),
                                 });
                             }
                             let session = match runtime
@@ -1402,7 +1402,7 @@ mod tests {
         use agent_client_protocol::schema::v1::{McpCapabilities, McpServerHttp, McpServerStdio};
 
         let http_server =
-            McpServer::Http(McpServerHttp::new("OxideTerm", "http://127.0.0.1:1/mcp"));
+            McpServer::Http(McpServerHttp::new("OxideLab", "http://127.0.0.1:1/mcp"));
         let stdio_server =
             McpServer::Stdio(McpServerStdio::new("Always Supported", "/test/mcp-helper"));
         let unsupported = supported_mcp_servers(

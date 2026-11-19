@@ -1,6 +1,9 @@
 //! Runtime host tests cover the behavior moved out of the GPUI app crate.
 
 use super::*;
+// Every consumer below is a #[cfg(unix)] process-plugin test, so the import is
+// gated to match and non-unix builds stay free of unused-import warnings.
+#[cfg(unix)]
 use oxideterm_plugin_registry::{
     NativePluginRegistry, NativePluginRuntime, NativePluginRuntimeKind, native_plugins_dir,
 };
@@ -22,7 +25,7 @@ fn unique_temp_dir(name: &str) -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis();
-    std::env::temp_dir().join(format!("oxideterm-{name}-{millis}"))
+    std::env::temp_dir().join(format!("oxidelab-{name}-{millis}"))
 }
 
 fn sample_manifest() -> NativePluginManifest {

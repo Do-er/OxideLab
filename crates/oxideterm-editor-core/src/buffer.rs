@@ -1141,10 +1141,10 @@ mod tests {
         let mut buffer = TextBuffer::new("hello world");
         let selection = Selection::new(BufferOffset(6), BufferOffset(11));
 
-        let next_selection = buffer.replace_selection(selection, "OxideTerm").unwrap();
+        let next_selection = buffer.replace_selection(selection, "OxideLab").unwrap();
 
-        assert_eq!(buffer.text(), "hello OxideTerm");
-        assert_eq!(next_selection, Selection::caret(BufferOffset(15)));
+        assert_eq!(buffer.text(), "hello OxideLab");
+        assert_eq!(next_selection, Selection::caret(BufferOffset(14)));
     }
 
     #[test]

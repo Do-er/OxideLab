@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use crate::{Notification, PaneId, SessionId, WindowId, decode_output, ids::parse_decimal};

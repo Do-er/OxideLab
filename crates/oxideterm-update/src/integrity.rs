@@ -6,13 +6,13 @@ use minisign_verify::{PublicKey, Signature};
 
 use crate::NativeUpdateError;
 
-pub const OXIDETERM_UPDATER_PUBKEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXkgQzExNzMwRDYwN0ZGRTI0OQpSV1JKNHY4SDFqQVh3VUQ0VjBHaGJWa1hLZ0tHb2FCYktrYTI1M2IrNmttUm1xVDRYUEhKaDg1YQo=";
+pub const OXIDELAB_UPDATER_PUBKEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXkgQzExNzMwRDYwN0ZGRTI0OQpSV1JKNHY4SDFqQVh3VUQ0VjBHaGJWa1hLZ0tHb2FCYktrYTI1M2IrNmttUm1xVDRYUEhKaDg1YQo=";
 
 pub fn verify_minisign_signature(
     data: &[u8],
     release_signature: &str,
 ) -> Result<(), NativeUpdateError> {
-    let pub_key_decoded = base64_to_string(OXIDETERM_UPDATER_PUBKEY)?;
+    let pub_key_decoded = base64_to_string(OXIDELAB_UPDATER_PUBKEY)?;
     let public_key = PublicKey::decode(&pub_key_decoded).map_err(|error| {
         NativeUpdateError::Integrity(format!("decode public key failed: {error}"))
     })?;

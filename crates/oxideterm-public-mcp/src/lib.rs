@@ -1,4 +1,4 @@
-//! Public MCP protocol boundary for OxideTerm.
+//! Public MCP protocol boundary for OxideLab.
 //!
 //! This crate owns external handles, client grants, approvals, auditing, and the
 //! typed bridge into the GPUI domain runtime. It intentionally has no access to

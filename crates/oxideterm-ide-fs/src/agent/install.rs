@@ -61,7 +61,7 @@ fn parse_remote_version_output(output: &str) -> RemoteAgentInstallState {
 const ENCODED_AGENT_SUFFIX: &str = ".b64";
 
 fn resolve_agent_binary(target: &str) -> Result<PathBuf, AgentError> {
-    let file_name = format!("oxideterm-agent-{target}");
+    let file_name = format!("oxidelab-agent-{target}");
     resolve_agent_binary_in_dirs(&file_name, agent_resource_dirs())
 }
 
@@ -80,13 +80,13 @@ fn resolve_agent_binary_in_dirs(
         }
     }
     Err(AgentError::BinaryNotFound(format!(
-        "agents/{file_name}; set OXIDETERM_AGENT_DIR or package it in app resources"
+        "agents/{file_name}; set OXIDELAB_AGENT_DIR or package it in app resources"
     )))
 }
 
 fn agent_resource_dirs() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
-    if let Some(dir) = std::env::var_os("OXIDETERM_AGENT_DIR") {
+    if let Some(dir) = std::env::var_os("OXIDELAB_AGENT_DIR") {
         dirs.push(PathBuf::from(dir));
     }
     if let Ok(exe) = std::env::current_exe()

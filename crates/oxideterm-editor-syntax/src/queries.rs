@@ -46,7 +46,7 @@ pub(crate) fn highlight_query_for(language: &LanguageId) -> &'static str {
 }
 
 // `tree-sitter-bash` ships a query file but does not export it from the Rust
-// crate. Keep a deliberately small OxideTerm-local query so common remote
+// crate. Keep a deliberately small OxideLab-local query so common remote
 // shell files get real tree-sitter spans instead of falling back to plain text.
 const BASH_HIGHLIGHTS_QUERY: &str = r#"
 [

@@ -17,7 +17,7 @@ use cpal::{
 use crate::queue::BoundedPcmQueue;
 
 const DEFAULT_BUFFER_DURATION_MILLISECONDS: usize = 500;
-const AUDIO_PLAYBACK_THREAD_NAME: &str = "oxideterm-pcm-audio";
+const AUDIO_PLAYBACK_THREAD_NAME: &str = "oxidelab-pcm-audio";
 
 /// Plays bounded little-endian signed 16-bit PCM without blocking producers.
 #[derive(Debug)]

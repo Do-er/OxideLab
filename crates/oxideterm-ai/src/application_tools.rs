@@ -322,7 +322,7 @@ pub(crate) fn extended_application_tool_definitions() -> Vec<AiToolDefinition> {
                 "type": "object",
                 "properties": {
                     "scope_kind": { "type": "string", "enum": ["user", "workspace", "project", "host"] },
-                    "scope_id": { "type": "string", "maxLength": MAX_IDENTIFIER_CHARS, "description": "Optional explicit scope identity. When omitted, OxideTerm resolves the current user, workspace, project, or host." },
+                    "scope_id": { "type": "string", "maxLength": MAX_IDENTIFIER_CHARS, "description": "Optional explicit scope identity. When omitted, OxideLab resolves the current user, workspace, project, or host." },
                     "memory_kind": { "type": "string", "enum": ["long_term", "temporary"] },
                     "include_expired": { "type": "boolean" }
                 },
@@ -339,7 +339,7 @@ pub(crate) fn extended_application_tool_definitions() -> Vec<AiToolDefinition> {
                     "id": { "type": "string", "maxLength": MAX_IDENTIFIER_CHARS },
                     "content": { "type": "string", "maxLength": 16000 },
                     "scope_kind": { "type": "string", "enum": ["user", "workspace", "project", "host"] },
-                    "scope_id": { "type": "string", "maxLength": MAX_IDENTIFIER_CHARS, "description": "Optional explicit scope identity. When omitted, OxideTerm resolves the current user, workspace, project, or host." },
+                    "scope_id": { "type": "string", "maxLength": MAX_IDENTIFIER_CHARS, "description": "Optional explicit scope identity. When omitted, OxideLab resolves the current user, workspace, project, or host." },
                     "memory_kind": { "type": "string", "enum": ["long_term", "temporary"] },
                     "expires_at_ms": { "type": "integer", "minimum": 1 },
                     "expected_revision": { "type": "integer", "minimum": 1 }

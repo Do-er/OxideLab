@@ -39,7 +39,7 @@ async fn loopback_endpoint_rejects_missing_credentials_and_accepts_registered_cl
     let authorized =
         send_request(server.port(), Some(&authorization), initialize_body(), None).await;
     assert!(authorized.starts_with("HTTP/1.1 200"), "{authorized}");
-    assert!(authorized.contains("oxideterm-public-mcp"));
+    assert!(authorized.contains("oxidelab-public-mcp"));
 
     let tools = send_request(
         server.port(),
@@ -212,7 +212,7 @@ async fn assert_overview(port: u16, authorization: &str, protocol: Option<&str>)
     let response = send_request(port, Some(authorization),
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"mcp_overview","arguments":{}}}"#, protocol).await;
     let result = &response_json(&response)["result"]["structuredContent"];
-    assert_eq!(result["server"], "OxideTerm Public MCP", "{response}");
+    assert_eq!(result["server"], "OxideLab Public MCP", "{response}");
     assert_eq!(result["approval_policy"], "unattended_for_enabled_groups");
 }
 

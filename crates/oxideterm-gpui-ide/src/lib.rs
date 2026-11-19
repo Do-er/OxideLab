@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! GPUI owner surface for OxideTerm's native IDE path.
+//! GPUI owner surface for OxideLab's native IDE path.
 //!
 //! This crate is the first real UI owner for `oxideterm-ide-core`: it owns the
 //! project tree, opened editor tabs, save dispatch, and reconnect snapshot

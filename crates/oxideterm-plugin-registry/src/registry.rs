@@ -5,7 +5,7 @@
 
 use super::*;
 
-/// Official catalog endpoint shipped with OxideTerm builds.
+/// Official catalog endpoint shipped with OxideLab builds.
 pub const OFFICIAL_NATIVE_PLUGIN_REGISTRY_URL: &str = "https://raw.githubusercontent.com/AnalyseDeCircuit/oxideterm-plugins/main/registry/v1/index.json";
 pub const OFFICIAL_NATIVE_PLUGIN_REGISTRY_V2_URL: &str = "https://raw.githubusercontent.com/AnalyseDeCircuit/oxideterm-plugins/main/registry/v2/index.json";
 const NATIVE_PLUGIN_REGISTRY_VERSION: u32 = 1;
@@ -1181,7 +1181,7 @@ pub(crate) fn validate_native_plugin_registry(
         if let Some(required) = entry.min_oxideterm_version.as_deref() {
             semver::Version::parse(required).map_err(|error| {
                 format!(
-                    "Plugin registry entry \"{}\" has invalid minimum OxideTerm version: {error}",
+                    "Plugin registry entry \"{}\" has invalid minimum OxideLab version: {error}",
                     entry.id
                 )
             })?;

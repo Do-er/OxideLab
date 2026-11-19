@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::hash::{Hash, Hasher};
@@ -262,7 +262,7 @@ mod tests {
     fn parent_handles_home_posix_and_windows_roots() {
         for (path, expected) in [
             ("~/Documents", Some("~")),
-            ("~/Documents/OxideTerm", Some("~/Documents")),
+            ("~/Documents/OxideLab", Some("~/Documents")),
             ("/Users", Some("/")),
             ("/Users/dominical", Some("/Users")),
             ("/", None),

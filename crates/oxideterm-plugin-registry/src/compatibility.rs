@@ -29,7 +29,7 @@ pub fn validate_native_plugin_host(manifest: &NativePluginManifest) -> Result<()
         Ok(())
     } else {
         Err(format!(
-            "plugin_host_incompatible: requires OxideTerm {}, current {host}",
+            "plugin_host_incompatible: requires OxideLab {}, current {host}",
             requirement.unwrap_or_default()
         ))
     }

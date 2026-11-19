@@ -139,7 +139,7 @@ pub fn plan_native_install(
             portable_root: context.portable_root.clone(),
             requires_app_exit: true,
             summary:
-                "Portable update staged. OxideTerm will restart after replacing application files."
+                "Portable update staged. OxideLab will restart after replacing application files."
                     .to_string(),
         };
     }
@@ -156,13 +156,13 @@ pub fn plan_native_install(
                 InstallStrategy::MacReplaceAppBundle,
                 InstallActionKind::LaunchReplacementScript,
                 true,
-                "Schedule .app bundle replacement after OxideTerm exits.",
+                "Schedule .app bundle replacement after OxideLab exits.",
             ),
             ("macos", InstallFlavor::MacApp, InstallPackageKind::MacArchive) => (
                 InstallStrategy::MacReplaceAppArchive,
                 InstallActionKind::LaunchReplacementScript,
                 true,
-                "Schedule archived .app bundle replacement after OxideTerm exits.",
+                "Schedule archived .app bundle replacement after OxideLab exits.",
             ),
             ("windows", InstallFlavor::WindowsNsis, InstallPackageKind::WindowsMsi) => (
                 InstallStrategy::WindowsRunInstaller,
@@ -174,7 +174,7 @@ pub fn plan_native_install(
                 InstallStrategy::WindowsRunInstaller,
                 InstallActionKind::LaunchInstaller,
                 true,
-                "Stage the Windows installer and apply it after OxideTerm exits.",
+                "Stage the Windows installer and apply it after OxideLab exits.",
             ),
             (
                 "windows",
@@ -190,13 +190,13 @@ pub fn plan_native_install(
                 InstallStrategy::LinuxReplaceAppImage,
                 InstallActionKind::LaunchReplacementScript,
                 true,
-                "Schedule AppImage replacement after OxideTerm exits.",
+                "Schedule AppImage replacement after OxideLab exits.",
             ),
             ("linux", InstallFlavor::LinuxAppImage, InstallPackageKind::LinuxAppImageArchive) => (
                 InstallStrategy::LinuxReplaceAppImageArchive,
                 InstallActionKind::LaunchReplacementScript,
                 true,
-                "Extract and schedule AppImage replacement after OxideTerm exits.",
+                "Extract and schedule AppImage replacement after OxideLab exits.",
             ),
             ("linux", InstallFlavor::LinuxDeb, InstallPackageKind::LinuxPackage) => (
                 InstallStrategy::LinuxOpenPackage,
@@ -349,7 +349,7 @@ fn execute_windows_installer(
         InstallPackageKind::WindowsExe => {
             launch_windows_installer_via_powershell(
                 &plan.package_path.to_string_lossy(),
-                &["/S".to_string(), "/OXIDETERM_UPDATE=1".to_string()],
+                &["/S".to_string(), "/OXIDELAB_UPDATE=1".to_string()],
                 &plan.package_path,
                 true,
                 false,
@@ -374,7 +374,7 @@ fn windows_installer_launched_message(
     package_kind: InstallPackageKind,
 ) -> String {
     if package_kind == InstallPackageKind::WindowsExe {
-        return "Windows update staged. OxideTerm will quit and the update helper will finish replacement."
+        return "Windows update staged. OxideLab will quit and the update helper will finish replacement."
             .to_string();
     }
     format!(
@@ -612,7 +612,7 @@ fn execute_linux_appimage_replacement(
             package = shell_escape_path(&plan.package_path)
         ),
         InstallPackageKind::LinuxAppImageArchive => format!(
-            r#"tmp_dir="$(mktemp -d "${{TMPDIR:-/tmp}}/oxideterm-update.XXXXXX")"
+            r#"tmp_dir="$(mktemp -d "${{TMPDIR:-/tmp}}/oxidelab-update.XXXXXX")"
 tar -xzf "{package}" -C "$tmp_dir"
 new_app="$(find "$tmp_dir" -maxdepth 3 -iname '*.AppImage' -type f | head -n 1)"
 if [ -z "$new_app" ]; then
@@ -728,7 +728,7 @@ fn execute_macos_app_replacement(
             package = shell_escape_path(&plan.package_path)
         ),
         InstallPackageKind::MacArchive => format!(
-            r#"tmp_dir="$(/usr/bin/mktemp -d "${{TMPDIR:-/tmp}}/oxideterm-update.XXXXXX")"
+            r#"tmp_dir="$(/usr/bin/mktemp -d "${{TMPDIR:-/tmp}}/oxidelab-update.XXXXXX")"
 case "{package}" in
   *.zip|*.app.zip)
     /usr/bin/ditto -x -k "{package}" "$tmp_dir"
@@ -877,22 +877,22 @@ mod tests {
     #[test]
     fn windows_install_plans_select_installer_strategies() {
         let plan = plan_native_install(
-            "C:/Temp/OxideTerm.msi",
+            "C:/Temp/OxideLab.msi",
             &context(
                 "windows",
                 InstallFlavor::WindowsNsis,
-                "C:/Program Files/OxideTerm/OxideTerm.exe",
+                "C:/Program Files/OxideLab/OxideLab.exe",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::WindowsRunInstaller);
         assert_eq!(plan.package_kind, InstallPackageKind::WindowsMsi);
 
         let plan = plan_native_install(
-            "C:/Temp/OxideTerm_setup.exe",
+            "C:/Temp/OxideLab_setup.exe",
             &context(
                 "windows",
                 InstallFlavor::WindowsNsis,
-                "C:/Users/me/AppData/Local/Programs/OxideTerm/oxideterm-native.exe",
+                "C:/Users/me/AppData/Local/Programs/OxideLab/oxideterm-native.exe",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::WindowsRunInstaller);
@@ -900,11 +900,11 @@ mod tests {
         assert!(plan.requires_app_exit);
 
         let plan = plan_native_install(
-            "C:/Temp/OxideTerm_1.0.0_x64.msi.zip",
+            "C:/Temp/OxideLab_1.0.0_x64.msi.zip",
             &context(
                 "windows",
                 InstallFlavor::WindowsNsis,
-                "C:/Program Files/OxideTerm/OxideTerm.exe",
+                "C:/Program Files/OxideLab/OxideLab.exe",
             ),
         );
         assert_eq!(
@@ -928,22 +928,22 @@ mod tests {
     #[test]
     fn linux_appimage_plans_require_replacement_runtime() {
         let plan = plan_native_install(
-            "/tmp/OxideTerm.AppImage",
+            "/tmp/OxideLab.AppImage",
             &context(
                 "linux",
                 InstallFlavor::LinuxAppImage,
-                "/opt/OxideTerm.AppImage",
+                "/opt/OxideLab.AppImage",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::LinuxReplaceAppImage);
         assert!(plan.requires_app_exit);
 
         let plan = plan_native_install(
-            "/tmp/OxideTerm.AppImage.tar.gz",
+            "/tmp/OxideLab.AppImage.tar.gz",
             &context(
                 "linux",
                 InstallFlavor::LinuxAppImage,
-                "/opt/OxideTerm.AppImage",
+                "/opt/OxideLab.AppImage",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::LinuxReplaceAppImageArchive);
@@ -954,22 +954,22 @@ mod tests {
     #[test]
     fn macos_install_plans_select_open_or_replace_strategy() {
         let plan = plan_native_install(
-            "/tmp/OxideTerm.dmg",
+            "/tmp/OxideLab.dmg",
             &context(
                 "macos",
                 InstallFlavor::MacApp,
-                "/Applications/OxideTerm.app/Contents/MacOS/OxideTerm",
+                "/Applications/OxideLab.app/Contents/MacOS/OxideLab",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::MacOpenDmg);
         assert_eq!(plan.action, InstallActionKind::OpenPackage);
 
         let plan = plan_native_install(
-            "/tmp/OxideTerm.app.zip",
+            "/tmp/OxideLab.app.zip",
             &context(
                 "macos",
                 InstallFlavor::MacApp,
-                "/Applications/OxideTerm.app/Contents/MacOS/OxideTerm",
+                "/Applications/OxideLab.app/Contents/MacOS/OxideLab",
             ),
         );
         assert_eq!(plan.strategy, InstallStrategy::MacReplaceAppArchive);
@@ -981,8 +981,8 @@ mod tests {
     fn linux_packages_open_with_the_package_installer() {
         // DEB and RPM packages share the installed-package handoff contract.
         let cases = [
-            ("/tmp/OxideTerm_linux_x64.deb", InstallFlavor::LinuxDeb),
-            ("/tmp/OxideTerm_linux_x64.rpm", InstallFlavor::LinuxRpm),
+            ("/tmp/OxideLab_linux_x64.deb", InstallFlavor::LinuxDeb),
+            ("/tmp/OxideLab_linux_x64.rpm", InstallFlavor::LinuxRpm),
         ];
 
         for (package_path, flavor) in cases {
@@ -1002,9 +1002,9 @@ mod tests {
         // Portable archives differ by platform, but all use the same guarded
         // replacement protocol instead of an installed-package flow.
         let cases = [
-            ("macos", "/tmp/OxideTerm_macos_x64_portable.tar.gz"),
-            ("windows", "C:/Temp/OxideTerm_windows_x64_portable.zip"),
-            ("linux", "/tmp/OxideTerm_linux_x64_portable.tar.gz"),
+            ("macos", "/tmp/OxideLab_macos_x64_portable.tar.gz"),
+            ("windows", "C:/Temp/OxideLab_windows_x64_portable.zip"),
+            ("linux", "/tmp/OxideLab_linux_x64_portable.tar.gz"),
         ];
 
         for (os, package_path) in cases {
@@ -1021,7 +1021,7 @@ mod tests {
     #[test]
     fn mismatched_install_flavor_falls_back_to_manual_open() {
         let plan = plan_native_install(
-            "/tmp/OxideTerm_linux_x64.AppImage",
+            "/tmp/OxideLab_linux_x64.AppImage",
             &context(
                 "linux",
                 InstallFlavor::LinuxDeb,

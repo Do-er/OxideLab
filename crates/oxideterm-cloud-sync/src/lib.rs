@@ -25,11 +25,11 @@ pub mod sync_v3;
 
 pub const CLOUD_SYNC_PLUGIN_ID: &str = "com.oxideterm.cloud-sync";
 
-pub const OXIDE_CONTENT_TYPE: &str = "application/vnd.oxideterm.oxide";
+pub const OXIDE_CONTENT_TYPE: &str = "application/vnd.oxidelab.oxide";
 pub const LEGACY_STRUCTURED_MANIFEST_FORMAT: &str = "structured-v1";
 pub const STRUCTURED_MANIFEST_FORMAT: &str = "structured-v2";
 pub const STRUCTURED_MANIFEST_CONTENT_TYPE: &str =
-    "application/vnd.oxideterm.cloud-sync.manifest+json";
+    "application/vnd.oxidelab.cloud-sync.manifest+json";
 
 /// Accepts the original structured format while new uploads advertise fields
 /// that older clients cannot safely round-trip.

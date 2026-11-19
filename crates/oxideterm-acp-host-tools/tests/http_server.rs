@@ -115,7 +115,7 @@ fn aliased_definition() -> AcpHostToolDefinition {
     AcpHostToolDefinition::with_execution_name(
         "external_mcp_demo_ping",
         "mcp::demo::ping",
-        "Ping a configured MCP server through OxideTerm.",
+        "Ping a configured MCP server through OxideLab.",
         json!({ "type": "object" }),
     )
 }

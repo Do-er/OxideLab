@@ -19,7 +19,7 @@ impl TestDirectory {
             .expect("system clock")
             .as_nanos();
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-skills-{name}-{}-{nonce}",
+            "oxidelab-skills-{name}-{}-{nonce}",
             std::process::id()
         ));
         fs::create_dir_all(&path).expect("create test directory");

@@ -14,7 +14,7 @@ fn local_file(name: &str) -> IdeLocation {
 #[test]
 fn open_file_reuses_existing_tab_for_same_location() {
     let mut workspace = IdeWorkspace::new();
-    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
 
     let first = workspace
         .open_file(
@@ -43,7 +43,7 @@ fn open_file_reuses_existing_tab_for_same_location() {
 fn replacement_marks_only_changed_text_dirty_and_saving_clears_it() {
     for (initial, replacement, dirty) in [("old", "new", true), ("same", "same", false)] {
         let mut workspace = IdeWorkspace::new();
-        workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+        workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
         let OpenFileOutcome::Opened(tab_id) = workspace
             .open_file(local_file("file.txt"), initial, SavedFileVersion::unknown())
             .unwrap()
@@ -73,7 +73,7 @@ fn replacement_marks_only_changed_text_dirty_and_saving_clears_it() {
 #[test]
 fn stale_save_completion_preserves_newer_dirty_text() {
     let mut workspace = IdeWorkspace::new();
-    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
     let OpenFileOutcome::Opened(tab_id) = workspace
         .open_file(local_file("race.rs"), "old", SavedFileVersion::unknown())
         .unwrap()
@@ -125,7 +125,7 @@ fn stale_save_completion_preserves_newer_dirty_text() {
 #[test]
 fn close_after_save_keeps_tab_open_when_newer_edit_arrives() {
     let mut workspace = IdeWorkspace::new();
-    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
     let OpenFileOutcome::Opened(tab_id) = workspace
         .open_file(
             local_file("close-race.rs"),
@@ -167,7 +167,7 @@ fn close_after_save_keeps_tab_open_when_newer_edit_arrives() {
 #[test]
 fn dirty_close_cancel_keeps_tab_and_later_discard_removes_it() {
     let mut workspace = IdeWorkspace::new();
-    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
     let OpenFileOutcome::Opened(tab_id) = workspace
         .open_file(local_file("dirty.txt"), "old", SavedFileVersion::unknown())
         .unwrap()
@@ -392,7 +392,7 @@ fn restore_preserves_user_closed_and_dirty_project_states() {
 #[test]
 fn reorders_tabs_before_targets_and_to_drop_indices() {
     let mut workspace = IdeWorkspace::new();
-    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+    workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
     let OpenFileOutcome::Opened(first) = workspace
         .open_file(local_file("a.rs"), "a", SavedFileVersion::unknown())
         .unwrap()
@@ -498,7 +498,7 @@ fn workspace_snapshot_memory() {
     for bytes in [16 * 1024 * 1024, 64 * 1024 * 1024] {
         let baseline = allocated();
         let mut workspace = IdeWorkspace::new();
-        workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideTerm");
+        workspace.open_project(IdeLocation::local("/tmp/oxideterm"), "OxideLab");
         let OpenFileOutcome::Opened(tab_id) = workspace
             .open_file(
                 local_file("memory.txt"),

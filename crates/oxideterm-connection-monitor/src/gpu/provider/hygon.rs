@@ -445,7 +445,7 @@ mod tests {
             .expect("system time should be after the Unix epoch")
             .as_nanos();
         let tool_dir = std::env::temp_dir().join(format!(
-            "oxideterm-hygon-provider-{}-{unique}",
+            "oxidelab-hygon-provider-{}-{unique}",
             std::process::id()
         ));
         fs::create_dir(&tool_dir).expect("temporary tool directory should be created");

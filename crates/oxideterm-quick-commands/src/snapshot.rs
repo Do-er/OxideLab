@@ -92,6 +92,7 @@ fn migration_sort_order(index: usize) -> i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::QuickCommandIcon;
 
     #[test]
     fn published_v1_snapshot_migrates_to_v2() {

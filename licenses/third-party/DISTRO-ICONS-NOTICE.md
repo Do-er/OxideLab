@@ -1,8 +1,8 @@
 # Linux distribution icons
 
-OxideTerm bundles the original SVG files below solely to identify operating systems
+OxideLab bundles the original SVG files below solely to identify operating systems
 in connection controls. The artwork retains its own license; it is not relicensed
-under OxideTerm's code license. Logos and names remain the trademarks of their
+under OxideLab's code license. Logos and names remain the trademarks of their
 respective owners. Their inclusion does not imply sponsorship or endorsement.
 
 The SVGs listed below were retrieved on 2026-09-23. The Ubuntu and Arch Linux
@@ -10,12 +10,12 @@ SVGs have only their root fill set to the colors recorded by Simple Icons. The
 remaining SVGs keep their original geometry apart from the canvas and crop
 changes recorded in their own entries. Display scaling preserves their original
 aspect ratios and colors. Unknown distributions use
-OxideTerm's generic icon instead of a related distribution's logo.
+OxideLab's generic icon instead of a related distribution's logo.
 
 ## Ubuntu
 
 **Ubuntu Circle of Friends**, a trademark of Canonical Ltd. Displayed only to
-identify an Ubuntu system; OxideTerm is not affiliated with Canonical.
+identify an Ubuntu system; OxideLab is not affiliated with Canonical.
 
 - Project: https://ubuntu.com/
 - Original SVG: https://github.com/simple-icons/simple-icons/blob/b86d5c9a0bdd4f3f5c30898a63654dd32f39fd76/icons/ubuntu.svg
@@ -31,7 +31,7 @@ Simple Icons' CC0 project license is not asserted as a license to Ubuntu's mark.
 ## Arch Linux
 
 **Arch Linux icon**, a trademark of the Arch Linux project. Displayed only to
-identify an Arch Linux system; OxideTerm is not affiliated with the project.
+identify an Arch Linux system; OxideLab is not affiliated with the project.
 
 - Project: https://archlinux.org/
 - Original SVG: https://github.com/simple-icons/simple-icons/blob/b86d5c9a0bdd4f3f5c30898a63654dd32f39fd76/icons/archlinux.svg
@@ -100,7 +100,7 @@ The branding repository explicitly confirms CC BY 4.0 for historical logo versio
 **Rocky Linux primary icon**, Rocky Linux branding contributors / Rocky Enterprise
 Software Foundation. Rocky Linux is a trademark of the Rocky Enterprise Software
 Foundation. Used only to identify Rocky Linux systems, not to brand or endorse
-OxideTerm.
+OxideLab.
 
 - Project: https://rockylinux.org/
 - Original SVG: https://github.com/rocky-linux/branding/blob/24e0c11e596d983dbca28653c8b15e69aa45a652/logo/src/icon-primary.svg
@@ -125,8 +125,8 @@ OxideTerm.
   use and display in designs and documents, provided the use does not impersonate
   Linux Mint or imply affiliation. This is not represented as a Creative Commons
   or MIT license.
-- OxideTerm displays the unchanged badge solely as an operating-system identifier.
-  OxideTerm is not affiliated with or endorsed by Linux Mint.
+- OxideLab displays the unchanged badge solely as an operating-system identifier.
+  OxideLab is not affiliated with or endorsed by Linux Mint.
 - Bundled file: `crates/oxideterm-gpui-app/resources/distro-icons/linuxmint.svg`.
 - SHA-256: `dee702dc5e28aafa4e6c033a6f7381b178036c460c7cfe9dc32c7fde0ccf0387`.
 
@@ -134,13 +134,13 @@ OxideTerm.
 
 **OpenBMC mark**, OpenBMC project contributors. OpenBMC is an open source project
 hosted by the Linux Foundation. Displayed only to identify an OpenBMC (BMC) system;
-OxideTerm is not affiliated with or endorsed by the OpenBMC project.
+OxideLab is not affiliated with or endorsed by the OpenBMC project.
 
 - Project: https://github.com/openbmc/openbmc
 - Brand guidance: https://github.com/openbmc/docs
-- Source of this copy: the OpenBMC lockup supplied by the OxideTerm maintainers
+- Source of this copy: the OpenBMC lockup supplied by the OxideLab maintainers
   for this conversion. Its license is not asserted by this notice; confirm the
-  project's brand terms before redistributing the artwork outside OxideTerm.
+  project's brand terms before redistributing the artwork outside OxideLab.
 - Change: the "openbmc" wordmark below the mark was removed, and the `viewBox`
   was cropped to the mark's bounding box.
 - Bundled file: `crates/oxideterm-gpui-app/resources/distro-icons/openbmc.svg`.

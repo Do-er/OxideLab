@@ -431,7 +431,7 @@ mod tests {
     async fn webdav_upload_creates_nested_collections_without_touching_service_root() {
         let executor = Arc::new(ScopedWebdav {
             collections: Mutex::new(
-                ["/dav".into(), "/dav/oxideterm-sync".into()]
+                ["/dav".into(), "/dav/oxidelab-sync".into()]
                     .into_iter()
                     .collect(),
             ),
@@ -442,7 +442,7 @@ mod tests {
             backend_type: BackendType::Webdav,
             auth_mode: crate::AuthMode::None,
             endpoint: "https://example.test/dav".into(),
-            namespace: "oxideterm-sync".into(),
+            namespace: "oxidelab-sync".into(),
             ..Default::default()
         };
         backend
@@ -458,15 +458,15 @@ mod tests {
         assert_eq!(
             *executor.requests.lock().unwrap(),
             [
-                ("MKCOL".into(), "/dav/oxideterm-sync".into()),
-                ("MKCOL".into(), "/dav/oxideterm-sync/structured".into()),
+                ("MKCOL".into(), "/dav/oxidelab-sync".into()),
+                ("MKCOL".into(), "/dav/oxidelab-sync/structured".into()),
                 (
                     "MKCOL".into(),
-                    "/dav/oxideterm-sync/structured/connections".into()
+                    "/dav/oxidelab-sync/structured/connections".into()
                 ),
                 (
                     "PUT".into(),
-                    "/dav/oxideterm-sync/structured/connections/revision.json".into()
+                    "/dav/oxidelab-sync/structured/connections/revision.json".into()
                 ),
             ]
         );

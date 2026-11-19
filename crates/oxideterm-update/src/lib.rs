@@ -3,7 +3,7 @@
 
 //! Native updater compatibility layer.
 //!
-//! OxideTerm's Tauri build reads release manifests through
+//! OxideLab's Tauri build reads release manifests through
 //! `tauri-plugin-updater`. The GPUI/native build cannot rely on that runtime,
 //! so this crate owns the shared channel endpoints, manifest parsing, platform
 //! package selection, version comparison, and package download plan. UI code

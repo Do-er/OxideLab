@@ -429,7 +429,7 @@ pub fn model_reasoning_capability(provider_type: &str, model: &str) -> AiModelRe
         _ => AiReasoningRequestFormat::Unsupported,
     };
     let levels = if request_format == AiReasoningRequestFormat::Unsupported {
-        // Ollama documents `think` for its native `/api/chat` endpoint. OxideTerm
+        // Ollama documents `think` for its native `/api/chat` endpoint. OxideLab
         // currently uses Ollama's OpenAI-compatible endpoint, so no control is
         // exposed until that transport can send the documented parameter.
         // https://docs.ollama.com/capabilities/thinking

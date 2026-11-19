@@ -5,6 +5,9 @@ use oxideterm_ai::{
 };
 use std::time::Instant;
 
+// getrusage exists only on Unix targets; keep the benchmark compilable everywhere
+// and report an unknown peak where the metric is unavailable.
+#[cfg(unix)]
 fn peak_rss_bytes() -> u64 {
     let mut usage: libc::rusage = unsafe { std::mem::zeroed() };
     if unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) } != 0 {
@@ -16,6 +19,11 @@ fn peak_rss_bytes() -> u64 {
     } else {
         value.saturating_mul(1024)
     }
+}
+
+#[cfg(not(unix))]
+fn peak_rss_bytes() -> u64 {
+    0
 }
 
 fn main() -> anyhow::Result<()> {

@@ -323,14 +323,14 @@ mod tests {
 
     #[test]
     fn windows_drive_segments_remain_absolute_on_every_platform() {
-        let segments = local_path_segments(r"D:\Projects\OxideTerm");
+        let segments = local_path_segments(r"D:\Projects\OxideLab");
 
         assert_eq!(
             segments
                 .iter()
                 .map(|segment| segment.full_path.as_str())
                 .collect::<Vec<_>>(),
-            [r"D:\", r"D:\Projects", r"D:\Projects\OxideTerm"]
+            [r"D:\", r"D:\Projects", r"D:\Projects\OxideLab"]
         );
         assert!(segments.iter().all(|segment| segment.root_is_drive));
     }
@@ -338,7 +338,7 @@ mod tests {
     #[test]
     fn windows_drive_parent_never_becomes_a_unix_style_path() {
         assert_eq!(
-            local_parent_path(r"D:\Projects\OxideTerm").as_deref(),
+            local_parent_path(r"D:\Projects\OxideLab").as_deref(),
             Some(r"D:\Projects")
         );
         assert_eq!(local_parent_path(r"D:\Projects").as_deref(), Some(r"D:\"));

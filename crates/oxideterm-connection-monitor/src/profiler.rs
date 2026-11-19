@@ -832,7 +832,7 @@ where
     F: Future<Output = ()> + Send + 'static,
 {
     let _ = std::thread::Builder::new()
-        .name("oxideterm-connection-profiler".to_string())
+        .name("oxidelab-connection-profiler".to_string())
         .spawn(move || {
             let Ok(runtime) = tokio::runtime::Builder::new_current_thread()
                 .enable_all()

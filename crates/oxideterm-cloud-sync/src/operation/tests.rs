@@ -78,6 +78,7 @@ fn connection_sync_record(
         deleted: false,
         payload: Some(oxideterm_connections::ConnectionInfo {
             totp_credential_id: None,
+            account_credential_id: None,
             id: "conn-1".to_string(),
             name: "Production".to_string(),
             group: None,
@@ -148,7 +149,7 @@ fn remote_desktop_cloud_metadata_omits_device_local_credential_refs() {
 #[test]
 fn remote_desktop_apply_preserves_local_credentials_and_valid_gateway_refs() {
     let path = std::env::temp_dir().join(format!(
-        "oxideterm-cloud-sync-remote-desktop-{}.json",
+        "oxidelab-cloud-sync-remote-desktop-{}.json",
         uuid::Uuid::new_v4()
     ));
     let mut store_data = oxideterm_connections::ConnectionStoreData::default();

@@ -728,7 +728,7 @@ pub fn ai_orchestrator_system_prompt(tool_use_enabled: bool) -> String {
         "## OxideSens Runtime Rules",
         "",
         "### Identity / Scope",
-        "- You are OxideSens inside OxideTerm. Treat terminals, files, saved connections, and app surfaces as real user resources.",
+        "- You are OxideSens inside OxideLab. Treat terminals, files, saved connections, and app surfaces as real user resources.",
         "- Do not claim something was connected, executed, read, modified, or verified until current context or a successful tool result proves it.",
         "- Current UI tab is only a ranking hint. It is not a capability boundary.",
         "",
@@ -746,7 +746,7 @@ pub fn ai_orchestrator_system_prompt(tool_use_enabled: bool) -> String {
         "- For an observed ordinary menu or non-sensitive interactive step already covered by the user's request, continue using the supported input tools and observe the result. `tuiState: \"alternate_screen\"` identifies a TUI, not a credential request; `\"shell\"` does not prove readiness or command completion. If the prompt, required value, or authorization is unclear, obtain the missing information before answering it. Do not guess host-key trust decisions.",
         "",
         "### Execution Environment",
-        "- Local OS describes the machine running OxideTerm, not a remote execution target. Bind each command and path to the selected target's verified OS, shell, and working directory. If remote facts are unknown, inspect that target's metadata or use a suitable read-only probe before choosing platform-specific commands. Never assume remote Linux, macOS, Windows, or a particular shell from the local environment.",
+        "- Local OS describes the machine running OxideLab, not a remote execution target. Bind each command and path to the selected target's verified OS, shell, and working directory. If remote facts are unknown, inspect that target's metadata or use a suitable read-only probe before choosing platform-specific commands. Never assume remote Linux, macOS, Windows, or a particular shell from the local environment.",
         "- Active-tab and inferred-directory context are hints, not instructions to switch targets. Keep working on the user's selected target until the task or user requires a change.",
         "",
         "### Tool Use Rules",
@@ -805,7 +805,7 @@ pub const AI_CONTEXT_WARNING_PERCENT: f32 = 70.0;
 pub const AI_CONTEXT_DANGER_PERCENT: f32 = 85.0;
 pub const AI_COMPACTION_DEFAULT_CONTEXT_WINDOW: usize = crate::DEFAULT_CONTEXT_WINDOW as usize;
 pub const AI_USER_MEMORY_MAX_CHARS: usize = 16_000;
-pub const DEFAULT_AI_SYSTEM_PROMPT: &str = r#"Help with shell commands, scripts, terminal output, files, connections, and OxideTerm workflows.
+pub const DEFAULT_AI_SYSTEM_PROMPT: &str = r#"Help with shell commands, scripts, terminal output, files, connections, and OxideLab workflows.
 
 ## Response Style
 - Be concise, direct, and honest about what you can verify.

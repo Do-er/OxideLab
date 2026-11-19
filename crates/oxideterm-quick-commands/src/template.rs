@@ -308,7 +308,7 @@ fn resolve_template(
                 errors.push(QuickCommandTemplateError::UnterminatedToken);
             } else {
                 // Double braces belong to many command syntaxes; preserve them unless they
-                // explicitly opt into an OxideTerm parameter or context namespace.
+                // explicitly opt into an OxideLab parameter or context namespace.
                 push_expanded(&mut resolved, "{{", target)?;
                 push_expanded(&mut resolved, unfinished, target)?;
             }

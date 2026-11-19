@@ -174,7 +174,7 @@ pub fn inspection_mime_type(extension: &str, header: &[u8]) -> Option<&'static s
             )
         })
     {
-        return Some("application/x-oxideterm-binary");
+        return Some("application/x-oxidelab-binary");
     }
     None
 }

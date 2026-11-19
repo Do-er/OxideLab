@@ -556,7 +556,7 @@ fn build_update_http_client(
 ) -> Result<reqwest::Client, NativeUpdateError> {
     let builder = reqwest::Client::builder()
         .timeout(Duration::from_millis(DOWNLOAD_TIMEOUT_MS))
-        .user_agent(format!("OxideTerm/{}", env!("CARGO_PKG_VERSION")));
+        .user_agent(format!("OxideLab/{}", env!("CARGO_PKG_VERSION")));
     let builder = oxideterm_network_proxy::configure_update_http_client_builder(builder, proxy)
         .map_err(|error| NativeUpdateError::General(error.to_string()))?;
     builder.build().map_err(NativeUpdateError::Client)
@@ -731,7 +731,7 @@ fn package_file_name(package: &NativeUpdatePackage) -> String {
         .next()
         .map(|name| name.split(['?', '#']).next().unwrap_or(name))
         .filter(|name| !name.trim().is_empty())
-        .unwrap_or("oxideterm-update");
+        .unwrap_or("oxidelab-update");
     let sanitized = source_name
         .chars()
         .map(|ch| {
@@ -853,7 +853,7 @@ mod tests {
             body: None,
             date: None,
             platform_key: "darwin-aarch64".into(),
-            url: "https://example.invalid/download/OxideTerm Preview.dmg?token=secret".into(),
+            url: "https://example.invalid/download/OxideLab Preview.dmg?token=secret".into(),
             signature: None,
         });
 

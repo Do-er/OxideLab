@@ -334,7 +334,7 @@ fn is_dockerfile_name(file_name: &str) -> bool {
 
 fn fish_language() -> Language {
     // `tree-sitter-fish` still exposes the pre-LanguageFn Rust helper, so use
-    // the generated C symbol directly to stay on OxideTerm's tree-sitter ABI.
+    // the generated C symbol directly to stay on OxideLab's tree-sitter ABI.
     unsafe { Language::from_raw(tree_sitter_fish()) }
 }
 

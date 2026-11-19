@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Native Mermaid rendering with OxideTerm theme, caching, and GPUI integration.
+//! Native Mermaid rendering with OxideLab theme, caching, and GPUI integration.
 
 mod cache;
 mod renderer;

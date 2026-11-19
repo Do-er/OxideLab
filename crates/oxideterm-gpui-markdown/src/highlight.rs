@@ -30,7 +30,7 @@ fn theme_set() -> &'static ThemeSet {
 
 /// The syntect theme name used for highlighting.
 /// `base16-ocean.dark` is a sensible dark-mode default that pairs well
-/// with OxideTerm's dark terminal themes.
+/// with OxideLab's dark terminal themes.
 const SYNTECT_THEME: &str = "base16-ocean.dark";
 
 // ─── public API ─────────────────────────────────────────────────────────

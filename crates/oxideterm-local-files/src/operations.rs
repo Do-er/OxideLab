@@ -52,7 +52,7 @@ mod tests {
     #[test]
     fn recursive_copy_reports_completed_file_bytes() {
         let root = std::env::temp_dir().join(format!(
-            "oxideterm-copy-audit-{}-{}",
+            "oxidelab-copy-audit-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -82,7 +82,7 @@ mod tests {
     #[test]
     fn recursive_copy_reports_the_failed_object() {
         let missing = std::env::temp_dir().join(format!(
-            "oxideterm-copy-missing-{}-{}",
+            "oxidelab-copy-missing-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

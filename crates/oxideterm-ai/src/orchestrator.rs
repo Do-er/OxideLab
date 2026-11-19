@@ -63,7 +63,7 @@ pub fn orchestrator_tool_definitions() -> Vec<AiToolDefinition> {
     let mut tools = vec![
         tool(
             "list_targets",
-            "List available OxideTerm targets by view. Default view is connections for remote host discovery. Use view=all only for debugging or last-resort fallback.",
+            "List available OxideLab targets by view. Default view is connections for remote host discovery. Use view=all only for debugging or last-resort fallback.",
             json!({
                 "type": "object",
                 "properties": {
@@ -76,7 +76,7 @@ pub fn orchestrator_tool_definitions() -> Vec<AiToolDefinition> {
         ),
         tool(
             "select_target",
-            "Select exactly one target from OxideTerm targets. Use only when the user named a specific target. Do not use for broad list/discovery requests.",
+            "Select exactly one target from OxideLab targets. Use only when the user named a specific target. Do not use for broad list/discovery requests.",
             json!({
                 "type": "object",
                 "properties": {
@@ -192,7 +192,7 @@ pub fn orchestrator_tool_definitions() -> Vec<AiToolDefinition> {
         ),
         tool(
             "read_resource",
-            "Read a durable OxideTerm resource or a live remote resource. Settings and knowledge use resource_ref; remote files, directories, SFTP, and IDE files require a current handle_id.",
+            "Read a durable OxideLab resource or a live remote resource. Settings and knowledge use resource_ref; remote files, directories, SFTP, and IDE files require a current handle_id.",
             json!({
                 "type": "object",
                 "properties": {
@@ -250,7 +250,7 @@ pub fn orchestrator_tool_definitions() -> Vec<AiToolDefinition> {
         ),
         tool(
             "write_resource",
-            "Safely write a durable OxideTerm settings value or a live remote file. Settings use resource_ref; remote files and IDE files require a current handle_id.",
+            "Safely write a durable OxideLab settings value or a live remote file. Settings use resource_ref; remote files and IDE files require a current handle_id.",
             json!({
                 "type": "object",
                 "properties": {
@@ -318,7 +318,7 @@ pub fn orchestrator_tool_definitions() -> Vec<AiToolDefinition> {
         ),
         tool(
             "open_app_surface",
-            "Open an OxideTerm application surface by durable resource_ref, or focus one exact mounted surface by its current handle_id.",
+            "Open an OxideLab application surface by durable resource_ref, or focus one exact mounted surface by its current handle_id.",
             json!({
                 "type": "object",
                 "properties": {

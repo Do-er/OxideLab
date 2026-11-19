@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Convert browser-compatible HTML5 fragments into OxideTerm-owned markdown nodes.
+//! Convert browser-compatible HTML5 fragments into OxideLab-owned markdown nodes.
 //!
 //! Parsing and rendering are intentionally separate security boundaries. `scraper`
 //! provides HTML5 error recovery, while this module accepts only explicit native

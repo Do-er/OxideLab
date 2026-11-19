@@ -3,7 +3,7 @@
 
 //! Render a [`MarkdownDocument`] into a GPUI element tree.
 //!
-//! This module converts OxideTerm-owned markdown model nodes into composed
+//! This module converts OxideLab-owned markdown model nodes into composed
 //! GPUI `Div` / `AnyElement` trees using only semantic theme tokens.
 
 use std::{ops::Range, path::PathBuf, rc::Rc, sync::Arc};
@@ -3611,7 +3611,16 @@ mod tests {
     #[test]
     fn link_resolution_enforces_schemes_and_requires_a_base_for_relative_paths() {
         let opts = MarkdownOptions::default();
-        let source_opts = MarkdownOptions::default().with_source_path("/tmp/notes/readme.md");
+        // Resolve from a platform-absolute path: Url::from_directory_path rejects
+        // unix-style roots on Windows, so a "/tmp/..." source never forms a file base.
+        let notes_dir = std::env::temp_dir().join("markdown-link-resolution-notes");
+        let source_opts = MarkdownOptions::default().with_source_path(notes_dir.join("readme.md"));
+        let expected_relative = format!(
+            "{}#intro",
+            url::Url::from_file_path(std::env::temp_dir().join("guide one.md"))
+                .unwrap()
+                .to_string()
+        );
         for (url, options, directly_openable, resolved) in [
             (
                 "https://example.com",
@@ -3634,7 +3643,7 @@ mod tests {
                 "../guide%20one.md#intro",
                 &source_opts,
                 false,
-                Some("file:///tmp/guide%20one.md#intro"),
+                Some(expected_relative.as_str()),
             ),
         ] {
             assert_eq!(should_open_link(url, options), directly_openable, "{url}");

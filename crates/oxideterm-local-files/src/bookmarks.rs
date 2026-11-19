@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-pub const BOOKMARKS_FILENAME: &str = "oxideterm-file-bookmarks.json";
+pub const BOOKMARKS_FILENAME: &str = "oxidelab-file-bookmarks.json";
 
 pub fn default_file_manager_bookmarks_path() -> PathBuf {
     std::env::current_dir()

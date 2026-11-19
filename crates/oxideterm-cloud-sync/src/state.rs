@@ -470,7 +470,7 @@ mod tests {
         .unwrap();
         for bytes in [b"{ not valid json".to_vec(), future] {
             let path = std::env::temp_dir()
-                .join(format!("oxideterm-rejected-{}.json", uuid::Uuid::new_v4()));
+                .join(format!("oxidelab-rejected-{}.json", uuid::Uuid::new_v4()));
             fs::write(&path, &bytes).unwrap();
             let result = CloudSyncStateStore::load(&path);
             let preserved = fs::read(&path).unwrap();
@@ -483,7 +483,7 @@ mod tests {
     #[test]
     fn failed_atomic_cloud_state_replace_preserves_previous_file() {
         let path = std::env::temp_dir().join(format!(
-            "oxideterm-cloud-state-atomic-{}.json",
+            "oxidelab-cloud-state-atomic-{}.json",
             uuid::Uuid::new_v4()
         ));
         let mut store = CloudSyncStateStore::load(&path).unwrap();

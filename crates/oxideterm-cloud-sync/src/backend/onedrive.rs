@@ -532,7 +532,7 @@ fn onedrive_headers(secrets: &CloudSyncSecrets) -> Result<HeaderMap> {
         .context("missing_backend_token: Microsoft Graph access token is not configured")?;
     let mut headers = HeaderMap::new();
     insert_header(&mut headers, ACCEPT.as_str(), "application/json")?;
-    headers.insert(USER_AGENT, HeaderValue::from_static("OxideTerm"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("OxideLab"));
     insert_bearer_auth_header(&mut headers, token)?;
     Ok(headers)
 }

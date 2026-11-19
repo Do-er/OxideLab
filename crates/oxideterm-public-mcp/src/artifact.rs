@@ -87,7 +87,7 @@ impl ArtifactStore {
         // A failed temporary directory creation disables artifacts without weakening the
         // boundary to an in-memory or caller-selected path fallback.
         let root = tempfile::Builder::new()
-            .prefix("oxideterm-public-mcp-")
+            .prefix("oxidelab-public-mcp-")
             .tempdir()
             .ok();
         Self {

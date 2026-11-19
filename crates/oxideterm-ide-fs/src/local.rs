@@ -604,6 +604,6 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        std::env::temp_dir().join(format!("oxideterm-ide-fs-{unique}"))
+        std::env::temp_dir().join(format!("oxidelab-ide-fs-{unique}"))
     }
 }

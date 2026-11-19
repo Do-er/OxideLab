@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Lean Wasmtime runtime for OxideTerm native Wasm plugins.
+//! Lean Wasmtime runtime for OxideLab native Wasm plugins.
 //!
 //! This crate intentionally owns only the Wasm execution boundary: entry path
 //! validation, WASI setup, guest ABI calls, timeout interruption, and outbound

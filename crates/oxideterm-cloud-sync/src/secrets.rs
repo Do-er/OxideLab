@@ -13,7 +13,7 @@ use zeroize::Zeroizing;
 
 use crate::{AuthMode, BackendType, CLOUD_SYNC_PLUGIN_ID, secret_keys};
 
-const CLOUD_SYNC_KEYCHAIN_SERVICE: &str = "com.oxideterm.ai";
+const CLOUD_SYNC_KEYCHAIN_SERVICE: &str = "com.oxidelab.ai";
 const LEGACY_NATIVE_CLOUD_SYNC_KEYCHAIN_SERVICE: &str = "com.oxideterm.cloud-sync";
 static SECRET_SESSION_CACHE: OnceLock<Mutex<BTreeMap<String, Option<CloudSyncSecretValue>>>> =
     OnceLock::new();
@@ -87,7 +87,7 @@ impl CloudSyncKeychainSecretProvider {
         if let Some(value) = value.filter(|value| !value.is_empty()) {
             self.store_current_secret(key, value)?;
             if !portable_keychain_enabled()
-                .with_context(|| "failed to determine OxideTerm portable mode")?
+                .with_context(|| "failed to determine OxideLab portable mode")?
             {
                 self.delete_legacy_secret(key)?;
             }
@@ -96,7 +96,7 @@ impl CloudSyncKeychainSecretProvider {
         } else {
             self.delete_current_secret(key)?;
             if !portable_keychain_enabled()
-                .with_context(|| "failed to determine OxideTerm portable mode")?
+                .with_context(|| "failed to determine OxideLab portable mode")?
             {
                 self.delete_legacy_secret(key)?;
             }
@@ -125,7 +125,7 @@ impl CloudSyncKeychainSecretProvider {
     fn store_current_secret(&self, key: &str, value: &str) -> Result<()> {
         let account = self.account(key);
         if portable_keychain_enabled()
-            .with_context(|| "failed to determine OxideTerm portable mode")?
+            .with_context(|| "failed to determine OxideLab portable mode")?
         {
             return portable_keystore::store_secret(&self.service, &account, value).with_context(
                 || format!("failed to store cloud sync secret {key} in portable keystore"),
@@ -172,7 +172,7 @@ impl CloudSyncKeychainSecretProvider {
     fn delete_current_secret(&self, key: &str) -> Result<()> {
         let account = self.account(key);
         if portable_keychain_enabled()
-            .with_context(|| "failed to determine OxideTerm portable mode")?
+            .with_context(|| "failed to determine OxideLab portable mode")?
         {
             return portable_keystore::delete_secret(&self.service, &account).with_context(|| {
                 format!("failed to delete cloud sync secret {key} from portable keystore")

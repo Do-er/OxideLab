@@ -666,15 +666,15 @@ mod tests {
                 "JSON rows",
                 concat!(
                     "===DOCKER===\n",
-                    "PS\t{\"ID\":\"abc123def4567890\",\"Names\":\"oxideterm-cloud-sync\",\"Image\":\"ghcr.io/analyse-decircuit/oxideterm-cloud-sync:latest\",\"State\":\"running\",\"Status\":\"Up 7 weeks\",\"Ports\":\"0.0.0.0:8730->8730/tcp\"}\n",
+                    "PS\t{\"ID\":\"abc123def4567890\",\"Names\":\"oxidelab-cloud-sync\",\"Image\":\"ghcr.io/analyse-decircuit/oxidelab-cloud-sync:latest\",\"State\":\"running\",\"Status\":\"Up 7 weeks\",\"Ports\":\"0.0.0.0:8730->8730/tcp\"}\n",
                     "PS\t{\"ID\":\"fff111eee2223334\",\"Names\":\"postgres-data\",\"Image\":\"postgres:16\",\"State\":\"exited\",\"Status\":\"Exited (0) 3 months ago\",\"Ports\":\"\"}\n",
                     "===DOCKER_END===",
                 ),
                 vec![
                     (
                         "abc123def4567890",
-                        "oxideterm-cloud-sync",
-                        "ghcr.io/analyse-decircuit/oxideterm-cloud-sync:latest",
+                        "oxidelab-cloud-sync",
+                        "ghcr.io/analyse-decircuit/oxidelab-cloud-sync:latest",
                         "running",
                         "Up 7 weeks",
                         Some("0.0.0.0:8730->8730/tcp"),
@@ -694,13 +694,13 @@ mod tests {
                 concat!(
                     "===DOCKER===\n",
                     "PS\t{\"ID\":\"abc123def4567890\",\"Names\":\"...\",\"Image\":\"...\",\"State\":\"running\",\"Status\":\"Up 7 weeks\",\"Ports\":\"127.0.0.1:2375->2375/tcp\"}\n",
-                    "INSPECT\t{\"Id\":\"abc123def4567890\",\"Name\":\"/oxideterm-cloud-sync\",\"Config\":{\"Image\":\"ghcr.io/analyse-decircuit/oxideterm-cloud-sync:latest\"},\"State\":{\"Status\":\"paused\"}}\n",
+                    "INSPECT\t{\"Id\":\"abc123def4567890\",\"Name\":\"/oxidelab-cloud-sync\",\"Config\":{\"Image\":\"ghcr.io/analyse-decircuit/oxidelab-cloud-sync:latest\"},\"State\":{\"Status\":\"paused\"}}\n",
                     "===DOCKER_END===",
                 ),
                 vec![(
                     "abc123def4567890",
-                    "oxideterm-cloud-sync",
-                    "ghcr.io/analyse-decircuit/oxideterm-cloud-sync:latest",
+                    "oxidelab-cloud-sync",
+                    "ghcr.io/analyse-decircuit/oxidelab-cloud-sync:latest",
                     "paused",
                     "Up 7 weeks",
                     Some("127.0.0.1:2375->2375/tcp"),

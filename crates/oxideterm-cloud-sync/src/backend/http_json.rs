@@ -48,12 +48,12 @@ impl CloudSyncBackend {
         );
         let mut headers = self.http_json_auth_headers(config, secrets)?;
         headers.insert(CONTENT_TYPE, HeaderValue::from_static(OXIDE_CONTENT_TYPE));
-        insert_header(&mut headers, "X-OxideTerm-Revision", &payload.revision)?;
-        insert_header(&mut headers, "X-OxideTerm-Device-Id", &payload.device_id)?;
+        insert_header(&mut headers, "X-OxideLab-Revision", &payload.revision)?;
+        insert_header(&mut headers, "X-OxideLab-Device-Id", &payload.device_id)?;
         if let Some(section_revisions) = payload.section_revisions.as_ref() {
             insert_header(
                 &mut headers,
-                "X-OxideTerm-Section-Revisions",
+                "X-OxideLab-Section-Revisions",
                 &serde_json::to_string(section_revisions)?,
             )?;
         }

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! UI-independent editor core for OxideTerm.
+//! UI-independent editor core for OxideLab.
 //!
 //! This crate owns text, cursor, selection, undo/redo, search, and other
 //! byte-offset editor semantics. GPUI layers should adapt these primitives to

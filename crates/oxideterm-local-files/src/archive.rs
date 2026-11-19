@@ -258,7 +258,7 @@ mod tests {
 
     fn temp_root(name: &str) -> std::path::PathBuf {
         std::env::temp_dir().join(format!(
-            "oxideterm-{name}-{}-{}",
+            "oxidelab-{name}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

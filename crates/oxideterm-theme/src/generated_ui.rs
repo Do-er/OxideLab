@@ -1,4 +1,4 @@
-// Built-in UI overrides initially ported from OxideTerm Tauri theme CSS variables.
+// Built-in UI overrides initially ported from OxideLab Tauri theme CSS variables.
 // New palettes live here when terminal colors alone cannot produce accessible light surfaces.
 
 pub(crate) fn apply_builtin_ui_overrides(theme_id: &str, mut ui: AppUiColors) -> AppUiColors {

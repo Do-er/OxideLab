@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Core IDE state for OxideTerm's native editor surface.
+//! Core IDE state for OxideLab's native editor surface.
 //!
 //! This crate owns project, tab, dirty-buffer, close-confirmation, and
 //! snapshot/restore state and plugin-facing IDE snapshot DTOs. It intentionally

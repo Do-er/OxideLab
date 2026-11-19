@@ -75,7 +75,7 @@ fn queue_hnsw_rebuild(store: RagStore) {
     }
 
     if let Err(error) = std::thread::Builder::new()
-        .name("oxideterm-rag-hnsw-rebuild".to_string())
+        .name("oxidelab-rag-hnsw-rebuild".to_string())
         .spawn(move || {
             loop {
                 if let Err(error) = store.rebuild_hnsw_index() {

@@ -5,7 +5,7 @@
 //!
 //! This ports Tauri's `agentService`/`node_agent_*` boundary into the native
 //! file-system layer: the IDE asks for files and directories, this adapter uses
-//! a remote OxideTerm agent when one is ready, and falls back to SFTP for the
+//! a remote OxideLab agent when one is ready, and falls back to SFTP for the
 //! operations that Tauri also treats as SFTP-compatible.
 
 use std::{
@@ -40,9 +40,9 @@ use tracing::{debug, info, warn};
 
 use crate::NodeSftpIdeFileSystem;
 
-const AGENT_REMOTE_DIR: &str = ".oxideterm";
-const AGENT_BINARY_NAME: &str = "oxideterm-agent";
-const AGENT_REMOTE_PATH: &str = "~/.oxideterm/oxideterm-agent";
+const AGENT_REMOTE_DIR: &str = ".oxidelab";
+const AGENT_BINARY_NAME: &str = "oxidelab-agent";
+const AGENT_REMOTE_PATH: &str = "~/.oxidelab/oxidelab-agent";
 const AGENT_RPC_TIMEOUT_SECS: u64 = 30;
 const AGENT_COMPRESS_THRESHOLD: usize = 32 * 1024;
 const LEGACY_AGENT_COMPATIBILITY_VERSION: u32 = 1;

@@ -10,7 +10,7 @@ use gpui::{
 };
 use oxideterm_theme::UiMetrics;
 
-const OXIDETERM_APP_ID: &str = "com.oxideterm.app";
+const OXIDELAB_APP_ID: &str = "com.oxidelab.app";
 
 /// Constructs the native GPUI application through the vendored platform boundary.
 pub fn application() -> gpui::Application {
@@ -58,7 +58,7 @@ pub fn window_options_with_bounds(window_bounds: WindowBounds) -> WindowOptions 
         )),
         // Linux compositors use app_id to associate runtime windows with the
         // desktop file and package icon generated from the bundle metadata.
-        app_id: Some(OXIDETERM_APP_ID.to_string()),
+        app_id: Some(OXIDELAB_APP_ID.to_string()),
         ..Default::default()
     }
 }

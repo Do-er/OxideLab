@@ -21,8 +21,8 @@ use crate::{
 };
 
 pub const PORTABLE_UPDATE_MANIFEST_FILENAME: &str = "portable-update.json";
-pub const PORTABLE_UPDATE_STAGING_DIR: &str = ".oxideterm-update-staging";
-pub const PORTABLE_UPDATE_BACKUP_DIR: &str = ".oxideterm-update-backup";
+pub const PORTABLE_UPDATE_STAGING_DIR: &str = ".oxidelab-update-staging";
+pub const PORTABLE_UPDATE_BACKUP_DIR: &str = ".oxidelab-update-backup";
 pub const PORTABLE_UPDATE_HELPER_SUBCOMMAND: &str = "portable";
 const PORTABLE_UPDATE_MANIFEST_FORMAT: u32 = 1;
 
@@ -991,10 +991,10 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let root = temp.path().join("portable-root");
         fs::create_dir(&root).unwrap();
-        let package_path = temp.path().join("OxideTerm_portable.zip");
+        let package_path = temp.path().join("OxideLab_portable.zip");
         let file = fs::File::create(&package_path).unwrap();
         let mut archive = zip::ZipWriter::new(file);
-        let package_root = "OxideTerm_portable";
+        let package_root = "OxideLab_portable";
         let update_manifest = manifest();
         write_zip_entry(
             &mut archive,

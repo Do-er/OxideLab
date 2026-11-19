@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Style helpers that map OxideTerm theme tokens to GPUI text / element styling.
+//! Style helpers that map OxideLab theme tokens to GPUI text / element styling.
 
 use gpui::{AbsoluteLength, Font, FontStyle, FontWeight, Hsla, Rgba, SharedString};
 use oxideterm_theme::ThemeTokens;

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! GPUI text editor surface for OxideTerm's native IDE path.
+//! GPUI text editor surface for OxideLab's native IDE path.
 //!
 //! This crate deliberately starts with virtualized plain-text rendering only.
 //! Syntax, project ownership, and remote save semantics belong to later crates

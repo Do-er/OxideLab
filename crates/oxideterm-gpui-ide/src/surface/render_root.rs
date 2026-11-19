@@ -19,7 +19,7 @@ impl Render for IdeSurface {
         let theme = self.tokens.ui;
         let font_family = tauri_ui_font_family(self.tokens.metrics.font_family);
         let mut root = div()
-            .id("oxideterm-gpui-ide")
+            .id("oxidelab-gpui-ide")
             .relative()
             .size_full()
             .overflow_hidden()

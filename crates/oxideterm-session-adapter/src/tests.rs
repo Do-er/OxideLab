@@ -28,7 +28,7 @@ use crate::{
 
 fn temp_connection_store(name: &str) -> (ConnectionStore, std::path::PathBuf) {
     let path = std::env::temp_dir().join(format!(
-        "oxideterm-session-adapter-{name}-{}-connections.json",
+        "oxidelab-session-adapter-{name}-{}-connections.json",
         std::process::id()
     ));
     let _ = std::fs::remove_file(&path);
@@ -74,7 +74,7 @@ fn missing_referenced_password_uses_runtime_prompt_with_kerberos_and_proxy_hops_
     let password = SavedAuth::Password {
         empty_password: false,
         keychain_id: Some(format!(
-            "oxideterm-missing-password-regression-{}",
+            "oxidelab-missing-password-regression-{}",
             std::process::id()
         )),
         plaintext_password: None,
@@ -86,6 +86,7 @@ fn missing_referenced_password_uses_runtime_prompt_with_kerberos_and_proxy_hops_
     });
     connection.proxy_chain.push(SavedProxyHop {
         totp_credential_id: None,
+        account_credential_id: None,
         host: "jump.example.com".into(),
         port: 2222,
         username: "jump-user".into(),
@@ -208,6 +209,7 @@ fn manual_proxy_command_uses_runtime_secret_and_overrides_other_routes() {
     });
     connection.proxy_chain.push(SavedProxyHop {
         totp_credential_id: None,
+        account_credential_id: None,
         host: "unused-jump.example.com".to_string(),
         port: 22,
         username: "jump".to_string(),
@@ -295,6 +297,7 @@ fn saved_proxy_chain_maps_to_shared_and_independent_runtime_configs() {
     connection.options.totp_credential_id = Some("target-mfa".into());
     connection.proxy_chain = vec![SavedProxyHop {
         totp_credential_id: Some("jump-mfa".into()),
+        account_credential_id: None,
         host: "jump.example.com".to_string(),
         port: 2222,
         username: "ops".to_string(),
@@ -436,8 +439,8 @@ fn saved_upstream_proxy_policy_overrides_global_proxy_and_hydrates_custom_secret
 
 #[test]
 fn global_upstream_proxy_overrides_environment_and_requires_saved_credentials() {
-    let _socks_env = EnvVarGuard::set("OXIDETERM_SOCKS5_PROXY", "env-proxy.local:1080");
-    let _http_env = EnvVarGuard::set("OXIDETERM_HTTP_PROXY", "http://env-http.local:8080");
+    let _socks_env = EnvVarGuard::set("OXIDELAB_SOCKS5_PROXY", "env-proxy.local:1080");
+    let _http_env = EnvVarGuard::set("OXIDELAB_HTTP_PROXY", "http://env-http.local:8080");
     let (store, path) = temp_connection_store("global-proxy-priority");
     let mut settings = PersistedSettings::default();
     settings.network.upstream_proxy = Some(SettingsUpstreamProxyConfig {

@@ -17,7 +17,7 @@ pub enum SkillScope {
 #[serde(rename_all = "snake_case")]
 pub enum SkillOrigin {
     AgentStandard,
-    OxideTerm,
+    OxideLab,
     ClaudeCompatible,
     CopilotCompatible,
     OpenCodeCompatible,

@@ -1106,7 +1106,7 @@ mod tests {
 
     fn temp_settings_path(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("oxideterm-quick-commands-{name}-{}", now_ms()));
+            std::env::temp_dir().join(format!("oxidelab-quick-commands-{name}-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         dir.join("settings.json")
     }

@@ -37,13 +37,13 @@ mod tests {
     fn installed_agent_without_private_save_creation_requires_update() {
         for compatibility_version in [4, 5] {
             assert_eq!(
-                parse_remote_version_output(&format!("oxideterm-agent 2.2.4 compat {compatibility_version}")),
+                parse_remote_version_output(&format!("oxidelab-agent 2.2.4 compat {compatibility_version}")),
                 RemoteAgentInstallState::Incompatible(RemoteAgentVersionInfo {
                     version: "2.2.4".into(), compatibility_version,
                 })
             );
         }
-        assert_eq!(parse_remote_version_output("oxideterm-agent 2.2.4 compat 6"), RemoteAgentInstallState::Current);
+        assert_eq!(parse_remote_version_output("oxidelab-agent 2.2.4 compat 6"), RemoteAgentInstallState::Current);
     }
 
     #[test]
@@ -142,7 +142,7 @@ mod tests {
         std::fs::create_dir_all(&directory).unwrap();
         let agent_bytes = b"\x7fELF bundled remote agent";
         for architecture in ["aarch64", "x86_64"] {
-            let binary_name = format!("oxideterm-agent-{architecture}-linux-musl");
+            let binary_name = format!("oxidelab-agent-{architecture}-linux-musl");
             let encoded_path = directory.as_path().join(format!("{binary_name}.b64"));
             std::fs::write(
                 &encoded_path,
@@ -206,7 +206,7 @@ mod tests {
         );
         assert_eq!(
             agent_error_log_label(&AgentError::Ssh(
-                "connection failed while running ~/.oxideterm/oxideterm-agent".to_string(),
+                "connection failed while running ~/.oxidelab/oxidelab-agent".to_string(),
             )),
             "ssh"
         );
@@ -218,7 +218,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "oxideterm-agent-{label}-{}-{unique}",
+            "oxidelab-agent-{label}-{}-{unique}",
             std::process::id()
         ))
     }

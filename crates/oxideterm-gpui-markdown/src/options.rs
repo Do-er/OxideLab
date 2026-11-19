@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 use oxideterm_theme::{ThemeTokens, UiMetrics};
 
-pub const MARKDOWN_IMAGE_CACHE_ID: &str = "oxideterm-markdown-images";
+pub const MARKDOWN_IMAGE_CACHE_ID: &str = "oxidelab-markdown-images";
 
 /// Options that control markdown rendering behaviour.
 #[derive(Clone, Debug)]

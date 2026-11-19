@@ -3,7 +3,7 @@
 
 //! # oxideterm-gpui-markdown
 //!
-//! A basic GPUI markdown rendering component for OxideTerm.
+//! A basic GPUI markdown rendering component for OxideLab.
 //!
 //! ## Usage
 //!
@@ -116,7 +116,7 @@ impl std::ops::Deref for MarkdownVirtualListScrollHandle {
 /// Parse and render markdown source into a GPUI element tree.
 ///
 /// This is the primary entry point.  It parses the source into an
-/// OxideTerm-owned model and immediately renders it using the given
+/// OxideLab-owned model and immediately renders it using the given
 /// theme tokens and default options.
 pub fn markdown(tokens: &ThemeTokens, source: &str) -> AnyElement {
     markdown_with_options(tokens, source, &MarkdownOptions::from_theme(tokens))

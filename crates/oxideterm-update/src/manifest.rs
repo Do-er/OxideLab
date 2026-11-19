@@ -155,13 +155,13 @@ mod tests {
             (
                 "macos",
                 "aarch64",
-                "/apps/OxideTerm.app/Contents/MacOS/oxideterm-native",
+                "/apps/OxideLab.app/Contents/MacOS/oxideterm-native",
                 "https://example.invalid/mac-app.zip",
             ),
             (
                 "linux",
                 "x86_64",
-                "/apps/OxideTerm.AppImage",
+                "/apps/OxideLab.AppImage",
                 "https://example.invalid/linux.AppImage",
             ),
             (

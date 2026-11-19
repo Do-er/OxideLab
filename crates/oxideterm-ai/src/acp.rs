@@ -502,7 +502,7 @@ pub fn acp_launch_model_hint(args: &[String]) -> Option<AcpLaunchModelHint> {
     None
 }
 
-/// Detects OxideTerm's native Claude Code adapter, which learns the resolved model from the
+/// Detects OxideLab's native Claude Code adapter, which learns the resolved model from the
 /// first prompt's stream instead of during ACP session creation.
 pub fn acp_model_report_is_deferred_until_first_prompt(args: &[String]) -> bool {
     args.windows(2).any(|arguments| {
@@ -510,7 +510,7 @@ pub fn acp_model_report_is_deferred_until_first_prompt(args: &[String]) -> bool 
     })
 }
 
-/// Detects OxideTerm's native Codex adapter, which publishes its model choices during
+/// Detects OxideLab's native Codex adapter, which publishes its model choices during
 /// ACP session creation without requiring a user prompt.
 pub fn acp_model_report_is_available_during_session_start(args: &[String]) -> bool {
     args.windows(2).any(|arguments| {
@@ -1212,7 +1212,7 @@ pub fn build_acp_initialize_request(
                     .write_text_file(policy.fs_write_text_file))
                 .terminal(policy.terminal),
         )
-        .client_info(Implementation::new("OxideTerm", client_version))
+        .client_info(Implementation::new("OxideLab", client_version))
 }
 
 fn ensure_acp_v1_initialize_response(
@@ -1221,7 +1221,7 @@ fn ensure_acp_v1_initialize_response(
     if response.protocol_version == ProtocolVersion::V1 {
         Ok(response)
     } else {
-        // OxideTerm's ACP client surface is defined for v1; continuing after a
+        // OxideLab's ACP client surface is defined for v1; continuing after a
         // pre-release or draft response would make capability checks ambiguous.
         Err(agent_client_protocol::util::internal_error(
             "ACP agent returned unsupported protocol version",
@@ -1236,7 +1236,7 @@ pub async fn initialize_acp_agent(
 ) -> Result<InitializeResponse, agent_client_protocol::Error> {
     Client
         .builder()
-        .name("OxideTerm")
+        .name("OxideLab")
         .connect_with(transport, async move |connection: ConnectionTo<Agent>| {
             let response = connection
                 .send_request(build_acp_initialize_request(&client_version, &policy))
@@ -1255,7 +1255,7 @@ pub async fn with_acp_agent_runtime<R>(
 ) -> Result<R, agent_client_protocol::Error> {
     Client
         .builder()
-        .name("OxideTerm")
+        .name("OxideLab")
         .connect_with(transport, async move |connection: ConnectionTo<Agent>| {
             let initialize_response = connection
                 .send_request(build_acp_initialize_request(&client_version, &policy))
@@ -1312,7 +1312,7 @@ pub async fn with_acp_agent_runtime_events<R>(
 
     Client
         .builder()
-        .name("OxideTerm")
+        .name("OxideLab")
         .on_receive_request(
             async move |request: CursorAskQuestion, responder, _connection| {
                 let response = forward_client_request(&cursor_question_tx, |response_tx| {
@@ -2346,7 +2346,7 @@ mod tests {
                     assert!(request.client_capabilities.elicitation.is_none());
                     assert_eq!(
                         request.client_info.as_ref().map(|info| info.name.as_str()),
-                        Some("OxideTerm")
+                        Some("OxideLab")
                     );
                     let capabilities = AgentCapabilities::new()
                         .auth(AgentAuthCapabilities::new().logout(LogoutCapabilities::new()))

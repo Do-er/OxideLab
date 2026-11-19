@@ -155,7 +155,7 @@ mod tests {
         assert_eq!(
             InstallFlavor::infer(
                 &PlatformTarget::new("windows", "x86_64"),
-                Path::new("C:/Users/me/OxideTerm/oxideterm-native.exe"),
+                Path::new("C:/Users/me/OxideLab/oxideterm-native.exe"),
                 false,
             ),
             InstallFlavor::WindowsNsis
@@ -163,7 +163,7 @@ mod tests {
         assert_eq!(
             InstallFlavor::infer(
                 &PlatformTarget::new("linux", "x86_64"),
-                Path::new("/tmp/OxideTerm.AppImage"),
+                Path::new("/tmp/OxideLab.AppImage"),
                 false,
             ),
             InstallFlavor::LinuxAppImage

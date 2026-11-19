@@ -857,10 +857,10 @@ fn plugin_package_install_supports_flat_nested_conflict_and_updates() {
 
     let nested_package = plugin_package(&[
         (
-            "oxideterm-demo-main/plugin.json",
+            "oxidelab-demo-main/plugin.json",
             manifest_json("com.example.demo", "1.1.0"),
         ),
-        ("oxideterm-demo-main/bin/plugin", "#!/bin/sh".to_string()),
+        ("oxidelab-demo-main/bin/plugin", "#!/bin/sh".to_string()),
     ]);
     let replaced = NativePluginRegistry::install_plugin_package_from_bytes(
         &settings_path,
@@ -3109,5 +3109,5 @@ pub(super) fn unique_temp_dir(label: &str) -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_nanos();
-    std::env::temp_dir().join(format!("oxideterm-{label}-{nanos}"))
+    std::env::temp_dir().join(format!("oxidelab-{label}-{nanos}"))
 }

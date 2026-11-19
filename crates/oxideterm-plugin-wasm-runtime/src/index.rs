@@ -212,7 +212,7 @@ mod tests {
 
     fn sample_descriptor() -> WasmRuntimeDescriptor {
         serde_json::from_value(serde_json::json!({
-            "name": "oxideterm-wasm-runtime",
+            "name": "oxidelab-wasm-runtime",
             "version": "0.1.0",
             "runtimeChannel": "stable",
             "supports": {

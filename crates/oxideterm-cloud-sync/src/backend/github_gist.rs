@@ -18,7 +18,7 @@ impl CloudSyncBackend {
     ) -> Result<String> {
         let namespace = gist_namespace(config);
         let filename = format!(
-            "oxideterm-{}-readme.txt",
+            "oxidelab-{}-readme.txt",
             gist_safe_filename_component(&namespace)
         );
         let response = execute_cloud_request(
@@ -27,11 +27,11 @@ impl CloudSyncBackend {
                 .headers(gist_headers(secrets)?)
                 .header(CONTENT_TYPE, "application/json")
                 .body(serde_json::to_vec(&json!({
-                    "description": format!("OxideTerm Cloud Sync ({namespace})"),
+                    "description": format!("OxideLab Cloud Sync ({namespace})"),
                     "public": false,
                     "files": {
                         filename: {
-                            "content": "OxideTerm Cloud Sync storage. Do not edit these files manually.\n",
+                            "content": "OxideLab Cloud Sync storage. Do not edit these files manually.\n",
                         }
                     }
                 }))?),
@@ -438,7 +438,7 @@ fn gist_v3_prefix(config: &CloudSyncSettings) -> String {
 
 fn gist_filename_prefix(config: &CloudSyncSettings) -> String {
     let namespace = gist_safe_filename_component(&gist_namespace(config));
-    format!("oxideterm-{namespace}")
+    format!("oxidelab-{namespace}")
 }
 
 fn gist_safe_filename_component(value: &str) -> String {
@@ -470,7 +470,7 @@ fn decode_gist_object_content(content: &str) -> Result<Vec<u8>> {
     if trimmed.starts_with('{') || trimmed.starts_with('[') {
         return Ok(content.as_bytes().to_vec());
     }
-    bail!("gist_invalid_encoding: GitHub Gist object is not an OxideTerm encoded file")
+    bail!("gist_invalid_encoding: GitHub Gist object is not an OxideLab encoded file")
 }
 
 fn parse_gist_id(config: &CloudSyncSettings) -> Result<String> {
@@ -522,7 +522,7 @@ fn gist_headers(secrets: &CloudSyncSecrets) -> Result<HeaderMap> {
     let mut headers = HeaderMap::new();
     insert_header(&mut headers, ACCEPT.as_str(), "application/vnd.github+json")?;
     insert_header(&mut headers, "X-GitHub-Api-Version", GITHUB_API_VERSION)?;
-    headers.insert(USER_AGENT, HeaderValue::from_static("OxideTerm"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("OxideLab"));
     insert_bearer_auth_header(&mut headers, token)?;
     Ok(headers)
 }
@@ -643,7 +643,7 @@ mod tests {
 
         assert_eq!(
             gist_object_filename(&first, "latest.json"),
-            "oxideterm-team-default-latest.json-b8308695435769ec1730cee70510131863d6e7c6e246c2db04ef0c03ae76cb97.b64"
+            "oxidelab-team-default-latest.json-b8308695435769ec1730cee70510131863d6e7c6e246c2db04ef0c03ae76cb97.b64"
         );
         assert_ne!(
             gist_object_filename(&first, "latest.json"),

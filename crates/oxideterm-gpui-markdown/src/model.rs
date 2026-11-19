@@ -1,10 +1,10 @@
 // Copyright (C) 2026 AnalyseDeCircuit
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! OxideTerm-owned markdown model.
+//! OxideLab-owned markdown model.
 //!
 //! These types are the **only** intermediate representation between
-//! `pulldown-cmark` events and GPUI rendering.  Keeping them OxideTerm-owned
+//! `pulldown-cmark` events and GPUI rendering.  Keeping them OxideLab-owned
 //! means neither the parser nor the renderer depend on each other's types.
 
 /// A parsed markdown document — an ordered list of block-level nodes.

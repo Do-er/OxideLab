@@ -20,7 +20,7 @@ fn unique_temp_dir(name: &str) -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis();
-    std::env::temp_dir().join(format!("oxideterm-wasm-runtime-{name}-{millis}"))
+    std::env::temp_dir().join(format!("oxidelab-wasm-runtime-{name}-{millis}"))
 }
 
 fn sample_manifest() -> oxideterm_plugin_manifest::NativePluginManifest {

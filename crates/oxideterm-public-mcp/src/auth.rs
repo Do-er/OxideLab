@@ -506,7 +506,7 @@ mod tests {
     #[test]
     fn persisted_client_registry_authenticates_without_storing_cleartext_credential() {
         let registry_path = std::env::temp_dir().join(format!(
-            "oxideterm-public-mcp-clients-{}.json",
+            "oxidelab-public-mcp-clients-{}.json",
             Uuid::new_v4().simple()
         ));
         let registry = ClientRegistry::open(&registry_path).expect("open empty registry");

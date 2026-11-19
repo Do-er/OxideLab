@@ -346,7 +346,7 @@ fn write_script(method: &str, params: &serde_json::Value) -> Result<String, Agen
 if [ -L "$p" ]; then {symlink}; fi
 {check}
 [ ! -d "$p" ] || exit 1
-tmp=$(mktemp -- "$(dirname -- "$p")/.oxideterm-write.XXXXXXXX")
+tmp=$(mktemp -- "$(dirname -- "$p")/.oxidelab-write.XXXXXXXX")
 trap 'rm -f -- "$tmp"' EXIT HUP INT TERM
 printf '%s' {content} | base64 -d > "$tmp"
 {install}
@@ -369,7 +369,7 @@ fn terminal_bootstrap(token: &str, pty: bool) -> String {
 printf '\036{token}:0\n\n'
 while IFS= read -r request; do
  [ "$request" != '!quit' ] || exit 0
- [ "$request" != '#oxideterm-cancel-{token}' ] || exit 1
+ [ "$request" != '#oxidelab-cancel-{token}' ] || exit 1
  printf '%s' "$request" | base64 -d > "$oxide_dir/request" || exit 1
  /bin/sh "$oxide_dir/request" > "$oxide_dir/output" 2>/dev/null
  status=$?
@@ -657,7 +657,7 @@ PATH="$root/bin:$PATH" timeout 3 /bin/sh "$root/request"
     fn linux_file_commands_preserve_targets_permissions_and_conflicts() {
         // macOS uses an isolated Linux container so the actual supported GNU commands run.
         let root = format!(
-            "/tmp/oxideterm-command-contract-{}-{}",
+            "/tmp/oxidelab-command-contract-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -807,7 +807,7 @@ for case in p['cases']:
   send(('/bin/sh -c '+shlex.quote(case['script'])+'\n').encode())
   if case['cancel']:
    until(('\x1e'+p['token']+':0\n\n').encode())
-   send(('\n#oxideterm-cancel-'+p['token']+'\n').encode())
+   send(('\n#oxidelab-cancel-'+p['token']+'\n').encode())
   until(('\x1e'+p['token']+':RESTORED\x1f').encode())
   assert termios.tcgetattr(master)==baseline, case['name']
   send(b"printf '\\036PARENT_OK:%s\\037' \"$PWD\"\n")
@@ -837,7 +837,7 @@ print('original shell usable after every failed startup')
     )]
     fn terminal_command_loop_preserves_cwd_bytes_and_restores_tty() {
         let root = format!(
-            "/tmp/oxideterm-pty-contract-{}-{}",
+            "/tmp/oxidelab-pty-contract-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

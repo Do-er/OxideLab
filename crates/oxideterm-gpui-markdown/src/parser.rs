@@ -29,7 +29,7 @@ fn markdown_options(enable_smart_punctuation: bool) -> Options {
     options
 }
 
-/// Parse a markdown string into an OxideTerm-owned [`MarkdownDocument`].
+/// Parse a markdown string into an OxideLab-owned [`MarkdownDocument`].
 pub fn parse(source: &str) -> MarkdownDocument {
     parse_with_smart_punctuation(source, true)
 }

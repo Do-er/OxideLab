@@ -180,7 +180,7 @@ mod tests {
     fn run_provider_script(tool: &str, fixture: &str, script: &str) -> (String, String) {
         use std::os::unix::fs::PermissionsExt;
         let directory = std::env::temp_dir().join(format!(
-            "oxideterm-{tool}-{}-{}",
+            "oxidelab-{tool}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

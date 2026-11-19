@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use std::collections::{HashMap, HashSet};
@@ -682,7 +682,7 @@ mod tests {
     fn shell_probe_records_preserve_identity_status_and_repository_absence() {
         for (output, root, branch, upstream, ahead, operation, paths) in [
             (
-                "noise\nOXIDETERM_GIT_PROBE_V1\0state\0repo\0root\0/tmp/Oxide Term\0branch\0feat/git\0status\0# branch.upstream origin/feat\n# branch.ab +1 -0\n? scratch.txt\n\0operation\0merge\0",
+                "noise\nOXIDELAB_GIT_PROBE_V1\0state\0repo\0root\0/tmp/Oxide Term\0branch\0feat/git\0status\0# branch.upstream origin/feat\n# branch.ab +1 -0\n? scratch.txt\n\0operation\0merge\0",
                 "/tmp/Oxide Term",
                 "feat/git",
                 Some("origin/feat"),
@@ -691,7 +691,7 @@ mod tests {
                 vec!["scratch.txt"],
             ),
             (
-                "OXIDETERM_GIT_PROBE_V1\0state\0repo\0root\0/repo\0branch\0main\0operation\0rebase\0",
+                "OXIDELAB_GIT_PROBE_V1\0state\0repo\0root\0/repo\0branch\0main\0operation\0rebase\0",
                 "/repo",
                 "main",
                 None,
@@ -728,7 +728,7 @@ mod tests {
             assert_eq!(snapshot.status.is_dirty(), !paths.is_empty(), "{output:?}");
         }
         assert_eq!(
-            parse_shell_probe_output("OXIDETERM_GIT_PROBE_V1\0state\0not_repo\0"),
+            parse_shell_probe_output("OXIDELAB_GIT_PROBE_V1\0state\0not_repo\0"),
             GitProbeOutcome::NotRepository,
         );
     }
@@ -785,14 +785,14 @@ mod tests {
     fn shell_branch_records_preserve_current_branch_and_filter_admin_worktrees() {
         for (output, expected) in [
             (
-                "noise\nOXIDETERM_GIT_BRANCH_LIST_V1\0state\0ok\0branch\0main\0current\x001\0branch\0feature/x\0current\x000\0worktree\0feature/x\0path\0/tmp/feature-x\0",
+                "noise\nOXIDELAB_GIT_BRANCH_LIST_V1\0state\0ok\0branch\0main\0current\x001\0branch\0feature/x\0current\x000\0worktree\0feature/x\0path\0/tmp/feature-x\0",
                 vec![
                     ("main", true, None),
                     ("feature/x", false, Some("/tmp/feature-x")),
                 ],
             ),
             (
-                "OXIDETERM_GIT_BRANCH_LIST_V1\0state\0ok\0branch\0master\0current\x001\0worktree\0master\0path\0/repo/.git/modules/vendor/child\0",
+                "OXIDELAB_GIT_BRANCH_LIST_V1\0state\0ok\0branch\0master\0current\x001\0worktree\0master\0path\0/repo/.git/modules/vendor/child\0",
                 vec![("master", true, None)],
             ),
         ] {
@@ -825,7 +825,7 @@ mod tests {
             (
                 "shell records",
                 parse_shell_staged_diff_output(
-                    "noise\nOXIDETERM_GIT_STAGED_DIFF_V1\0state\0ok\0stat\0 src/lib.rs | 1 +\0patch\0diff --git a/src/lib.rs b/src/lib.rs\n+added\n\0",
+                    "noise\nOXIDELAB_GIT_STAGED_DIFF_V1\0state\0ok\0stat\0 src/lib.rs | 1 +\0patch\0diff --git a/src/lib.rs b/src/lib.rs\n+added\n\0",
                 ),
                 Some((
                     " src/lib.rs | 1 +",
@@ -842,7 +842,7 @@ mod tests {
             ),
             (
                 "empty shell records",
-                parse_shell_staged_diff_output("OXIDETERM_GIT_STAGED_DIFF_V1\0state\0empty\0"),
+                parse_shell_staged_diff_output("OXIDELAB_GIT_STAGED_DIFF_V1\0state\0empty\0"),
                 None,
             ),
         ] {

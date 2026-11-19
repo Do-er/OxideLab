@@ -228,7 +228,7 @@ case "$oxide_action" in
    : > "$oxide_encoded" || exit 1
    oxide_received=0
    while IFS= read -r oxide_line; do
-    case "$oxide_line" in .) break;; '#oxideterm-cancel-{token}') exit 1;; esac
+    case "$oxide_line" in .) break;; '#oxidelab-cancel-{token}') exit 1;; esac
     printf '%s' "$oxide_line" >> "$oxide_encoded" || exit 1
     oxide_received=$((oxide_received + ${{#oxide_line}}))
     printf '\036%s:UPLOADED:%s\n' '{token}' "$oxide_received"
@@ -358,7 +358,7 @@ mod tests {
         let agent = format!(
             r#"#!/bin/sh
 if [ "$1" = --version ]; then
- printf 'oxideterm-agent fixture compat {}\n'
+ printf 'oxidelab-agent fixture compat {}\n'
 else
  printf '\036%s:READY\n' "$2"
  IFS= read -r request
@@ -372,10 +372,10 @@ fi
 import base64,json,os,pty,select,shutil,stat,subprocess,sys,tempfile,termios
 p=json.load(sys.stdin)
 root=tempfile.mkdtemp(prefix="oxide home' ")
-directory=os.path.join(root,'.oxideterm')
+directory=os.path.join(root,'.oxidelab')
 os.mkdir(directory)
-path=os.path.join(directory,'oxideterm-agent')
-with open(path,'w') as f: f.write('#!/bin/sh\necho oxideterm-agent old compat 0\n')
+path=os.path.join(directory,'oxidelab-agent')
+with open(path,'w') as f: f.write('#!/bin/sh\necho oxidelab-agent old compat 0\n')
 os.chmod(path,0o700)
 try:
  for action in ['install','reuse','invalid upload','cancel upload']:
@@ -401,14 +401,14 @@ try:
   try:
    probe=line().decode()
    assert probe.startswith('\x1e'+p['token']+':PROBE:'),probe
-   expected='oxideterm-agent old compat 0' if action=='install' else 'oxideterm-agent fixture compat '+str(p['compatibility'])
+   expected='oxidelab-agent old compat 0' if action=='install' else 'oxidelab-agent fixture compat '+str(p['compatibility'])
    assert probe.endswith(':'+expected),probe
    if action=='reuse':
     send(b'reuse\n')
    else:
     send(b'upload\n')
     if action=='cancel upload':
-     send(('#oxideterm-cancel-'+p['token']+'\n').encode())
+     send(('#oxidelab-cancel-'+p['token']+'\n').encode())
     else:
      payload=p['agent'].encode() if action=='install' else b'not an executable\n'
      encoded=base64.b64encode(payload)
@@ -423,7 +423,7 @@ try:
    assert termios.tcgetattr(master)==baseline
    with open(path) as f: assert f.read()==p['agent']
    assert stat.S_IMODE(os.stat(path).st_mode)==0o700
-   assert os.listdir(directory)==['oxideterm-agent']
+   assert os.listdir(directory)==['oxidelab-agent']
    if action=='install': installed_inode=os.stat(path).st_ino
    else: assert os.stat(path).st_ino==installed_inode
   finally:

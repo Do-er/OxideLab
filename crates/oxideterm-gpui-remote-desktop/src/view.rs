@@ -24,7 +24,7 @@ use crate::{
 const VIEW_PADDING: f32 = 14.0;
 const FRAME_BORDER_ALPHA: u32 = 0x80;
 const FRAME_BG_ALPHA: u32 = 0x66;
-const REMOTE_DESKTOP_DIAGNOSTICS_ENV: &str = "OXIDETERM_REMOTE_DESKTOP_DIAGNOSTICS";
+const REMOTE_DESKTOP_DIAGNOSTICS_ENV: &str = "OXIDELAB_REMOTE_DESKTOP_DIAGNOSTICS";
 
 pub fn remote_desktop_surface(tokens: &ThemeTokens, state: &RemoteDesktopViewState) -> AnyElement {
     remote_desktop_surface_with_geometry(tokens, state, None)

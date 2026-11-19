@@ -1,6 +1,6 @@
 # Language plugin fixtures
 
-`elixir.zip` is an OxideTerm language plugin built from
+`elixir.zip` is an OxideLab language plugin built from
 `tree-sitter-elixir` 0.3.5, crate SHA-256
 `66dd064a762ed95bfc29857fa3cb7403bb1e5cb88112de0f6341b7e47284ba40`,
 using Tree-sitter CLI 0.27.0. The archive includes the upstream Apache-2.0

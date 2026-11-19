@@ -934,7 +934,7 @@ mod tests {
     fn temp_path(name: &str, file_name: &str) -> std::path::PathBuf {
         std::env::temp_dir()
             .join(format!(
-                "oxideterm-cloud-sync-{name}-{}",
+                "oxidelab-cloud-sync-{name}-{}",
                 uuid::Uuid::new_v4()
             ))
             .join(file_name)
@@ -946,9 +946,9 @@ mod tests {
 
     #[test]
     fn app_settings_revision_ignores_export_timestamp() {
-        let first = r#"{"format":"oxideterm-settings","exportedAt":100,"sectionIds":["general"],"settings":{"general":{"language":"zh-CN"}}}"#;
-        let second = r#"{"format":"oxideterm-settings","exportedAt":200,"sectionIds":["general"],"settings":{"general":{"language":"zh-CN"}}}"#;
-        let changed = r#"{"format":"oxideterm-settings","exportedAt":200,"sectionIds":["general"],"settings":{"general":{"language":"en"}}}"#;
+        let first = r#"{"format":"oxidelab-settings","exportedAt":100,"sectionIds":["general"],"settings":{"general":{"language":"zh-CN"}}}"#;
+        let second = r#"{"format":"oxidelab-settings","exportedAt":200,"sectionIds":["general"],"settings":{"general":{"language":"zh-CN"}}}"#;
+        let changed = r#"{"format":"oxidelab-settings","exportedAt":200,"sectionIds":["general"],"settings":{"general":{"language":"en"}}}"#;
 
         assert_eq!(
             app_settings_snapshot_revision(first).unwrap(),
@@ -1086,13 +1086,14 @@ mod tests {
     #[test]
     fn invalid_late_resource_does_not_commit_connections() {
         let source_path = std::env::temp_dir().join(format!(
-            "oxideterm-cloud-sync-source-{}.json",
+            "oxidelab-cloud-sync-source-{}.json",
             uuid::Uuid::new_v4()
         ));
         let mut source = ConnectionStore::load(source_path).unwrap();
         source
             .upsert(SaveConnectionRequest {
                 totp_credential_id: None,
+                account_credential_id: None,
                 id: Some("conn-1".to_string()),
                 name: "Production".to_string(),
                 group: None,
@@ -1124,13 +1125,13 @@ mod tests {
         let connections_snapshot = source.export_saved_connections_snapshot().unwrap();
 
         let target_path = std::env::temp_dir().join(format!(
-            "oxideterm-cloud-sync-target-{}.json",
+            "oxidelab-cloud-sync-target-{}.json",
             uuid::Uuid::new_v4()
         ));
         let mut target = ConnectionStore::load(&target_path).unwrap();
         let forwarding_registry = ForwardingRegistry::new();
         let settings_path = std::env::temp_dir().join(format!(
-            "oxideterm-cloud-sync-settings-{}.json",
+            "oxidelab-cloud-sync-settings-{}.json",
             uuid::Uuid::new_v4()
         ));
         let mut settings_store =

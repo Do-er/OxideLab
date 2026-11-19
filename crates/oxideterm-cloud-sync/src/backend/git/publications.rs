@@ -120,7 +120,7 @@ impl CloudSyncBackend {
             let sha = file.sha.context("Git omitted sync object identity")?;
             crate::backend::publications::check_delete(execute_cloud_request(self.client.delete(git_contents_url(config, &path, false)?)
                 .headers(git_headers(secrets, "application/vnd.github+json")?).header(CONTENT_TYPE, "application/json")
-                .body(serde_json::to_vec(&json!({"message": "Remove superseded OxideTerm sync snapshot", "sha": sha, "branch": git_branch(config)}))?)).await?)?;
+                .body(serde_json::to_vec(&json!({"message": "Remove superseded OxideLab sync snapshot", "sha": sha, "branch": git_branch(config)}))?)).await?)?;
         }
         Ok(())
     }

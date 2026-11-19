@@ -252,7 +252,7 @@ mod tests {
         fn new() -> Self {
             let sequence = ATOMIC_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed);
             let path = std::env::temp_dir().join(format!(
-                "oxideterm-plugin-settings-test-{}-{sequence}",
+                "oxidelab-plugin-settings-test-{}-{sequence}",
                 std::process::id()
             ));
             fs::create_dir(&path).expect("temporary directory should be created");

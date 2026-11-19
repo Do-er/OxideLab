@@ -964,8 +964,8 @@ async fn failed_disk_write_retains_the_batch_until_storage_retry_commits_it() {
 #[ignore = "child process used by the crash durability test"]
 fn history_crash_child() {
     use std::io::Write;
-    let path = std::env::var_os("OXIDETERM_HISTORY_CRASH_PATH").expect("child fixture path");
-    let committed = std::env::var_os("OXIDETERM_HISTORY_CRASH_COMMIT").is_some();
+    let path = std::env::var_os("OXIDELAB_HISTORY_CRASH_PATH").expect("child fixture path");
+    let committed = std::env::var_os("OXIDELAB_HISTORY_CRASH_COMMIT").is_some();
     let store = ConversationStore::open(PathBuf::from(path)).unwrap();
     let guard = store.db.read();
     let tx = guard.as_ref().unwrap().begin_write().unwrap();
@@ -1011,11 +1011,11 @@ fn process_crash_recovers_only_committed_transactions() {
                 "persistence::storage_tests::history_crash_child",
                 "--nocapture",
             ])
-            .env("OXIDETERM_HISTORY_CRASH_PATH", &path)
+            .env("OXIDELAB_HISTORY_CRASH_PATH", &path)
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
         if committed {
-            child.env("OXIDETERM_HISTORY_CRASH_COMMIT", "1");
+            child.env("OXIDELAB_HISTORY_CRASH_COMMIT", "1");
         }
         let mut child = child.spawn().unwrap();
         let output = child.stdout.take().unwrap();

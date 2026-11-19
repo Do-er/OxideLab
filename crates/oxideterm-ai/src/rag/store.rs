@@ -35,7 +35,7 @@ const DOC_RAW_CONTENT_TABLE: TableDefinition<&str, &[u8]> = TableDefinition::new
 
 /// Compression threshold: compress chunks larger than 4 KB.
 const COMPRESSION_THRESHOLD: usize = 4096;
-const LOCK_PROFILE_ENV: &str = "OXIDETERM_PROFILE_LOCKS";
+const LOCK_PROFILE_ENV: &str = "OXIDELAB_PROFILE_LOCKS";
 
 fn rag_lock_profiling_enabled() -> bool {
     static ENABLED: OnceLock<bool> = OnceLock::new();
@@ -1163,7 +1163,7 @@ impl RagStore {
         let store = self.clone();
         let runtime = self.bm25_index.clone();
         std::thread::Builder::new()
-            .name("oxideterm-bm25-rebuild".to_string())
+            .name("oxidelab-bm25-rebuild".to_string())
             .spawn(move || store.run_bm25_rebuild_worker())
             .map_err(|error| {
                 if let Ok(mut state) = runtime.state.lock() {

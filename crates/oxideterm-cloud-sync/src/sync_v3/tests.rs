@@ -189,7 +189,7 @@ fn deselection_does_not_delete_and_concurrent_delete_edit_remains_pending() {
 
 #[test]
 fn preparing_sync_does_not_lock_password_and_old_unused_bindings_can_be_replaced() {
-    let path = std::env::temp_dir().join(format!("oxideterm-password-{}", Uuid::new_v4()));
+    let path = std::env::temp_dir().join(format!("oxidelab-password-{}", Uuid::new_v4()));
     let mut secrets = Secrets::default();
     let store = ReplicaStore::open(&path, &mut secrets).unwrap();
     let mut record = LocalReplica::new();
@@ -241,7 +241,7 @@ fn encrypted_replica_reopens_and_retries_the_exact_pending_publication() {
         open_oxide_document,
     };
 
-    let path = std::env::temp_dir().join(format!("oxideterm-replica-{}", Uuid::new_v4()));
+    let path = std::env::temp_dir().join(format!("oxidelab-replica-{}", Uuid::new_v4()));
     let mut secrets = Secrets::default();
     let store = ReplicaStore::open(&path, &mut secrets).unwrap();
     assert!(ReplicaStore::open(&path, &mut secrets).is_err());

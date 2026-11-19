@@ -1,4 +1,4 @@
-// Copyright (C) 2026 OxideTerm contributors.
+// Copyright (C) 2026 OxideLab contributors.
 // SPDX-License-Identifier: GPL-3.0-only
 
 use super::model::{ProjectManifestEntry, ProjectProbeError, ProjectProbeOutcome};
@@ -6,7 +6,7 @@ use super::parse::{interpret_project_manifest_entries, project_manifest_file_nam
 use crate::cwd::{CurrentDirectorySource, expand_local_home_path};
 use crate::shell::shell_quote;
 
-pub const PROJECT_SHELL_PROBE_SENTINEL: &str = "OXIDETERM_PROJECT_PROBE_V1";
+pub const PROJECT_SHELL_PROBE_SENTINEL: &str = "OXIDELAB_PROJECT_PROBE_V1";
 pub const PROJECT_PROBE_MAX_ANCESTORS: usize = 12;
 pub const PROJECT_PROBE_MAX_FILE_BYTES: usize = 64 * 1024;
 
@@ -185,7 +185,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "oxideterm-environment-{name}-{}-{nonce}",
+            "oxidelab-environment-{name}-{}-{nonce}",
             std::process::id()
         ))
     }
