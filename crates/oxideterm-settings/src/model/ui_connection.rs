@@ -20,21 +20,15 @@ pub enum AppIconVariant {
     #[default]
     Default,
     WhiteBlue,
-    WhiteGraphite,
+    WhiteOrange,
     WhiteGreen,
     WhitePurple,
     WhiteRed,
-    #[serde(alias = "orange")]
     FilledOrange,
-    #[serde(alias = "blue")]
     FilledBlue,
-    #[serde(alias = "graphite")]
     FilledGraphite,
-    #[serde(alias = "green")]
     FilledGreen,
-    #[serde(alias = "purple")]
     FilledPurple,
-    #[serde(alias = "red")]
     FilledRed,
 }
 

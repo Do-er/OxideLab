@@ -52,13 +52,13 @@ impl gpui::Asset for AppIconPreview {
 pub(crate) const APP_ICON_VARIANTS: &[AppIconVariant] = &[
     AppIconVariant::Default,
     AppIconVariant::WhiteBlue,
-    AppIconVariant::WhiteGraphite,
+    AppIconVariant::WhiteOrange,
     AppIconVariant::WhiteGreen,
     AppIconVariant::WhitePurple,
     AppIconVariant::WhiteRed,
-    AppIconVariant::FilledOrange,
-    AppIconVariant::FilledBlue,
     AppIconVariant::FilledGraphite,
+    AppIconVariant::FilledBlue,
+    AppIconVariant::FilledOrange,
     AppIconVariant::FilledGreen,
     AppIconVariant::FilledPurple,
     AppIconVariant::FilledRed,
@@ -66,9 +66,12 @@ pub(crate) const APP_ICON_VARIANTS: &[AppIconVariant] = &[
 
 pub(crate) fn app_icon_variant_file_name(variant: AppIconVariant) -> &'static str {
     match variant {
-        AppIconVariant::Default => "default.png",
+        // Default is not a skin: it is the packaged application icon itself.
+        // `icon.png` / `icon.ico` / `icon.icns` are generated from the same
+        // `default` render, so pointing here keeps one copy instead of two.
+        AppIconVariant::Default => "icon.png",
         AppIconVariant::WhiteBlue => "white-blue.png",
-        AppIconVariant::WhiteGraphite => "white-graphite.png",
+        AppIconVariant::WhiteOrange => "white-orange.png",
         AppIconVariant::WhiteGreen => "white-green.png",
         AppIconVariant::WhitePurple => "white-purple.png",
         AppIconVariant::WhiteRed => "white-pink.png",
@@ -81,15 +84,20 @@ pub(crate) fn app_icon_variant_file_name(variant: AppIconVariant) -> &'static st
     }
 }
 
-#[cfg(target_os = "windows")]
-fn app_icon_variant_ico_file_name(variant: AppIconVariant) -> String {
-    app_icon_variant_file_name(variant).replace(".png", ".ico")
+/// Location of a variant's assets relative to an `icons/` resource root. Skins
+/// live under `variants/`; `Default` resolves to the packaged icon at the root.
+fn app_icon_variant_relative_path(variant: AppIconVariant) -> PathBuf {
+    let file_name = app_icon_variant_file_name(variant);
+    match variant {
+        AppIconVariant::Default => PathBuf::from(file_name),
+        _ => PathBuf::from("variants").join(file_name),
+    }
 }
 
 pub(crate) fn app_icon_variant_resource_path(variant: AppIconVariant) -> PathBuf {
-    let file_name = app_icon_variant_file_name(variant);
+    let relative = app_icon_variant_relative_path(variant);
     for root in app_icon_resource_roots() {
-        let candidate = root.join("variants").join(file_name);
+        let candidate = root.join(&relative);
         if candidate.exists() {
             return candidate;
         }
@@ -101,8 +109,7 @@ pub(crate) fn app_icon_variant_resource_path(variant: AppIconVariant) -> PathBuf
         .join("oxideterm-gpui-app")
         .join("resources")
         .join("icons")
-        .join("variants")
-        .join(file_name)
+        .join(relative)
 }
 
 fn app_icon_resource_roots() -> Vec<PathBuf> {
@@ -139,10 +146,10 @@ fn app_icon_resource_roots() -> Vec<PathBuf> {
 #[cfg(target_os = "macos")]
 fn app_icon_variant_png(variant: AppIconVariant) -> &'static [u8] {
     match variant {
-        AppIconVariant::Default => include_bytes!("../resources/icons/variants/default.png"),
+        AppIconVariant::Default => include_bytes!("../resources/icons/icon.png"),
         AppIconVariant::WhiteBlue => include_bytes!("../resources/icons/variants/white-blue.png"),
-        AppIconVariant::WhiteGraphite => {
-            include_bytes!("../resources/icons/variants/white-graphite.png")
+        AppIconVariant::WhiteOrange => {
+            include_bytes!("../resources/icons/variants/white-orange.png")
         }
         AppIconVariant::WhiteGreen => {
             include_bytes!("../resources/icons/variants/white-green.png")
@@ -170,9 +177,9 @@ fn app_icon_variant_png(variant: AppIconVariant) -> &'static [u8] {
 
 #[cfg(target_os = "windows")]
 fn app_icon_variant_ico_resource_path(variant: AppIconVariant) -> PathBuf {
-    let file_name = app_icon_variant_ico_file_name(variant);
+    let relative = app_icon_variant_relative_path(variant).with_extension("ico");
     for root in app_icon_resource_roots() {
-        let candidate = root.join("variants").join(&file_name);
+        let candidate = root.join(&relative);
         if candidate.exists() {
             return candidate;
         }
@@ -183,8 +190,7 @@ fn app_icon_variant_ico_resource_path(variant: AppIconVariant) -> PathBuf {
         .join("oxideterm-gpui-app")
         .join("resources")
         .join("icons")
-        .join("variants")
-        .join(file_name)
+        .join(relative)
 }
 
 #[cfg(target_os = "macos")]

@@ -76,9 +76,14 @@ COLORS = {
 }
 
 VARIANTS: dict[str, tuple[str, str, str | None]] = {
-    "default": ("#FBFBFD", COLORS["orange"], "#E5E7EB"),
+    # `default` is the packaged application icon, not a skin: it is written to
+    # `icon.icns`/`icon.ico`/`icon.png` plus the Linux hicolor PNGs and has no
+    # `variants/` copy, so it alone decides the installer, shortcut and
+    # taskbar/Dock colors. Keep it on graphite: the packaged first impression
+    # must not be the orange accent.
+    "default": ("#FBFBFD", COLORS["graphite"], "#E5E7EB"),
+    "white-orange": ("#FBFBFD", COLORS["orange"], "#E5E7EB"),
     "white-blue": ("#FBFBFD", COLORS["blue"], "#E5E7EB"),
-    "white-graphite": ("#FBFBFD", COLORS["graphite"], "#E5E7EB"),
     "white-green": ("#FBFBFD", COLORS["green"], "#E5E7EB"),
     "white-purple": ("#FBFBFD", COLORS["purple"], "#E5E7EB"),
     "white-pink": ("#FBFBFD", COLORS["pink"], "#E5E7EB"),
@@ -231,7 +236,10 @@ def generate_native(
         png_1024 = tmp_dir / f"{name}_1024.png"
         subprocess.run([str(renderer), str(svg_file), str(png_1024), "1024"], check=True)
 
-        out_png = VARIANTS_DIR / f"{name}.png"
+        # `default` is the packaged application icon, not a selectable skin: it
+        # is written straight to the icon root and never into `variants/`.
+        is_default = name == "default"
+        out_png = ICON_DIR / "icon.png" if is_default else VARIANTS_DIR / f"{name}.png"
         resize_png(png_1024, out_png, 512)
 
         # ICO targets render their own composition when either ICO knob differs,
@@ -250,12 +258,10 @@ def generate_native(
                 [str(renderer), str(ico_svg_file), str(ico_png_1024), "1024"], check=True
             )
 
-        out_ico = VARIANTS_DIR / f"{name}.ico"
+        out_ico = ICON_DIR / "icon.ico" if is_default else VARIANTS_DIR / f"{name}.ico"
         write_ico_from_png(ico_png_1024, out_ico, tmp_dir)
 
-        if name == "default":
-            shutil.copy2(out_png, ICON_DIR / "icon.png")
-            shutil.copy2(out_ico, ICON_DIR / "icon.ico")
+        if is_default:
             write_icns_from_png(png_1024, ICON_DIR / "icon.icns", tmp_dir)
             for sz, fname in LINUX_PNG_SIZES:
                 resize_png(png_1024, ICON_DIR / fname, sz)
@@ -379,14 +385,13 @@ def generate_portable(
         else:
             ico_renders = {size: main_renders[size] for size in ico_sizes}
 
-        out_png = VARIANTS_DIR / f"{name}.png"
+        is_default = name == "default"
+        out_png = ICON_DIR / "icon.png" if is_default else VARIANTS_DIR / f"{name}.png"
         shutil.copyfile(main_renders[512], out_png)
-        out_ico = VARIANTS_DIR / f"{name}.ico"
+        out_ico = ICON_DIR / "icon.ico" if is_default else VARIANTS_DIR / f"{name}.ico"
         out_ico.write_bytes(pack_ico([(sz, ico_renders[sz].read_bytes()) for sz in ICO_SIZES]))
 
-        if name == "default":
-            shutil.copyfile(out_png, ICON_DIR / "icon.png")
-            shutil.copyfile(out_ico, ICON_DIR / "icon.ico")
+        if is_default:
             (ICON_DIR / "icon.icns").write_bytes(
                 pack_icns({sz: main_renders[sz].read_bytes() for sz in ICNS_SIZES})
             )
