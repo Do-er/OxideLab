@@ -622,6 +622,10 @@
       "ssh_shell": "SSH（Shell チャネル）",
       "agent_installing": "エージェントをインストール中：{{percent}}%（{{transferred}} / {{total}} KiB）",
       "agent_starting": "エージェントを起動中…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "折り返しを無効にする",
+      "disabled_tooltip": "折り返しを有効にする"
     }
   },
   "search": {

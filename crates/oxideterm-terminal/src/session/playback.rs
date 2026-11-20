@@ -275,6 +275,12 @@ impl TerminalSessionBackend for PlaybackTerminalSession {
         }
     }
 
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        if delta != 0 {
+            scroll_display_logical(&mut self.term.lock(), delta);
+        }
+    }
+
     fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -359,6 +365,25 @@ impl TerminalSessionBackend for PlaybackTerminalSession {
             self.size,
             &self.graphics,
             &self.palette,
+            previous,
+        )
+    }
+
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        snapshot_from_term_with_window(
+            &self.term.lock(),
+            self.size,
+            &self.graphics,
+            &self.palette,
+            display_offset,
+            rows,
+            window,
             previous,
         )
     }

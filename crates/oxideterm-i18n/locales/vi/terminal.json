@@ -622,6 +622,10 @@
       "ssh_shell": "SSH (kênh Shell)",
       "agent_installing": "Đang cài đặt tác nhân: {{percent}}% ({{transferred}} / {{total}} KiB)",
       "agent_starting": "Đang khởi động tác nhân…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "Tắt ngắt dòng",
+      "disabled_tooltip": "Bật ngắt dòng"
     }
   },
   "search": {

@@ -32,6 +32,7 @@ fn test_snapshot(display_offset: usize, scrollback_lines: usize) -> TerminalSnap
     TerminalSnapshot {
         logical_context: Vec::new(),
         generation: 0,
+        buffer_reset_generation: 0,
         cols: 80,
         rows: 10,
         cursor_col: 0,
@@ -55,6 +56,7 @@ fn cursor_snapshot() -> TerminalSnapshot {
         source_id: 0,
         absolute_line: 0,
         wrapped: false,
+        trailing_wide_char_spacer: false,
         active_input: false,
         signature: 0,
         cells: Arc::new(vec![
@@ -118,6 +120,7 @@ fn row_from_text(text: &str, cols: usize) -> oxideterm_terminal::TerminalRow {
         absolute_line: 0,
         cells: Arc::new(cells),
         wrapped: false,
+        trailing_wide_char_spacer: false,
         active_input: false,
         signature: 0,
     };
@@ -176,6 +179,7 @@ fn row_from_text_with_wide_spacers(text: &str) -> oxideterm_terminal::TerminalRo
         absolute_line: 0,
         cells: Arc::new(cells),
         wrapped: false,
+        trailing_wide_char_spacer: false,
         active_input: false,
         signature: 0,
     };

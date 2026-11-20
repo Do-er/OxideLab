@@ -622,6 +622,10 @@
       "ssh_shell": "SSH (canal Shell)",
       "agent_installing": "Instalando agente: {{percent}}% ({{transferred}} / {{total}} KiB)",
       "agent_starting": "Iniciando agente…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "Desactivar el ajuste de línea",
+      "disabled_tooltip": "Activar el ajuste de línea"
     }
   },
   "search": {

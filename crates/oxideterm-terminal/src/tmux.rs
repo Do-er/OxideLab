@@ -616,6 +616,7 @@ impl TmuxDisplay {
         let mut snapshot = TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 0,
+            buffer_reset_generation: 0,
             cols: size.cols,
             rows: size.rows,
             cursor_col,

@@ -18,14 +18,13 @@ use oxideterm_terminal_graphics::{GraphicsCursor, TerminalGraphicsEvent, Termina
 mod activity;
 mod backpressure;
 mod color;
-mod send_plan;
 mod data;
-mod logical_context;
 mod editor_integration;
 mod integration_scripts;
 mod local_graphics_event_loop;
 mod local_shell;
 mod local_shell_integration;
+mod logical_context;
 mod privilege_prompt;
 mod process;
 mod process_lifecycle;
@@ -36,6 +35,7 @@ mod recording_test_support;
 mod remote_shell_integration;
 mod search;
 mod selection;
+mod send_plan;
 mod session;
 mod shell_channel;
 mod shell_completion;
@@ -49,13 +49,9 @@ pub use tmux::{
 
 pub use activity::TerminalActivityReceiver;
 pub use alacritty_terminal::term::TermMode;
-pub use send_plan::{
-    TerminalSendFrame, TerminalSendInputMode, TerminalSendPacing, TerminalSendPlan,
-    TerminalSendPlanError, build_terminal_send_plan,
-};
 pub use data::{
-    GraphicsOptions, KittyFileTransmissionControl, KittyFileTransmissionPrompt, TerminalAttrs,
-    TerminalCell, TerminalColor, TerminalCursorShape, TerminalImageAnimationState,
+    GraphicsOptions, KittyFileTransmissionControl, KittyFileTransmissionPrompt, SnapshotWindow,
+    TerminalAttrs, TerminalCell, TerminalColor, TerminalCursorShape, TerminalImageAnimationState,
     TerminalImageData, TerminalImageFrame, TerminalImageId, TerminalImageProtocol,
     TerminalImageSnapshot, TerminalLogicalContext, TerminalLogicalContextRow,
     TerminalLogicalMember, TerminalRow, TerminalSearchMatch, TerminalSearchRange, TerminalSnapshot,
@@ -66,7 +62,9 @@ pub use editor_integration::{
     TerminalEditorClipboardEvent, TerminalEditorClipboardOperation, TerminalEditorIntegrationEvent,
     TerminalEditorMode, TerminalEditorSelection, VIM_FREE_TYPE_INTEGRATION_SOURCE,
 };
-pub use local_shell::{LocalCommand, LocalPtyConfig, ShellInfo, default_shell, is_shell_executable, scan_shells};
+pub use local_shell::{
+    LocalCommand, LocalPtyConfig, ShellInfo, default_shell, is_shell_executable, scan_shells,
+};
 pub use local_shell_integration::TerminalCwdIntegrationLaunchState;
 pub use oxideterm_modem_transfer::{
     DetectedModemProtocol, ModemTransferDirection,
@@ -91,6 +89,10 @@ pub use search::{
     TerminalSearchOptions, TerminalSearchQuery, TerminalSearchResult, TerminalSearchSource,
 };
 pub use selection::TerminalSelectionRange;
+pub use send_plan::{
+    TerminalSendFrame, TerminalSendInputMode, TerminalSendPacing, TerminalSendPlan,
+    TerminalSendPlanError, build_terminal_send_plan,
+};
 pub use session::{
     MoshConnectionStatus, MoshPredictionDisplay, MoshTerminalConfig, SerialControlLine,
     SerialControlState, SerialDisplayMode, SerialError, SerialErrorCode, SerialFlowControl,

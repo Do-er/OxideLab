@@ -147,7 +147,7 @@ impl TerminalPane {
         self.snapshot
             .scrollback_lines
             .saturating_add(self.snapshot.cursor_row)
-            .saturating_sub(self.snapshot.display_offset)
+            .saturating_sub(self.snapshot.window_display_offset())
     }
 
     fn prompt_block_start_line(&self, command_line: usize) -> usize {
@@ -328,7 +328,7 @@ impl TerminalPane {
         let viewport_start = self
             .snapshot
             .scrollback_lines
-            .saturating_sub(self.snapshot.display_offset);
+            .saturating_sub(self.snapshot.window_display_offset());
         let row = absolute_line.checked_sub(viewport_start)?;
         self.snapshot.lines.get(row).map(|line| line.text())
     }

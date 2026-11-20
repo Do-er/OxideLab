@@ -76,6 +76,9 @@ impl WorkspaceApp {
         let session_log_active =
             self.active_terminal_session_log_status(cx).state != TerminalSessionLogState::Idle;
         let timestamps_active = self.active_terminal_timestamps_enabled(cx);
+        let wrap_disabled = self.active_terminal_wrap_disabled(cx);
+        let wrap_enabled_tooltip_title = self.i18n.t("terminal.line_wrap.enabled_tooltip");
+        let wrap_disabled_tooltip_title = self.i18n.t("terminal.line_wrap.disabled_tooltip");
         let highlight_override_active = self.active_terminal_highlight_override(cx);
         let timestamps_tooltip_title = self.i18n.t("terminal.recording.timestamps");
         let recording_toggle_tooltip_title = match recording_status.state {
@@ -163,8 +166,10 @@ impl WorkspaceApp {
                                             );
                                             this.edit_settings(
                                                 |settings| {
-                                                    settings.terminal.command_bar.composer_expanded =
-                                                        expanding;
+                                                    settings
+                                                        .terminal
+                                                        .command_bar
+                                                        .composer_expanded = expanding;
                                                 },
                                                 cx,
                                             );
@@ -278,15 +283,17 @@ impl WorkspaceApp {
                                     )
                                     .on_mouse_down(
                                         MouseButton::Left,
-                                        cx.listener(|this, _event: &MouseDownEvent, _window, cx| {
-                                            this.terminal_highlight_popover_open = false;
-                                            this.toggle_terminal_broadcast_menu(cx);
-                                            cx.stop_propagation();
-                                            cx.notify();
-                                        }),
+                                        cx.listener(
+                                            |this, _event: &MouseDownEvent, _window, cx| {
+                                                this.terminal_highlight_popover_open = false;
+                                                this.toggle_terminal_broadcast_menu(cx);
+                                                cx.stop_propagation();
+                                                cx.notify();
+                                            },
+                                        ),
                                     )
-                                    .on_mouse_move(
-                                        cx.listener(move |this, event: &MouseMoveEvent, _window, cx| {
+                                    .on_mouse_move(cx.listener(
+                                        move |this, event: &MouseMoveEvent, _window, cx| {
                                             this.queue_workspace_tooltip(
                                                 "terminal-command-broadcast",
                                                 broadcast_tooltip_title.clone(),
@@ -294,11 +301,14 @@ impl WorkspaceApp {
                                                 f32::from(event.position.y) + 16.0,
                                                 cx,
                                             );
-                                        }),
-                                    )
+                                        },
+                                    ))
                                     .on_hover(cx.listener(|this, hovered: &bool, _window, cx| {
                                         if !*hovered {
-                                            this.clear_workspace_tooltip("terminal-command-broadcast", cx);
+                                            this.clear_workspace_tooltip(
+                                                "terminal-command-broadcast",
+                                                cx,
+                                            );
                                         }
                                     })),
                                 {
@@ -429,6 +439,31 @@ impl WorkspaceApp {
                                         });
                                     }
                                 },
+                            ))
+                            .child(self.terminal_command_action_button(
+                                LucideIcon::WrapText,
+                                if wrap_disabled {
+                                    rgb(theme.accent)
+                                } else {
+                                    rgb(theme.text_muted)
+                                },
+                                false,
+                                Some(if wrap_disabled {
+                                    rgba((theme.accent << 8) | 0x26)
+                                } else {
+                                    rgba(0x00000000)
+                                }),
+                                "terminal-command-line-wrap",
+                                if wrap_disabled {
+                                    wrap_disabled_tooltip_title
+                                } else {
+                                    wrap_enabled_tooltip_title
+                                },
+                                |this, _event, _window, cx| {
+                                    this.toggle_active_terminal_wrap(cx);
+                                    cx.stop_propagation();
+                                },
+                                cx,
                             ))
                             .child(self.terminal_command_action_button(
                                 LucideIcon::Clock,
@@ -861,12 +896,7 @@ impl WorkspaceApp {
                 div()
                     .flex_1()
                     .min_w(px(0.0))
-                    .child(self.text_input_with_workspace_ime(
-                        target,
-                        input,
-                        |_this, _cx| {},
-                        cx,
-                    )),
+                    .child(self.text_input_with_workspace_ime(target, input, |_this, _cx| {}, cx)),
             )
             .child(
                 div()
@@ -1091,9 +1121,11 @@ impl WorkspaceApp {
                     .as_ref()
                     .map(|(_, value)| value.as_str())
                     .unwrap_or_default();
-                menu = menu.child(
-                    self.render_terminal_broadcast_group_edit_row(Some(group_id), value, cx),
-                );
+                menu = menu.child(self.render_terminal_broadcast_group_edit_row(
+                    Some(group_id),
+                    value,
+                    cx,
+                ));
                 continue;
             }
             let selected = selected_group_id == Some(group_id);
@@ -1103,11 +1135,7 @@ impl WorkspaceApp {
                 .sync_groups()
                 .panes(Some(group_id))
                 .len();
-            let group_enabled = self
-                .terminal
-                .read(cx)
-                .sync_groups()
-                .enabled(Some(group_id));
+            let group_enabled = self.terminal.read(cx).sync_groups().enabled(Some(group_id));
             let name = group.name.clone();
             menu = menu.child(
                 div()
@@ -1351,7 +1379,9 @@ impl WorkspaceApp {
                             .cursor_pointer()
                         })
                         .when(selected_count == 0, |button| {
-                            button.text_color(rgb(theme.text_muted)).cursor_not_allowed()
+                            button
+                                .text_color(rgb(theme.text_muted))
+                                .cursor_not_allowed()
                         })
                         .text_size(px(11.0))
                         .child(Self::render_lucide_icon(

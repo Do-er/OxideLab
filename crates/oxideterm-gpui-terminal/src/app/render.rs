@@ -22,7 +22,7 @@ use oxideterm_gpui_ui::separator::{SeparatorOrientation, separator};
 use oxideterm_terminal::{
     DetectedModemProtocol, KittyFileTransmissionControl, KittyFileTransmissionPrompt,
     ModemTransferDirection, SerialControlLine, SerialDisplayMode, SerialFlowControl,
-    SerialLineEnding, SerialParity, SerialSendMode, SerialSessionConfig, TermMode,
+    SerialLineEnding, SerialParity, SerialSendMode, SerialSessionConfig, SnapshotWindow, TermMode,
     TerminalCommandMark, TerminalCursorShape, TerminalLifecycle, TerminalSessionKind,
     TerminalSnapshot, TmuxAction, TmuxUiState,
 };
@@ -228,10 +228,19 @@ impl Render for TerminalPane {
             let allow_defer = self.snapshot_deferred_since.is_none_or(|since| {
                 snapshot_started.duration_since(since) < MAX_SNAPSHOT_DEFER_DURATION
             });
-            let next = self
-                .terminal
-                .lock()
-                .try_render_snapshot(&self.snapshot, allow_defer);
+            let snapshot_window =
+                if self.wrap_disabled && !self.render_mode.contains(TermMode::ALT_SCREEN) {
+                    SnapshotWindow::LogicalLines {
+                        count: self.snapshot.rows,
+                    }
+                } else {
+                    SnapshotWindow::Viewport
+                };
+            let next = self.terminal.lock().try_render_snapshot_with_window(
+                &self.snapshot,
+                allow_defer,
+                snapshot_window,
+            );
             #[cfg(feature = "bench")]
             {
                 self.benchmark_backend_snapshot_micros = backend_snapshot_started
@@ -297,6 +306,8 @@ impl Render for TerminalPane {
             self.clear_terminal_hover(cx);
         }
         self.refresh_command_folding();
+        self.refresh_display_view();
+        self.reveal_cursor_horizontally();
         let scrollbar_display_offset = self.smooth_scroll_display_offset();
         if self
             .context_menu
@@ -511,9 +522,12 @@ impl Render for TerminalPane {
         .scrollbar_active(self.scrollbar_hovered || self.scrollbar_drag.is_some())
         .scroll_y_offset(smooth_scroll_y_offset)
         .scroll_x_offset(self.horizontal_scroll_offset_px)
+        .horizontal_scroll_enabled(self.wrap_disabled)
         .performance_metrics_enabled(performance_metrics_enabled)
         .command_mark_gutter_width(self.command_mark_gutter_width())
-        .scrollbar_dragging(self.scrollbar_drag.is_some() || self.horizontal_scrollbar_drag.is_some())
+        .scrollbar_dragging(
+            self.scrollbar_drag.is_some() || self.horizontal_scrollbar_drag.is_some(),
+        )
         .layout_cache(self.layout_cache.clone());
         let accepts_local_path_drop =
             cfg!(target_os = "macos") && self.session_kind() == TerminalSessionKind::LocalPty;
@@ -686,7 +700,9 @@ impl Render for TerminalPane {
                         )
                     })
                     .when(
-                        self.horizontal_scroll_offset_px > px(0.0)
+                        // A long logical row overflows before any scrolling happens, so the
+                        // drag track must exist whenever overflow does, not only once moved.
+                        self.terminal_horizontal_scroll_limit() > px(0.0)
                             || self.horizontal_scrollbar_drag.is_some(),
                         |this| {
                             this.child(
@@ -2169,6 +2185,9 @@ impl TerminalPane {
     fn render_snapshot_for_smooth_scroll(&mut self) -> (TerminalSnapshot, gpui::Pixels, usize) {
         let snapshot = self.displayed_snapshot().clone();
         let viewport_rows = snapshot.rows;
+        if self.display_view.active() {
+            return (snapshot, px(0.0), viewport_rows);
+        }
         if !self.settings.smooth_scroll {
             return (snapshot, px(0.0), viewport_rows);
         }
@@ -2270,11 +2289,7 @@ impl TerminalPane {
             .command_selection_labels
             .copy_command
             .clone();
-        let select_all_label = self
-            .preferences
-            .command_selection_labels
-            .select_all
-            .clone();
+        let select_all_label = self.preferences.command_selection_labels.select_all.clone();
         let send_to_ai_label = self.preferences.command_selection_labels.send_to_ai.clone();
         let fill_command_bar_label = self
             .preferences
@@ -2953,7 +2968,7 @@ impl TerminalPane {
         let snapshot = self.displayed_snapshot();
         let top = snapshot
             .scrollback_lines
-            .saturating_sub(snapshot.display_offset);
+            .saturating_sub(snapshot.window_display_offset());
         self.command_marks
             .iter()
             .find(|mark| mark.command_id == selected_id)
@@ -3116,7 +3131,7 @@ impl TerminalPane {
         let viewport_start = self
             .displayed_snapshot()
             .scrollback_lines
-            .saturating_sub(self.displayed_snapshot().display_offset);
+            .saturating_sub(self.displayed_snapshot().window_display_offset());
         let visible_start = mark.start_line.max(viewport_start);
         let visible_end =
             end_line.min(viewport_start.saturating_add(self.snapshot.rows.saturating_sub(1)));

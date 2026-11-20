@@ -368,6 +368,7 @@ pub struct Term<T> {
     /// Information about damaged cells.
     damage: TermDamageState,
     resize_generation: u64,
+    buffer_reset_generation: u64,
     graphics_events: Option<graphics::GraphicsGridEvents>,
 
     /// Config directly for the terminal.
@@ -430,6 +431,10 @@ pub enum Osc52 {
 }
 
 impl<T> Term<T> {
+    pub fn buffer_reset_generation(&self) -> u64 {
+        self.buffer_reset_generation
+    }
+
     pub fn graphics_events(&mut self) -> graphics::GraphicsGridEvents {
         let events = self.graphics_events.get_or_insert_with(Default::default).clone();
         events
@@ -515,6 +520,7 @@ impl<T> Term<T> {
             event_proxy,
             damage,
             resize_generation: 0,
+            buffer_reset_generation: 0,
             graphics_events: None,
             config,
             grid,
@@ -2203,6 +2209,7 @@ impl<T: EventListener> Handler for Term<T> {
                 self.selection = self.selection.take().filter(|s| !s.intersects_range(range));
             },
             ansi::ClearMode::All => {
+                self.buffer_reset_generation = self.buffer_reset_generation.wrapping_add(1);
                 if self.mode.contains(TermMode::ALT_SCREEN) {
                     self.grid.reset_region(..);
                 } else {
@@ -2223,6 +2230,7 @@ impl<T: EventListener> Handler for Term<T> {
                 self.selection = None;
             },
             ansi::ClearMode::Saved if self.history_size() > 0 => {
+                self.buffer_reset_generation = self.buffer_reset_generation.wrapping_add(1);
                 self.grid.clear_history();
 
                 self.vi_mode_cursor.point.line =
@@ -2253,6 +2261,7 @@ impl<T: EventListener> Handler for Term<T> {
     /// Reset all important fields in the term struct.
     #[inline]
     fn reset_state(&mut self) {
+        self.buffer_reset_generation = self.buffer_reset_generation.wrapping_add(1);
         self.record_graphics_change(graphics::GraphicsGridChange::Reset);
         if self.mode.contains(TermMode::ALT_SCREEN) {
             mem::swap(&mut self.grid, &mut self.inactive_grid);

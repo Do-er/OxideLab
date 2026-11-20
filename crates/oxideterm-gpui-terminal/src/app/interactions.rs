@@ -206,7 +206,7 @@ impl TerminalPane {
             let snapshot = {
                 let mut terminal = self.terminal.lock();
                 terminal.scroll_to_bottom();
-                terminal.snapshot()
+                self.snapshot_for_current_view(&mut terminal)
             };
             self.clear_smooth_scroll_remainder();
             self.snapshot = self.stamp_snapshot(snapshot);
@@ -220,7 +220,7 @@ impl TerminalPane {
             let snapshot = {
                 let mut terminal = self.terminal.lock();
                 terminal.scroll_to_top();
-                terminal.snapshot()
+                self.snapshot_for_current_view(&mut terminal)
             };
             self.clear_smooth_scroll_remainder();
             self.snapshot = self.stamp_snapshot(snapshot);
@@ -612,7 +612,10 @@ impl TerminalPane {
             let mut terminal = self.terminal.lock();
             let physical_offset_before = terminal.display_offset();
             let delta = terminal_scroll_delta(scroll_delta.rows);
-            let snapshot = if let Some(offset) = folded_offset {
+            let snapshot = if self.logical_view_active() {
+                terminal.scroll_logical_lines(delta);
+                self.snapshot_for_current_view(&mut terminal)
+            } else if let Some(offset) = folded_offset {
                 terminal.scroll_to_display_offset(offset);
                 terminal.snapshot()
             } else {
@@ -658,7 +661,7 @@ impl TerminalPane {
         self.snapshot_dirty = false;
         self.snapshot = self.stamp_snapshot(snapshot);
         self.refresh_command_folding();
-        if scroll_delta.animate_rows {
+        if scroll_delta.animate_rows && !self.logical_view_active() {
             self.start_smooth_scroll_row_animation(applied_rows);
         }
         let clamped_remainder = self.clamp_smooth_scroll_remainder_to_bounds();
@@ -672,11 +675,7 @@ impl TerminalPane {
     ///
     /// The pane reports the step count only: Workspace owns the persisted font size, so
     /// wheel zoom and the font size shortcuts share one settings path.
-    fn handle_font_zoom_scroll(
-        &mut self,
-        event: &ScrollEvent,
-        cx: &mut Context<Self>,
-    ) -> bool {
+    fn handle_font_zoom_scroll(&mut self, event: &ScrollEvent, cx: &mut Context<Self>) -> bool {
         if !event.modifiers.control {
             self.font_zoom_scroll_remainder_px = px(0.0);
             return false;
@@ -705,11 +704,7 @@ impl TerminalPane {
         true
     }
 
-    fn handle_horizontal_scroll(
-        &mut self,
-        event: &ScrollEvent,
-        cx: &mut Context<Self>,
-    ) -> bool {
+    fn handle_horizontal_scroll(&mut self, event: &ScrollEvent, cx: &mut Context<Self>) -> bool {
         let max_scroll = self.terminal_horizontal_scroll_limit();
         if max_scroll <= px(0.0) {
             return false;
@@ -1056,6 +1051,9 @@ impl TerminalPane {
         let Some(selection) = self.selection else {
             return false;
         };
+        if self.selection_uses_display_coordinates {
+            return false;
+        }
         let input_state = self.input_tracker.state();
         let Some((text, bytes)) =
             free_type_selection_cut_payload(&self.snapshot, selection, &input_state, mode)
@@ -1128,6 +1126,9 @@ impl TerminalPane {
 
     fn selected_text(&self) -> Option<String> {
         let selection = self.selection?;
+        if self.selection_uses_display_coordinates {
+            return selected_text_for_selection(self.displayed_snapshot(), selection);
+        }
         let Some(request) = snapshot_request_for_selection(&self.snapshot, selection) else {
             return selected_text_for_selection(&self.snapshot, selection);
         };
@@ -1159,10 +1160,11 @@ impl TerminalPane {
         // Reject ordinary multiline selections before materializing potentially large scrollback.
         let multiline = selection.mode == TerminalSelectionMode::Lines
             || (selection.mode == TerminalSelectionMode::Block && start.line != end.line)
-            || self.snapshot.lines.iter().enumerate().any(|(row, line)| {
-                let grid_line = row as i32 - self.snapshot.display_offset as i32;
-                grid_line >= start.line && grid_line < end.line && !line.wrapped
-            });
+            || (!self.selection_uses_display_coordinates
+                && self.snapshot.lines.iter().enumerate().any(|(row, line)| {
+                    let grid_line = row as i32 - self.snapshot.window_display_offset() as i32;
+                    grid_line >= start.line && grid_line < end.line && !line.wrapped
+                }));
         let query = if multiline {
             None
         } else {
@@ -1230,7 +1232,7 @@ impl TerminalPane {
 
         TerminalPoint {
             row,
-            col: logical_col.min(self.snapshot.cols.saturating_sub(1)),
+            col: logical_col.min(self.displayed_snapshot().cols.saturating_sub(1)),
         }
     }
 
@@ -1389,7 +1391,7 @@ impl TerminalPane {
         let snapshot = {
             let mut terminal = self.terminal.lock();
             terminal.scroll_to_display_offset(offset);
-            terminal.snapshot()
+            self.snapshot_for_view_at(&mut terminal, offset)
         };
         self.clear_smooth_scroll_remainder();
         self.snapshot = self.stamp_snapshot(snapshot);
@@ -1403,7 +1405,12 @@ impl TerminalPane {
         cx: &mut Context<Self>,
     ) {
         let point = self.terminal_point_for_position(position);
-        let Some(point) = self.physical_grid_point(point) else {
+        let point = if mode == TerminalSelectionMode::Block && self.display_view.active() {
+            grid_point_for_viewport_point(self.displayed_snapshot(), point)
+        } else {
+            self.physical_grid_point(point)
+        };
+        let Some(point) = point else {
             return;
         };
         self.selection_started_at_bottom = self.snapshot.display_offset == 0;
@@ -1465,7 +1472,11 @@ impl TerminalPane {
         }
 
         let point = self.terminal_point_for_position(position);
-        let point = self.physical_grid_point(point);
+        let point = if self.selection_uses_display_coordinates {
+            grid_point_for_viewport_point(self.displayed_snapshot(), point)
+        } else {
+            self.physical_grid_point(point)
+        };
         if let Some(selection) = &mut self.selection {
             if let Some(point) = point {
                 selection.head = point;
@@ -1522,6 +1533,9 @@ impl TerminalPane {
             self.selection_autoscroll_position = None;
             return;
         }
+        if self.selection_uses_display_coordinates {
+            return;
+        }
 
         let delta_rows = self.selection_autoscroll_delta_rows(position);
         if delta_rows == 0 {
@@ -1547,7 +1561,7 @@ impl TerminalPane {
         let snapshot = {
             let mut terminal = self.terminal.lock();
             terminal.scroll_to_display_offset(target_offset);
-            terminal.snapshot()
+            self.snapshot_for_view_at(&mut terminal, target_offset)
         };
         self.clear_smooth_scroll_remainder();
         self.snapshot = self.stamp_snapshot(snapshot);
@@ -1586,19 +1600,32 @@ impl TerminalPane {
         });
         let snapshot = {
             let mut terminal = self.terminal.lock();
-            if let Some(offset) = folded_offset {
-                terminal.scroll_to_display_offset(offset);
-            } else {
+            if self.logical_view_active() {
+                let page = self.snapshot.rows.saturating_sub(1).max(1) as i32;
                 match action {
-                    TerminalScrollAction::PageUp => terminal.page_up(),
-                    TerminalScrollAction::PageDown => terminal.page_down(),
-                    TerminalScrollAction::LineUp => terminal.scroll_lines(1),
-                    TerminalScrollAction::LineDown => terminal.scroll_lines(-1),
+                    TerminalScrollAction::PageUp => terminal.scroll_logical_lines(page),
+                    TerminalScrollAction::PageDown => terminal.scroll_logical_lines(-page),
+                    TerminalScrollAction::LineUp => terminal.scroll_logical_lines(1),
+                    TerminalScrollAction::LineDown => terminal.scroll_logical_lines(-1),
                     TerminalScrollAction::Top => terminal.scroll_to_top(),
                     TerminalScrollAction::Bottom => terminal.scroll_to_bottom(),
                 }
+                self.snapshot_for_current_view(&mut terminal)
+            } else {
+                if let Some(offset) = folded_offset {
+                    terminal.scroll_to_display_offset(offset);
+                } else {
+                    match action {
+                        TerminalScrollAction::PageUp => terminal.page_up(),
+                        TerminalScrollAction::PageDown => terminal.page_down(),
+                        TerminalScrollAction::LineUp => terminal.scroll_lines(1),
+                        TerminalScrollAction::LineDown => terminal.scroll_lines(-1),
+                        TerminalScrollAction::Top => terminal.scroll_to_top(),
+                        TerminalScrollAction::Bottom => terminal.scroll_to_bottom(),
+                    }
+                }
+                terminal.snapshot()
             }
-            terminal.snapshot()
         };
         self.clear_smooth_scroll_remainder();
         self.snapshot = self.stamp_snapshot(snapshot);
@@ -2127,8 +2154,7 @@ impl TerminalPane {
                 if !self.move_cursor_to_free_type_click(event.position, event.modifiers, mode, cx) {
                     self.select_command_mark_at_position(event.position, mode, cx);
                 }
-                if started_at_bottom
-                    && self.selection.is_some_and(|selection| selection.is_empty())
+                if started_at_bottom && self.selection.is_some_and(|selection| selection.is_empty())
                 {
                     // A plain click at the bottom should not leave live output paused at an
                     // incidental scrollback offset accumulated between mouse-down and mouse-up.
@@ -3555,7 +3581,7 @@ fn selection_point_offset(
 }
 
 fn viewport_row_for_selection_line(snapshot: &TerminalSnapshot, line: i32) -> Option<usize> {
-    let row = line + snapshot.display_offset as i32;
+    let row = line + snapshot.window_display_offset() as i32;
     usize::try_from(row).ok().filter(|row| *row < snapshot.rows)
 }
 
@@ -4241,7 +4267,8 @@ mod tests {
         // Content-driven refreshes run on the streaming debounce because the
         // output just updated last_terminal_activity; only query changes use
         // the urgent debounce.
-        cx.executor().advance_clock(TERMINAL_SEARCH_STREAMING_DEBOUNCE);
+        cx.executor()
+            .advance_clock(TERMINAL_SEARCH_STREAMING_DEBOUNCE);
         cx.run_until_parked();
         pane.read_with(cx, |pane, _| {
             assert_eq!(
@@ -4400,7 +4427,6 @@ mod tests {
         cx.run_until_parked();
         pane.read_with(cx, |pane, _| assert!(!pane.scrollbar_visible));
     }
-
 
     #[gpui::test]
     fn ctrl_wheel_steps_font_size_without_scrolling(cx: &mut TestAppContext) {
@@ -4707,7 +4733,8 @@ mod tests {
                 cx.run_until_parked();
                 // Output-driven refreshes use the longer streaming debounce; the
                 // previous cache stays displayed until the rescan lands.
-                cx.executor().advance_clock(TERMINAL_SEARCH_STREAMING_DEBOUNCE);
+                cx.executor()
+                    .advance_clock(TERMINAL_SEARCH_STREAMING_DEBOUNCE);
                 cx.run_until_parked();
                 pane.update(cx, |pane, cx| {
                     assert_eq!(pane.search_status().match_count, 3);
@@ -5124,6 +5151,7 @@ mod tests {
             absolute_line: 0,
             cells: Arc::new(cells),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input,
             signature: 0,
         };
@@ -5144,6 +5172,7 @@ mod tests {
         TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols,
             rows: lines.len(),
             cursor_col,

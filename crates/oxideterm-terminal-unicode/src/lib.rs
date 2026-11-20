@@ -387,6 +387,7 @@ mod tests {
                     .collect(),
             ),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };

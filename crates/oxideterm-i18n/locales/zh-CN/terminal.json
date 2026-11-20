@@ -622,6 +622,10 @@
       "ssh_shell": "SSH（Shell 通道）",
       "agent_installing": "正在安装代理：{{percent}}%（{{transferred}} / {{total}} KiB）",
       "agent_starting": "正在启动代理…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "关闭自动换行",
+      "disabled_tooltip": "开启自动换行"
     }
   },
   "search": {

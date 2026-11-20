@@ -622,6 +622,10 @@
       "ssh_shell": "SSH (Shell 채널)",
       "agent_installing": "에이전트 설치 중: {{percent}}% ({{transferred}} / {{total}} KiB)",
       "agent_starting": "에이전트 시작 중…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "줄 바꿈 끄기",
+      "disabled_tooltip": "줄 바꿈 켜기"
     }
   },
   "search": {

@@ -1449,8 +1449,9 @@ impl WorkspaceApp {
         &mut self,
         cx: &mut Context<Self>,
     ) -> bool {
-        self.terminal
-            .update(cx, |terminal, _cx| terminal.quick_commands.dismiss_category_menu())
+        self.terminal.update(cx, |terminal, _cx| {
+            terminal.quick_commands.dismiss_category_menu()
+        })
     }
 
     pub(in crate::workspace) fn dismiss_terminal_broadcast_menu(
@@ -2788,10 +2789,9 @@ impl WorkspaceApp {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        let Some(execution) = self
-            .terminal
-            .update(cx, |terminal, _cx| terminal.quick_commands.pending_execution.take())
-        else {
+        let Some(execution) = self.terminal.update(cx, |terminal, _cx| {
+            terminal.quick_commands.pending_execution.take()
+        }) else {
             return;
         };
         let parameter_values = execution
@@ -2857,9 +2857,7 @@ impl WorkspaceApp {
 
         let target_lines: Vec<(PaneId, Vec<String>)> = targets
             .iter()
-            .map(|(pane_id, command)| {
-                (*pane_id, split_quick_command_lines(command))
-            })
+            .map(|(pane_id, command)| (*pane_id, split_quick_command_lines(command)))
             .collect();
         let max_lines = target_lines
             .iter()
@@ -2874,14 +2872,18 @@ impl WorkspaceApp {
                 target_count,
                 active_pane_id,
                 |pane_id, command, source, parent_id| {
-                    self.send_terminal_quick_command_to_pane(pane_id, command, source, parent_id, cx)
+                    self.send_terminal_quick_command_to_pane(
+                        pane_id, command, source, parent_id, cx,
+                    )
                 },
             )
         } else {
             let first_step_targets = target_lines
                 .iter()
                 .filter_map(|(pane_id, lines)| {
-                    lines.first().map(|line| (*pane_id, Zeroizing::new(line.clone())))
+                    lines
+                        .first()
+                        .map(|line| (*pane_id, Zeroizing::new(line.clone())))
                 })
                 .collect::<Vec<_>>();
             let initial_sent = dispatch_quick_command_batch(
@@ -2890,7 +2892,9 @@ impl WorkspaceApp {
                 target_count,
                 active_pane_id,
                 |pane_id, command, source, parent_id| {
-                    self.send_terminal_quick_command_to_pane(pane_id, command, source, parent_id, cx)
+                    self.send_terminal_quick_command_to_pane(
+                        pane_id, command, source, parent_id, cx,
+                    )
                 },
             );
 
@@ -2910,11 +2914,7 @@ impl WorkspaceApp {
                                         TerminalCommandMarkDetectionSource::Broadcast
                                     };
                                     if this.send_terminal_quick_command_to_pane(
-                                        *pane_id,
-                                        line,
-                                        source,
-                                        None,
-                                        cx,
+                                        *pane_id, line, source, None, cx,
                                     ) {
                                         any_sent = true;
                                     }
@@ -2940,13 +2940,10 @@ impl WorkspaceApp {
             initial_sent
         };
         if sent_count > 0 {
-            if focus_command
-                .as_deref()
-                .is_some_and(|command| {
-                    !command.ends_with('\n') && !command.ends_with('\r')
-                        || self.terminal_command_should_handoff_focus(command)
-                })
-            {
+            if focus_command.as_deref().is_some_and(|command| {
+                !command.ends_with('\n') && !command.ends_with('\r')
+                    || self.terminal_command_should_handoff_focus(command)
+            }) {
                 self.focus_active_pane(window, cx);
             }
             if self
@@ -3154,6 +3151,18 @@ impl WorkspaceApp {
     pub(super) fn toggle_active_terminal_timestamps(&mut self, cx: &mut Context<Self>) {
         if let Some(pane) = self.active_pane(cx) {
             let _ = pane.update(cx, |pane, cx| pane.toggle_terminal_timestamps(cx));
+        }
+        cx.notify();
+    }
+
+    pub(super) fn active_terminal_wrap_disabled(&self, cx: &mut Context<Self>) -> bool {
+        self.active_pane(cx)
+            .is_some_and(|pane| pane.read(cx).terminal_wrap_disabled())
+    }
+
+    pub(super) fn toggle_active_terminal_wrap(&mut self, cx: &mut Context<Self>) {
+        if let Some(pane) = self.active_pane(cx) {
+            let _ = pane.update(cx, |pane, cx| pane.toggle_terminal_wrap(cx));
         }
         cx.notify();
     }
@@ -4088,7 +4097,8 @@ mod keybinding_update_tests {
                 .track_focus(&self.focus)
                 .on_action(cx.listener(|this, _: &NewTerminal, _, _| this.actions += 1))
                 .on_key_down(cx.listener(|this, event: &KeyDownEvent, _, cx| {
-                    this.input.push(event.keystroke.unparse(cx.platform_info().os));
+                    this.input
+                        .push(event.keystroke.unparse(cx.platform_info().os));
                 }))
         }
     }

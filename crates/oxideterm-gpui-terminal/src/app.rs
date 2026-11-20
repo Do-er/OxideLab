@@ -24,15 +24,15 @@ use oxideterm_terminal::{
     GraphicsOptions, KittyFileTransmissionControl, KittyFileTransmissionPrompt, LocalPtyConfig,
     SerialControlLine, SerialControlState, SerialDisplayMode, SerialLineEnding,
     SerialRuntimeOptions, SerialSendMode, SerialSessionConfig, ShellIntegrationLifecycleState,
-    ShellIntegrationStatus, SshSessionConfig, TelnetSessionConfig, TermMode, TerminalCell,
-    TerminalCommandMark, TerminalCommandMarkClosedBy,
-    TerminalCommandMarkConfidence, TerminalCommandMarkDetectionSource, TerminalCommandMarkEvent,
+    ShellIntegrationStatus, SnapshotWindow, SshSessionConfig, TelnetSessionConfig, TermMode,
+    TerminalCell, TerminalCommandMark, TerminalCommandMarkClosedBy, TerminalCommandMarkConfidence,
+    TerminalCommandMarkDetectionSource, TerminalCommandMarkEvent,
     TerminalCwdIntegrationLaunchState, TerminalDrainBudget, TerminalDrainReport,
     TerminalEditorApplication, TerminalEditorClipboardOperation, TerminalEditorIntegrationEvent,
-    TerminalEvent, TerminalLifecycle, TerminalOutputProcessor, TerminalProcessInfo,
-    TerminalProcessProbe, TerminalRow, TerminalSearchMatch, TerminalSession, TerminalSessionKind,
-    TerminalSnapshot, TmuxSeparator, TmuxSeparatorDirection, TrzszTransferDirection,
-    TrzszTransferSelection, serial_list_ports,
+    TerminalEvent, TerminalImageSnapshot, TerminalLifecycle, TerminalOutputProcessor,
+    TerminalProcessInfo, TerminalProcessProbe, TerminalRow, TerminalSearchMatch, TerminalSession,
+    TerminalSessionKind, TerminalSnapshot, TmuxSeparator, TmuxSeparatorDirection,
+    TrzszTransferDirection, TrzszTransferSelection, serial_list_ports,
 };
 use oxideterm_trzsz::TrzszState;
 use parking_lot::Mutex;
@@ -57,6 +57,7 @@ use oxideterm_terminal_recording::{
 };
 
 mod command_folding;
+mod display_view;
 mod image_animation;
 mod image_cache;
 mod ime;
@@ -67,6 +68,7 @@ mod scrollbar;
 mod timestamp_hover;
 mod trigger_interaction;
 
+use display_view::DisplayView;
 use timestamp_hover::TerminalTextHover;
 
 use crate::modem_worker::{
@@ -412,8 +414,10 @@ fn terminal_output_coalescing_delay(
     // redraw. Hold output-driven ticks to one animation interval; input and
     // maintenance wakes still interrupt the wait immediately. Other backends
     // keep their current pacing until their wake rates prove equally hot.
-    if matches!(kind, TerminalSessionKind::Serial | TerminalSessionKind::SshPty)
-        && wake == TerminalSchedulerWake::BackendActivity
+    if matches!(
+        kind,
+        TerminalSessionKind::Serial | TerminalSessionKind::SshPty
+    ) && wake == TerminalSchedulerWake::BackendActivity
     {
         TERMINAL_ANIMATION_INTERVAL.saturating_sub(since_last_tick)
     } else {
@@ -441,10 +445,7 @@ fn session_kind_protocol_label(session_kind: TerminalSessionKind) -> &'static st
     }
 }
 
-fn is_pure_selection_translation(
-    previous: &TerminalSelection,
-    next: &TerminalSelection,
-) -> bool {
+fn is_pure_selection_translation(previous: &TerminalSelection, next: &TerminalSelection) -> bool {
     // Grid coordinates shift uniformly when output scrolls the selection into
     // history; columns and the selection mode carry no positional meaning here.
     previous.mode == next.mode
@@ -533,6 +534,7 @@ pub struct TerminalPane {
     metrics: TerminalMetrics,
     metrics_dirty: bool,
     selection: Option<TerminalSelection>,
+    selection_uses_display_coordinates: bool,
     // The draft owns the pending paste text, so protected pastes never keep a
     // second copy of clipboard contents in the pane.
     paste_editor: Option<paste::PasteEditor>,
@@ -680,6 +682,11 @@ pub struct TerminalPane {
     viewport_scale_factor_bits: Option<u32>,
     last_pty_resize: Option<(usize, usize, u16, u16)>,
     pending_pty_resize: Option<(usize, usize, u16, u16)>,
+    wrap_disabled: bool,
+    display_view: DisplayView,
+    // Cursor position and cell width that last drove horizontal reveal, so manual
+    // horizontal scrolling and viewport resizing do not recenter the following frame.
+    revealed_cursor: Option<(usize, usize, u32)>,
     pty_resize_generation: u64,
     pty_resize_task: Option<gpui::Task<()>>,
     trzsz_state: Arc<TrzszState>,
@@ -1318,6 +1325,7 @@ impl TerminalPane {
             metrics,
             metrics_dirty: false,
             selection: None,
+            selection_uses_display_coordinates: false,
             paste_editor: None,
             kitty_file_transmission,
             kitty_file_transmission_prompt: None,
@@ -1471,6 +1479,9 @@ impl TerminalPane {
             viewport_scale_factor_bits: None,
             last_pty_resize: None,
             pending_pty_resize: None,
+            wrap_disabled: false,
+            display_view: DisplayView::default(),
+            revealed_cursor: None,
             pty_resize_generation: 0,
             pty_resize_task: None,
             trzsz_state: TrzszState::new(),
@@ -1497,25 +1508,30 @@ impl TerminalPane {
     }
 
     fn set_selection(&mut self, selection: Option<TerminalSelection>) {
-        let range = selection.map(|selection| {
-            let (start, end) = selection.normalized();
-            let is_block = selection.mode == TerminalSelectionMode::Block;
-            oxideterm_terminal::TerminalSelectionRange {
-                start_line: start.line,
-                end_line: end.line,
-                start_col: if is_block {
-                    start.col.min(end.col)
-                } else {
-                    start.col
-                },
-                end_col: if is_block {
-                    start.col.max(end.col)
-                } else {
-                    end.col
-                },
-                is_block,
-            }
+        self.selection_uses_display_coordinates = selection.is_some_and(|selection| {
+            selection.mode == TerminalSelectionMode::Block && self.display_view.active()
         });
+        let range = selection
+            .filter(|_| !self.selection_uses_display_coordinates)
+            .map(|selection| {
+                let (start, end) = selection.normalized();
+                let is_block = selection.mode == TerminalSelectionMode::Block;
+                oxideterm_terminal::TerminalSelectionRange {
+                    start_line: start.line,
+                    end_line: end.line,
+                    start_col: if is_block {
+                        start.col.min(end.col)
+                    } else {
+                        start.col
+                    },
+                    end_col: if is_block {
+                        start.col.max(end.col)
+                    } else {
+                        end.col
+                    },
+                    is_block,
+                }
+            });
         self.terminal
             .lock()
             .set_selection_from_display_offset(range, self.snapshot.display_offset);
@@ -1527,6 +1543,9 @@ impl TerminalPane {
         &mut self,
         range: Option<oxideterm_terminal::TerminalSelectionRange>,
     ) {
+        if self.selection_uses_display_coordinates {
+            return;
+        }
         let Some(previous) = self.selection else {
             return;
         };
@@ -1687,6 +1706,69 @@ impl TerminalPane {
 
     pub fn terminal_timestamps_enabled(&self) -> bool {
         self.terminal_timestamps_enabled
+    }
+
+    pub fn terminal_wrap_disabled(&self) -> bool {
+        self.wrap_disabled
+    }
+
+    fn logical_view_active(&self) -> bool {
+        self.wrap_disabled && self.display_view.active()
+    }
+
+    fn snapshot_for_current_view(
+        &self,
+        terminal: &mut oxideterm_terminal::TerminalSession,
+    ) -> TerminalSnapshot {
+        if self.logical_view_active() {
+            terminal.snapshot_incremental_with_window(
+                &self.snapshot,
+                SnapshotWindow::LogicalLines {
+                    count: self.snapshot.rows,
+                },
+            )
+        } else {
+            terminal.snapshot()
+        }
+    }
+
+    fn snapshot_for_view_at(
+        &self,
+        terminal: &mut oxideterm_terminal::TerminalSession,
+        display_offset: usize,
+    ) -> TerminalSnapshot {
+        if !self.logical_view_active() {
+            return terminal.snapshot();
+        }
+        let snapshot = terminal.snapshot_with_display_offset_and_window(
+            display_offset,
+            self.snapshot.rows,
+            SnapshotWindow::LogicalLines {
+                count: self.snapshot.rows,
+            },
+            Some(&self.snapshot),
+        );
+        terminal.scroll_to_display_offset(snapshot.display_offset);
+        snapshot
+    }
+
+    pub fn toggle_terminal_wrap(&mut self, cx: &mut Context<Self>) {
+        self.wrap_disabled = !self.wrap_disabled;
+        self.horizontal_scroll_offset_px = px(0.0);
+        self.horizontal_scrollbar_drag = None;
+        self.revealed_cursor = None;
+        self.display_view.invalidate();
+        self.set_selection(None);
+        self.clear_smooth_scroll_remainder();
+        self.snapshot_dirty = true;
+        if let Some(bounds) = self.bounds {
+            let scale_factor = self
+                .viewport_scale_factor_bits
+                .map(f32::from_bits)
+                .unwrap_or(1.0);
+            self.apply_viewport_bounds(bounds, scale_factor, cx);
+        }
+        cx.notify();
     }
 
     pub fn toggle_terminal_timestamps(&mut self, cx: &mut Context<Self>) {
@@ -2461,11 +2543,7 @@ impl TerminalPane {
         Ok(())
     }
 
-    pub fn restart_local(
-        &mut self,
-        config: LocalPtyConfig,
-        cx: &mut Context<Self>,
-    ) -> Result<()> {
+    pub fn restart_local(&mut self, config: LocalPtyConfig, cx: &mut Context<Self>) -> Result<()> {
         self.terminal.lock().restart_local(config)?;
         self.set_selection(None);
         let _ = self.scheduler_wake_sender.try_send(());
@@ -2893,11 +2971,12 @@ impl TerminalPane {
         let Some(pattern) = self.search_pattern.clone() else {
             return;
         };
-        let debounce = if urgent || self.last_terminal_activity.elapsed() > RECENT_TERMINAL_ACTIVITY_WINDOW {
-            TERMINAL_SEARCH_DEBOUNCE
-        } else {
-            TERMINAL_SEARCH_STREAMING_DEBOUNCE
-        };
+        let debounce =
+            if urgent || self.last_terminal_activity.elapsed() > RECENT_TERMINAL_ACTIVITY_WINDOW {
+                TERMINAL_SEARCH_DEBOUNCE
+            } else {
+                TERMINAL_SEARCH_STREAMING_DEBOUNCE
+            };
         let cancellation = self.search_generation.clone();
         self.search_task = Some(cx.spawn(async move |weak, cx| {
             cx.background_executor().timer(debounce).await;
@@ -3325,12 +3404,7 @@ impl TerminalPane {
         true
     }
 
-    fn send_composer_text(
-        &mut self,
-        text: &str,
-        whole_line: bool,
-        cx: &mut Context<Self>,
-    ) -> bool {
+    fn send_composer_text(&mut self, text: &str, whole_line: bool, cx: &mut Context<Self>) -> bool {
         if text.is_empty() || !self.terminal_accepts_input() {
             return false;
         }
@@ -4705,7 +4779,7 @@ impl TerminalPane {
         let snapshot = {
             let mut terminal = self.terminal.lock();
             terminal.scroll_to_bottom();
-            terminal.snapshot()
+            self.snapshot_for_current_view(&mut terminal)
         };
         self.clear_smooth_scroll_remainder();
         self.snapshot = self.stamp_snapshot(snapshot);
@@ -4988,7 +5062,16 @@ impl TerminalPane {
         }
         self.bounds = Some(bounds);
         self.viewport_scale_factor_bits = Some(scale_factor.to_bits());
-        let resize = self.grid_size_for_viewport(bounds, scale_factor);
+        let mut resize = self.grid_size_for_viewport(bounds, scale_factor);
+        if self.wrap_disabled {
+            resize.0 = self
+                .last_pty_resize
+                .map_or(self.snapshot.cols, |(cols, _, _, _)| cols);
+        }
+        let max_scroll = self.terminal_horizontal_scroll_limit();
+        if self.horizontal_scroll_offset_px > max_scroll {
+            self.horizontal_scroll_offset_px = max_scroll;
+        }
 
         if self.last_pty_resize == Some(resize)
             && (self.snapshot.cols, self.snapshot.rows) == (resize.0, resize.1)
@@ -5173,6 +5256,9 @@ impl TerminalPane {
     }
 
     fn terminal_horizontal_scroll_limit(&self) -> Pixels {
+        if !self.wrap_disabled {
+            return px(0.0);
+        }
         let bounds = match self.bounds {
             Some(bounds) => bounds,
             None => return px(0.0),
@@ -5181,8 +5267,73 @@ impl TerminalPane {
         let gutter_width = self.timestamp_gutter_width() + self.command_mark_gutter_width();
         let available_width =
             terminal_grid_span_for_viewport(bounds.size.width, cell_width, gutter_width);
-        let content_width = self.snapshot.cols as f32 * cell_width;
+        let content_width = self.displayed_snapshot().cols as f32 * cell_width;
         px((content_width - available_width).max(0.0))
+    }
+
+    /// Keeps the input caret inside the horizontally scrolled viewport.
+    ///
+    /// Only a cursor move or cell-metric change re-centers the view; manual horizontal
+    /// scrolling and viewport resizing must not snap away on the next frame.
+    fn reveal_cursor_horizontally(&mut self) -> bool {
+        let max_scroll = f32::from(self.terminal_horizontal_scroll_limit());
+        if max_scroll <= 0.0 {
+            return false;
+        }
+        let Some(bounds) = self.bounds else {
+            return false;
+        };
+        let cursor_is_active_input = self
+            .displayed_snapshot()
+            .lines
+            .get(self.displayed_snapshot().cursor_row)
+            .is_some_and(|row| row.active_input);
+        if !cursor_is_active_input
+            && self.last_terminal_input.elapsed() >= RECENT_TERMINAL_INPUT_WINDOW
+        {
+            return false;
+        }
+        let (cursor_row, cursor_col) = {
+            let displayed = self.displayed_snapshot();
+            (displayed.cursor_row, displayed.cursor_col)
+        };
+        let key = (
+            cursor_row,
+            cursor_col,
+            self.metrics.cell_width_f32().to_bits(),
+        );
+        if self.revealed_cursor == Some(key) {
+            return false;
+        }
+        self.revealed_cursor = Some(key);
+        let Some(cursor) = ime_cursor_bounds_for_snapshot(self.displayed_snapshot(), &self.metrics)
+        else {
+            return false;
+        };
+        let cell_width = self.metrics.cell_width_f32();
+        let gutter_width = self.timestamp_gutter_width() + self.command_mark_gutter_width();
+        let viewport_width = f32::from(terminal_grid_span_for_viewport(
+            bounds.size.width,
+            cell_width,
+            gutter_width,
+        ));
+        let cursor_left = f32::from(cursor.origin.x);
+        let cursor_right = cursor_left + f32::from(cursor.size.width);
+        let offset = f32::from(self.horizontal_scroll_offset_px);
+        // Scroll the minimum distance that makes the whole caret cell visible.
+        let next = if cursor_left < offset {
+            cursor_left
+        } else if cursor_right > offset + viewport_width {
+            cursor_right - viewport_width
+        } else {
+            return false;
+        };
+        let next = px(next.clamp(0.0, max_scroll));
+        if next == self.horizontal_scroll_offset_px {
+            return false;
+        }
+        self.horizontal_scroll_offset_px = next;
+        true
     }
 
     fn command_mark_gutter_width(&self) -> f32 {
@@ -5953,6 +6104,186 @@ mod tests {
             assert!(
                 pane.snapshot.rows as f32 * pane.metrics.line_height_f32()
                     <= f32::from(bounds.size.height) - TERMINAL_CONTENT_PADDING * 2.0
+            );
+        });
+    }
+
+    #[gpui::test]
+    fn wrapped_grid_never_reports_horizontal_scroll_while_timestamps_toggle(
+        cx: &mut TestAppContext,
+    ) {
+        let (_, cx) = cx.add_window_view(|_window, _cx| TerminalTestRoot);
+        let pane = cx.update(|window, cx| {
+            cx.new(|cx| {
+                TerminalPane::new_recording_playback(
+                    DEFAULT_COLS,
+                    DEFAULT_ROWS,
+                    TerminalUiPreferences::default(),
+                    window,
+                    cx,
+                )
+                .expect("test terminal pane")
+            })
+        });
+        let bounds = gpui::Bounds::new(
+            gpui::point(px(0.0), px(0.0)),
+            gpui::size(px(640.0), px(320.0)),
+        );
+        pane.update(cx, |pane, cx| pane.apply_viewport_bounds(bounds, 1.0, cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        let settled = pane.read_with(cx, |pane, _| (pane.snapshot.cols, pane.snapshot.rows));
+
+        // The timestamp gutter appears immediately while the narrowing PTY resize is
+        // still debounced. That gap must not surface as a horizontal scrollbar.
+        pane.update(cx, |pane, cx| {
+            pane.toggle_terminal_timestamps(cx);
+            cx.notify();
+        });
+        pane.read_with(cx, |pane, _| {
+            assert!(pane.terminal_timestamps_enabled());
+            assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
+        });
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
+            // Wrapping still re-adopts the viewport, now one gutter narrower.
+            assert!(pane.snapshot.cols < settled.0);
+            assert_eq!(pane.snapshot.rows, settled.1);
+        });
+
+        pane.update(cx, |pane, cx| pane.toggle_terminal_timestamps(cx));
+        pane.read_with(cx, |pane, _| {
+            assert!(!pane.terminal_timestamps_enabled());
+            assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
+        });
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert_eq!((pane.snapshot.cols, pane.snapshot.rows), settled);
+            assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
+        });
+    }
+
+    #[gpui::test]
+    fn no_wrap_freezes_columns_until_wrapping_is_restored(cx: &mut TestAppContext) {
+        let (_, cx) = cx.add_window_view(|_window, _cx| TerminalTestRoot);
+        let pane = cx.update(|window, cx| {
+            cx.new(|cx| {
+                TerminalPane::new_recording_playback(
+                    DEFAULT_COLS,
+                    DEFAULT_ROWS,
+                    TerminalUiPreferences::default(),
+                    window,
+                    cx,
+                )
+                .expect("test terminal pane")
+            })
+        });
+        let wide = gpui::Bounds::new(
+            gpui::point(px(0.0), px(0.0)),
+            gpui::size(px(960.0), px(400.0)),
+        );
+        pane.update(cx, |pane, cx| pane.apply_viewport_bounds(wide, 1.0, cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        let settled = pane.read_with(cx, |pane, _| pane.snapshot.cols);
+
+        pane.update(cx, |pane, cx| pane.toggle_terminal_wrap(cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert!(pane.terminal_wrap_disabled());
+            assert_eq!(pane.snapshot.cols, settled);
+            assert_eq!(pane.terminal.lock().snapshot().cols, settled);
+            assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+        });
+
+        // Width changes only alter horizontal overflow while no-wrap is active.
+        let narrow = gpui::Bounds::new(
+            gpui::point(px(0.0), px(0.0)),
+            gpui::size(px(480.0), px(400.0)),
+        );
+        pane.update(cx, |pane, cx| pane.apply_viewport_bounds(narrow, 1.0, cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert_eq!(pane.snapshot.cols, settled);
+            assert_eq!(pane.terminal.lock().snapshot().cols, settled);
+            assert!(pane.terminal_horizontal_scroll_limit() > px(0.0));
+        });
+
+        pane.update(cx, |pane, cx| pane.apply_viewport_bounds(wide, 1.0, cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert_eq!(pane.snapshot.cols, settled);
+            assert_eq!(pane.terminal.lock().snapshot().cols, settled);
+            assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+        });
+
+        // Restoring wrapping adopts the current viewport again.
+        pane.update(cx, |pane, cx| pane.toggle_terminal_wrap(cx));
+        cx.run_until_parked();
+        cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
+        cx.run_until_parked();
+        pane.read_with(cx, |pane, _| {
+            assert!(!pane.terminal_wrap_disabled());
+            assert_eq!(pane.snapshot.cols, settled);
+            assert_eq!(pane.terminal.lock().snapshot().cols, pane.snapshot.cols);
+            assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+        });
+    }
+
+    #[gpui::test]
+    fn no_wrap_bottom_anchor_survives_scrolling_and_user_input(cx: &mut TestAppContext) {
+        let (pane, cx) = cx.add_window_view(|window, cx| {
+            TerminalPane::new_recording_playback(5, 2, Default::default(), window, cx).unwrap()
+        });
+        pane.update(cx, |pane, cx| {
+            pane.feed_recording_output(b"one\r\nabcdefghij\r\nxy", cx);
+            pane.tick(cx);
+            pane.toggle_terminal_wrap(cx);
+            pane.refresh_display_view();
+            assert_eq!(pane.snapshot.display_offset, 0);
+            assert!(pane.snapshot.window_display_offset() > 0);
+
+            pane.apply_scroll_action(TerminalScrollAction::LineUp, cx);
+            assert!(pane.snapshot.display_offset > 0);
+            pane.restore_live_output_after_user_input();
+            assert_eq!(pane.snapshot.display_offset, 0);
+            assert!(pane.snapshot.window_display_offset() > 0);
+            pane.refresh_display_view();
+            assert_eq!(
+                pane.displayed_snapshot()
+                    .lines
+                    .iter()
+                    .map(|row| row.text().trim_end().to_owned())
+                    .collect::<Vec<_>>(),
+                ["abcdefghij", "xy"]
+            );
+            assert_eq!(pane.displayed_snapshot().cursor_row, 1);
+
+            pane.apply_scroll_action(TerminalScrollAction::LineUp, cx);
+            assert!(pane.snapshot.display_offset > 0);
+            pane.apply_scroll_action(TerminalScrollAction::Bottom, cx);
+            assert_eq!(pane.snapshot.display_offset, 0);
+            pane.refresh_display_view();
+            assert_eq!(
+                pane.displayed_snapshot()
+                    .lines
+                    .iter()
+                    .map(|row| row.text().trim_end().to_owned())
+                    .collect::<Vec<_>>(),
+                ["abcdefghij", "xy"]
             );
         });
     }
@@ -7015,6 +7346,7 @@ mod tests {
             absolute_line,
             cells: Arc::new(cells),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input,
             signature: 0,
         };
@@ -7026,6 +7358,7 @@ mod tests {
         TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols: row.cells.len().max(1),
             rows: 1,
             cursor_col: 0,
@@ -7050,6 +7383,7 @@ mod tests {
         let previous = TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols: 8,
             rows: 3,
             cursor_col: 0,

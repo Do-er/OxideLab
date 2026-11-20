@@ -747,6 +747,10 @@ impl TerminalSession {
         self.backend.scroll_lines(delta);
     }
 
+    pub fn scroll_logical_lines(&mut self, delta: i32) {
+        self.backend.scroll_logical_lines(delta);
+    }
+
     /// Queue UI geometry without requiring a synchronous local-history reflow.
     pub fn request_resize(
         &mut self,
@@ -841,6 +845,15 @@ impl TerminalSession {
         self.backend.snapshot_incremental(previous)
     }
 
+    pub fn snapshot_incremental_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        window: crate::SnapshotWindow,
+    ) -> TerminalSnapshot {
+        self.backend
+            .snapshot_incremental_with_window(previous, window)
+    }
+
     pub fn try_render_snapshot(
         &self,
         previous: &TerminalSnapshot,
@@ -851,6 +864,31 @@ impl TerminalSession {
         TermMode,
     )> {
         self.backend.try_render_snapshot(previous, allow_defer)
+    }
+
+    pub fn try_render_snapshot_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        allow_defer: bool,
+        window: crate::SnapshotWindow,
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
+        self.backend
+            .try_render_snapshot_with_window(previous, allow_defer, window)
+    }
+
+    pub fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        self.backend
+            .snapshot_with_display_offset_and_window(display_offset, rows, window, previous)
     }
 
     pub fn snapshot_with_display_offset(

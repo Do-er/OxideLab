@@ -147,8 +147,15 @@ impl TerminalPane {
         let first =
             (start.line + usize::from(start.column != 0)).max(mark.command_line.saturating_add(1));
         let last = end.line;
-        (last > first && last <= self.snapshot.scrollback_lines + self.snapshot.rows)
-            .then_some(first..last)
+        let crosses_wrapped_chain = self.snapshot.logical_context.iter().any(|context| {
+            let chain_end = context.end_line.saturating_add(1);
+            (first > context.start_line && first < chain_end)
+                || (last > context.start_line && last < chain_end)
+        });
+        (!crosses_wrapped_chain).then_some(()).and_then(|()| {
+            (last > first && last <= self.snapshot.scrollback_lines + self.snapshot.rows)
+                .then_some(first..last)
+        })
     }
 
     pub(super) fn command_fold_action(&self, id: &str) -> Option<String> {
@@ -171,12 +178,16 @@ impl TerminalPane {
         }
         if self.command_reflow_pending {
             self.command_folding.ranges.clear();
-            self.command_folding.snapshot = None;
+            if self.command_folding.snapshot.take().is_some() {
+                self.display_view.invalidate();
+            }
             return;
         }
         if self.command_folding.collapsed.is_empty() {
             self.command_folding.ranges.clear();
-            self.command_folding.snapshot = None;
+            if self.command_folding.snapshot.take().is_some() {
+                self.display_view.invalidate();
+            }
             return;
         }
         let mut ranges = self
@@ -219,6 +230,7 @@ impl TerminalPane {
             return;
         }
         self.command_folding.ranges = ranges;
+        self.display_view.invalidate();
         self.command_folding.snapshot = if self.command_folding.ranges.is_empty() {
             None
         } else {
@@ -235,11 +247,33 @@ impl TerminalPane {
         }
     }
 
-    pub(super) fn displayed_snapshot(&self) -> &TerminalSnapshot {
+    fn base_displayed_snapshot(&self) -> &TerminalSnapshot {
         self.command_folding
             .snapshot
             .as_ref()
             .unwrap_or(&self.snapshot)
+    }
+
+    pub(super) fn refresh_display_view(&mut self) {
+        let tmux_active = self.terminal.lock().tmux_state().is_some();
+        let enabled =
+            self.wrap_disabled && !self.render_mode.contains(TermMode::ALT_SCREEN) && !tmux_active;
+        let base = self
+            .command_folding
+            .snapshot
+            .as_ref()
+            .unwrap_or(&self.snapshot);
+        if self.display_view.refresh(base, enabled) {
+            self.horizontal_scroll_offset_px = px(0.0);
+            self.horizontal_scrollbar_drag = None;
+            self.revealed_cursor = None;
+        }
+    }
+
+    pub(super) fn displayed_snapshot(&self) -> &TerminalSnapshot {
+        self.display_view
+            .snapshot()
+            .unwrap_or_else(|| self.base_displayed_snapshot())
     }
 
     pub(super) fn folding_active(&self) -> bool {
@@ -298,6 +332,7 @@ impl TerminalPane {
                 row.line_id = 0;
                 row.source_id = 0;
                 row.wrapped = false;
+                row.trailing_wide_char_spacer = false;
                 row.active_input = false;
                 row.absolute_line = visible as i64 - history as i64;
                 row.refresh_signature();
@@ -315,7 +350,7 @@ impl TerminalPane {
             let raw_top = self
                 .snapshot
                 .scrollback_lines
-                .saturating_sub(self.snapshot.display_offset);
+                .saturating_sub(self.snapshot.window_display_offset());
             let segment =
                 if physical >= raw_top && physical + count <= raw_top + self.snapshot.lines.len() {
                     self.snapshot.clone()
@@ -330,7 +365,7 @@ impl TerminalPane {
                 };
             let segment_top = segment
                 .scrollback_lines
-                .saturating_sub(segment.display_offset);
+                .saturating_sub(segment.window_display_offset());
             if segment.scrollback_lines != self.snapshot.scrollback_lines
                 || segment.cols != self.snapshot.cols
             {
@@ -399,23 +434,39 @@ impl TerminalPane {
     }
 
     pub(super) fn displayed_absolute_line(&self, row: usize) -> usize {
-        let snapshot = self.displayed_snapshot();
+        let row = if self.display_view.active() {
+            self.display_view.physical_row(row).unwrap_or(row)
+        } else {
+            row
+        };
+        let snapshot = self.base_displayed_snapshot();
         self.command_folding.physical_line(
             snapshot
                 .scrollback_lines
-                .saturating_sub(snapshot.display_offset)
+                .saturating_sub(snapshot.window_display_offset())
                 + row,
         )
     }
 
     pub(super) fn physical_grid_point(&self, point: TerminalPoint) -> Option<TerminalGridPoint> {
-        (point.row
-            < self
+        if point.row
+            >= self
                 .displayed_snapshot()
                 .lines
                 .len()
-                .min(self.snapshot.rows))
-        .then(|| TerminalGridPoint {
+                .min(self.snapshot.rows)
+        {
+            return None;
+        }
+        if self.display_view.active() {
+            let point = self.display_view.physical_point(point)?;
+            let row = self.base_displayed_snapshot().lines.get(point.row)?;
+            return Some(TerminalGridPoint {
+                line: row.absolute_line as i32,
+                col: point.col,
+            });
+        }
+        Some(TerminalGridPoint {
             line: self.displayed_absolute_line(point.row) as i32
                 - self.snapshot.scrollback_lines as i32,
             col: point.col,
@@ -424,14 +475,30 @@ impl TerminalPane {
 
     pub(super) fn physical_terminal_point(&self, point: TerminalPoint) -> Option<TerminalPoint> {
         let grid = self.physical_grid_point(point)?;
-        let row = grid.line as i64 + self.snapshot.display_offset as i64;
+        let row = grid.line as i64 + self.snapshot.window_display_offset() as i64;
         Some(TerminalPoint {
             row: usize::try_from(row).ok()?,
-            col: point.col,
+            col: grid.col,
         })
     }
 
     pub(super) fn physical_selection(&self, mut selection: TerminalSelection) -> TerminalSelection {
+        if self.display_view.active() {
+            let base = self.base_displayed_snapshot();
+            for point in [&mut selection.anchor, &mut selection.head] {
+                let row =
+                    (i64::from(point.line) + base.window_display_offset() as i64).max(0) as usize;
+                if let Some(mapped) = self.display_view.physical_point(TerminalPoint {
+                    row,
+                    col: point.col,
+                }) && let Some(source) = base.lines.get(mapped.row)
+                {
+                    point.line = source.absolute_line as i32;
+                    point.col = mapped.col;
+                }
+            }
+            return selection;
+        }
         let history = self.visible_scroll_history() as i64;
         for point in [&mut selection.anchor, &mut selection.head] {
             let visible = (history + i64::from(point.line)).max(0) as usize;
@@ -443,10 +510,36 @@ impl TerminalPane {
 
     pub(super) fn displayed_selection(&self) -> Option<TerminalSelection> {
         let mut selection = self.selection?;
+        if self.selection_uses_display_coordinates {
+            return Some(selection);
+        }
         for point in [&mut selection.anchor, &mut selection.head] {
-            point.line = self.displayed_grid_line(point.line);
+            let (line, col) = self.displayed_grid_point(point.line, point.col);
+            point.line = line;
+            point.col = col;
         }
         Some(selection)
+    }
+
+    fn displayed_grid_point(&self, line: i32, col: usize) -> (i32, usize) {
+        let line = self.displayed_grid_line(line);
+        self.displayed_view_point(line, col)
+    }
+
+    fn displayed_view_point(&self, line: i32, col: usize) -> (i32, usize) {
+        if !self.display_view.active() {
+            return (line, col);
+        }
+        let base = self.base_displayed_snapshot();
+        let row = (i64::from(line) + base.window_display_offset() as i64).max(0) as usize;
+        self.display_view
+            .display_point(TerminalPoint { row, col })
+            .map_or((line, col), |point| {
+                (
+                    point.row as i32 - base.window_display_offset() as i32,
+                    point.col,
+                )
+            })
     }
 
     fn displayed_grid_line(&self, line: i32) -> i32 {
@@ -458,7 +551,7 @@ impl TerminalPane {
         &self,
         matches: Arc<[TerminalSearchMatch]>,
     ) -> Arc<[TerminalSearchMatch]> {
-        if !self.folding_active() {
+        if !self.folding_active() && !self.display_view.active() {
             return matches;
         }
         matches
@@ -475,9 +568,35 @@ impl TerminalPane {
                         .any(|fold| fold.lines.contains(&physical))
                 });
                 for range in &mut found.ranges {
-                    range.line = self.displayed_grid_line(range.line);
+                    let (line, start_col) = self.displayed_grid_point(range.line, range.start_col);
+                    let (_, end_col) = self.displayed_grid_point(range.line, range.end_col);
+                    range.line = line;
+                    range.start_col = start_col;
+                    range.end_col = end_col;
+                    if self.display_view.active() {
+                        range.source_id = 0;
+                    }
                 }
-                found.line = self.displayed_grid_line(found.line);
+                if self.display_view.active() {
+                    let mut merged: Vec<oxideterm_terminal::TerminalSearchRange> =
+                        Vec::with_capacity(found.ranges.len());
+                    for range in found.ranges.drain(..) {
+                        if let Some(previous) = merged.last_mut()
+                            && previous.line == range.line
+                            && range.start_col <= previous.end_col
+                        {
+                            previous.end_col = previous.end_col.max(range.end_col);
+                        } else {
+                            merged.push(range);
+                        }
+                    }
+                    found.ranges = merged;
+                }
+                let (line, start_col) = self.displayed_grid_point(found.line, found.start_col);
+                let (_, end_col) = self.displayed_grid_point(found.line, found.end_col);
+                found.line = line;
+                found.start_col = start_col;
+                found.end_col = end_col;
                 found
             })
             .collect()
@@ -496,6 +615,26 @@ impl TerminalPane {
             .flatten()
         {
             position.line = map.visible_line(position.line);
+            if self.display_view.active() {
+                let history = self.visible_scroll_history();
+                let line = position.line as i32 - history as i32;
+                let (line, column) = self.displayed_view_point(line, position.column);
+                position.line = (i64::from(line) + history as i64).max(0) as usize;
+                position.column = column;
+            }
+        }
+        if self.display_view.active() {
+            let history = self.visible_scroll_history();
+            for line in [&mut mark.start_line, &mut mark.command_line] {
+                let grid = *line as i32 - history as i32;
+                let (grid, _) = self.displayed_view_point(grid, 0);
+                *line = (i64::from(grid) + history as i64).max(0) as usize;
+            }
+            if let Some(line) = &mut mark.end_line {
+                let grid = *line as i32 - history as i32;
+                let (grid, _) = self.displayed_view_point(grid, 0);
+                *line = (i64::from(grid) + history as i64).max(0) as usize;
+            }
         }
         mark
     }
@@ -520,7 +659,7 @@ impl TerminalPane {
         let snapshot = {
             let mut terminal = self.terminal.lock();
             terminal.scroll_to_display_offset(offset);
-            terminal.snapshot()
+            self.snapshot_for_view_at(&mut terminal, offset)
         };
         self.snapshot = self.stamp_snapshot(snapshot);
         self.refresh_command_folding();
@@ -548,7 +687,13 @@ impl TerminalPane {
         let snapshot = self.displayed_snapshot();
         let offset = self.smooth_scroll_display_offset();
         let base_offset = offset.ceil() as usize;
-        let top = snapshot.scrollback_lines.saturating_sub(base_offset);
+        let top = if self.display_view.active() {
+            snapshot
+                .scrollback_lines
+                .saturating_sub(snapshot.window_display_offset())
+        } else {
+            snapshot.scrollback_lines.saturating_sub(base_offset)
+        };
         let y_offset = (offset - base_offset as f32) * self.metrics.line_height_f32();
         self.command_folding
             .ranges

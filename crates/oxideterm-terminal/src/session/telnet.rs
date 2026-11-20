@@ -966,6 +966,12 @@ impl TerminalSessionBackend for TelnetSession {
         }
     }
 
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        if delta != 0 {
+            scroll_display_logical(&mut self.term.lock(), delta);
+        }
+    }
+
     fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -1077,6 +1083,30 @@ impl TerminalSessionBackend for TelnetSession {
             },
             &self.graphics,
             &self.palette,
+            previous,
+        )
+    }
+
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        snapshot_from_term_with_window(
+            &self.term.lock(),
+            TerminalSize {
+                cols: self.resize.cols,
+                rows: self.resize.rows,
+                cell_width: self.resize.cell_width,
+                cell_height: self.resize.cell_height,
+            },
+            &self.graphics,
+            &self.palette,
+            display_offset,
+            rows,
+            window,
             previous,
         )
     }

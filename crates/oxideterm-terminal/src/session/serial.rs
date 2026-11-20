@@ -679,7 +679,9 @@ impl SerialSession {
     fn handle_modem_consumer_events(&mut self, events: Vec<ModemConsumerEvent>) {
         for event in events {
             match event {
-                ModemConsumerEvent::WriteTerminal(bytes) => self.feed_plain_transport_output(&bytes),
+                ModemConsumerEvent::WriteTerminal(bytes) => {
+                    self.feed_plain_transport_output(&bytes)
+                }
                 ModemConsumerEvent::SendServer(bytes) => {
                     let _ = self.write_protocol_bytes(&bytes);
                 }
@@ -716,9 +718,7 @@ impl SerialSession {
                     .normalize(bytes, self.runtime_options.output_line_ending);
                 self.serial_console_ingress.filter(&normalized)
             }
-            SerialDisplayMode::Hex => {
-                format_serial_hexdump(bytes, &mut self.hexdump_offset, false)
-            }
+            SerialDisplayMode::Hex => format_serial_hexdump(bytes, &mut self.hexdump_offset, false),
             SerialDisplayMode::Mixed => {
                 format_serial_hexdump(bytes, &mut self.hexdump_offset, true)
             }
@@ -737,7 +737,8 @@ impl SerialSession {
     fn push_output_event(&mut self, bytes: &[u8]) {
         if self.output_events_enabled && !bytes.is_empty() {
             // File consumers are opt-in, so keep this allocation off the normal rendering path.
-            self.pending_events.push(TerminalEvent::Output(bytes.to_vec()));
+            self.pending_events
+                .push(TerminalEvent::Output(bytes.to_vec()));
         }
     }
 
@@ -773,7 +774,8 @@ impl SerialSession {
                 false
             }
             AlacEvent::ClipboardStore(_, text) => {
-                self.pending_events.push(TerminalEvent::ClipboardStore(text));
+                self.pending_events
+                    .push(TerminalEvent::ClipboardStore(text));
                 false
             }
             AlacEvent::ClipboardLoad(_, formatter) => {
@@ -1062,6 +1064,12 @@ impl TerminalSessionBackend for SerialSession {
         }
     }
 
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        if delta != 0 {
+            scroll_display_logical(&mut self.term.lock(), delta);
+        }
+    }
+
     fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -1173,6 +1181,30 @@ impl TerminalSessionBackend for SerialSession {
             },
             &self.graphics,
             &self.palette,
+            previous,
+        )
+    }
+
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        snapshot_from_term_with_window(
+            &self.term.lock(),
+            TerminalSize {
+                cols: self.resize.cols,
+                rows: self.resize.rows,
+                cell_width: self.resize.cell_width,
+                cell_height: self.resize.cell_height,
+            },
+            &self.graphics,
+            &self.palette,
+            display_offset,
+            rows,
+            window,
             previous,
         )
     }

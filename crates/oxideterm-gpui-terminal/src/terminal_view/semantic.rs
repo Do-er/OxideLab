@@ -196,7 +196,7 @@ pub(super) fn semantic_line_role_for_rows(
     }
     let viewport_start = snapshot
         .scrollback_lines
-        .saturating_sub(snapshot.display_offset);
+        .saturating_sub(snapshot.window_display_offset());
     let start_line = context.map_or(viewport_start.saturating_add(rows.start), |context| {
         context.start_line
     });
@@ -283,6 +283,7 @@ mod tests {
                     .collect(),
             ),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -290,6 +291,7 @@ mod tests {
         TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 0,
+            buffer_reset_generation: 0,
             cols: text.chars().count(),
             rows: 1,
             cursor_col: 0,

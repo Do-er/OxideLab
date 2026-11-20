@@ -999,6 +999,10 @@ impl TerminalSessionBackend for SshPtySession {
         self.shared.core.lock().scroll_lines(delta)
     }
 
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        self.shared.core.lock().scroll_logical_lines(delta)
+    }
+
     fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -1193,6 +1197,37 @@ impl TerminalSessionBackend for SshPtySession {
             Ok(())
         })?;
         Ok(None)
+    }
+
+    fn try_render_snapshot_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        allow_defer: bool,
+        window: crate::SnapshotWindow,
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
+        if window == crate::SnapshotWindow::Viewport {
+            return self.try_render_snapshot(previous, allow_defer);
+        }
+        let core = if allow_defer {
+            self.shared.core.try_lock_unfair()?
+        } else {
+            self.shared.core.lock()
+        };
+        let snapshot = (
+            core.snapshot_incremental_with_window(previous, window),
+            core.selection(),
+            core.mode(),
+        );
+        self.shared
+            .report
+            .lock()
+            .expect("SSH parser report")
+            .output_presented = true;
+        Some(snapshot)
     }
 
     fn try_render_snapshot(

@@ -66,8 +66,16 @@ impl SshPtyCore {
         encoding: TerminalEncoding,
         scrollback_lines: usize,
     ) -> Self {
-        Self::new_inner(config, audit, cols, rows, graphics_options, encoding,
-            scrollback_lines, true)
+        Self::new_inner(
+            config,
+            audit,
+            cols,
+            rows,
+            graphics_options,
+            encoding,
+            scrollback_lines,
+            true,
+        )
     }
 
     #[cfg(test)]
@@ -312,7 +320,10 @@ impl SshPtyCore {
                 // The established transport supplies the recording identity; keep this pane's consumer ID.
                 let mut audit = handle.audit_context().or_else(|| self.audit.clone());
                 if let Some(context) = &mut audit {
-                    context.consumer_id = self.audit.as_ref().and_then(|owner| owner.consumer_id.clone());
+                    context.consumer_id = self
+                        .audit
+                        .as_ref()
+                        .and_then(|owner| owner.consumer_id.clone());
                 }
                 self.audit = audit;
                 self.parser_state.set_recording_context(self.audit.as_ref());
@@ -471,7 +482,11 @@ impl SshPtyCore {
                         if !self.parser_state.flush_recording() {
                             break;
                         }
-                        if self.handle.as_ref().is_some_and(SshPtyHandle::shell_started) {
+                        if self
+                            .handle
+                            .as_ref()
+                            .is_some_and(SshPtyHandle::shell_started)
+                        {
                             self.parser_state.close_recording();
                         } else {
                             self.parser_state.interrupt_recording();
@@ -711,7 +726,11 @@ impl TerminalSessionBackend for SshPtyCore {
         self.parser_state.tmux_state()
     }
 
-    fn tmux_action(&mut self, action: crate::TmuxAction, audit: oxideterm_audit::AuditOperation) -> Result<bool> {
+    fn tmux_action(
+        &mut self,
+        action: crate::TmuxAction,
+        audit: oxideterm_audit::AuditOperation,
+    ) -> Result<bool> {
         self.parser_state.tmux_action(action, audit)
     }
 
@@ -759,6 +778,12 @@ impl TerminalSessionBackend for SshPtyCore {
                 .display_term()
                 .lock()
                 .scroll_display(Scroll::Delta(delta));
+        }
+    }
+
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        if delta != 0 {
+            scroll_display_logical(&mut self.parser_state.display_term().lock(), delta);
         }
     }
 
@@ -949,6 +974,69 @@ impl TerminalSessionBackend for SshPtyCore {
         )
     }
 
+    fn snapshot_incremental_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        window: crate::SnapshotWindow,
+    ) -> TerminalSnapshot {
+        if window == crate::SnapshotWindow::Viewport {
+            return self.snapshot_incremental(previous);
+        }
+        let size = TerminalSize {
+            cols: self.parser_state.resize.cols,
+            rows: self.parser_state.resize.rows,
+            cell_width: self.parser_state.resize.cell_width,
+            cell_height: self.parser_state.resize.cell_height,
+        };
+        if let Some(snapshot) = self
+            .parser_state
+            .tmux_display
+            .snapshot(size, Some(previous))
+        {
+            return snapshot;
+        }
+        let term = self.parser_state.display_term();
+        let mut term = term.lock();
+        incremental_snapshot_from_term_with_window(
+            &mut term,
+            size,
+            &self.parser_state.graphics,
+            &self.parser_state.palette,
+            previous,
+            window,
+        )
+    }
+
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        if window == crate::SnapshotWindow::Viewport || self.parser_state.tmux_display.is_active() {
+            return self.snapshot_with_display_offset(display_offset, rows, previous);
+        }
+        let size = TerminalSize {
+            cols: self.parser_state.resize.cols,
+            rows: self.parser_state.resize.rows,
+            cell_width: self.parser_state.resize.cell_width,
+            cell_height: self.parser_state.resize.cell_height,
+        };
+        let term = self.parser_state.display_term();
+        let term = term.lock();
+        snapshot_from_term_with_window(
+            &term,
+            size,
+            &self.parser_state.graphics,
+            &self.parser_state.palette,
+            display_offset,
+            rows,
+            window,
+            previous,
+        )
+    }
+
     fn snapshot_with_display_offset(
         &self,
         display_offset: usize,
@@ -1085,36 +1173,48 @@ mod ssh_output_protocol_tests {
     #[test]
     fn ssh_parser_records_display_output_after_trzsz_filter_without_ui_events() {
         use oxideterm_audit::{
-            AuditContext, AuditKeyProvider, AuditPolicy, AuditService, AuditSource,
-            RecordingState, StoredRecordingFrameKind,
+            AuditContext, AuditKeyProvider, AuditPolicy, AuditService, AuditSource, RecordingState,
+            StoredRecordingFrameKind,
         };
         use zeroize::Zeroizing;
 
         struct Keys;
         impl AuditKeyProvider for Keys {
-            fn load(&self, _: &str) -> std::result::Result<Zeroizing<Vec<u8>>, oxideterm_audit::AuditError> {
+            fn load(
+                &self,
+                _: &str,
+            ) -> std::result::Result<Zeroizing<Vec<u8>>, oxideterm_audit::AuditError> {
                 Ok(Zeroizing::new(vec![13; 32]))
             }
-            fn create(&self, id: &str) -> std::result::Result<Zeroizing<Vec<u8>>, oxideterm_audit::AuditError> {
+            fn create(
+                &self,
+                id: &str,
+            ) -> std::result::Result<Zeroizing<Vec<u8>>, oxideterm_audit::AuditError> {
                 self.load(id)
             }
         }
 
         let directory = tempfile::tempdir().unwrap();
-        let service = AuditService::with_key_provider(directory.path().join("audit.db"), Keys).unwrap();
+        let service =
+            AuditService::with_key_provider(directory.path().join("audit.db"), Keys).unwrap();
         let client = service.client();
         let runtime = tokio::runtime::Runtime::new().unwrap();
-        runtime.block_on(client.set_policy(AuditPolicy {
-            enabled: true,
-            record_output: true,
-            ..Default::default()
-        })).unwrap();
+        runtime
+            .block_on(client.set_policy(AuditPolicy {
+                enabled: true,
+                record_output: true,
+                ..Default::default()
+            }))
+            .unwrap();
         let context = AuditContext::new(client.clone(), AuditSource::User)
-            .session("ssh", "test@example.invalid:22").consumer();
+            .session("ssh", "test@example.invalid:22")
+            .consumer();
         let mut session = session();
         session.set_output_events_enabled(false);
         session.parser_state.set_recording_context(Some(&context));
-        session.parser_state.feed_transport_output(b"visible-shell-output\r\n");
+        session
+            .parser_state
+            .feed_transport_output(b"visible-shell-output\r\n");
         let handshake = b"::TRZSZ:TRANSFER:R:1.1.6:9\n";
         let config = b"#CFG:eJyrVkrKzEssqlSySkvMKU7VUUrJLEpNLsmHi9QCANctDJE=\n";
         session.parser_state.feed_transport_output(handshake);
@@ -1130,19 +1230,38 @@ mod ssh_output_protocol_tests {
             {
                 break recording.id.clone();
             }
-            assert!(Instant::now() < deadline, "SSH parser recording should close");
+            assert!(
+                Instant::now() < deadline,
+                "SSH parser recording should close"
+            );
             std::thread::sleep(Duration::from_millis(20));
         };
-        let page = runtime.block_on(client.read_recording_page(recording_id, None, None, 10)).unwrap();
-        let output: Vec<u8> = page.chunks.iter().flat_map(|chunk| &chunk.frames)
+        let page = runtime
+            .block_on(client.read_recording_page(recording_id, None, None, 10))
+            .unwrap();
+        let output: Vec<u8> = page
+            .chunks
+            .iter()
+            .flat_map(|chunk| &chunk.frames)
             .filter_map(|frame| match &frame.kind {
                 StoredRecordingFrameKind::Output(bytes) => Some(bytes.as_slice()),
                 _ => None,
-            }).flatten().copied().collect();
-        assert!(output.windows(b"VISIBLE-SHELL-OUTPUT".len())
-            .any(|window| window == b"VISIBLE-SHELL-OUTPUT"));
+            })
+            .flatten()
+            .copied()
+            .collect();
+        assert!(
+            output
+                .windows(b"VISIBLE-SHELL-OUTPUT".len())
+                .any(|window| window == b"VISIBLE-SHELL-OUTPUT")
+        );
         assert!(!output.windows(config.len()).any(|window| window == config));
-        assert!(session.take_events().into_iter().all(|event| !matches!(event, TerminalEvent::Output(_))));
+        assert!(
+            session
+                .take_events()
+                .into_iter()
+                .all(|event| !matches!(event, TerminalEvent::Output(_)))
+        );
     }
 
     #[test]

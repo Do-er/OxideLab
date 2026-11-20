@@ -45,6 +45,7 @@ const TERMINAL_ROW_LAYOUT_CACHE_CAPACITY: usize = 512;
 const TERMINAL_HIGHLIGHT_CACHE_CAPACITY: usize = 128;
 const TERMINAL_SEMANTIC_SPAN_CACHE_BUDGET: usize = 65_536;
 const TERMINAL_LINK_CACHE_CAPACITY: usize = 512;
+const TERMINAL_COLUMN_CACHE_QUANTUM: usize = 8;
 const TRANSIENT_COMMAND_HIGHLIGHT_ALPHA: u32 = 0x52;
 
 pub(crate) use layout::*;
@@ -93,6 +94,8 @@ pub(crate) struct TerminalElement {
     scrollbar_active: bool,
     scroll_y_offset: Pixels,
     scroll_x_offset: Pixels,
+    // Wrapping derives its columns from the viewport; only the no-wrap view exposes overflow.
+    horizontal_scroll_enabled: bool,
     command_mark_gutter_width: f32,
     command_mark_decorations: bool,
     collapsed_commands: HashSet<String>,
@@ -731,6 +734,7 @@ impl TerminalElement {
             scrollbar_active: false,
             scroll_y_offset: px(0.0),
             scroll_x_offset: px(0.0),
+            horizontal_scroll_enabled: false,
             command_mark_gutter_width: 0.0,
             command_mark_decorations: true,
             collapsed_commands: HashSet::new(),
@@ -865,6 +869,11 @@ impl TerminalElement {
         self
     }
 
+    pub(crate) fn horizontal_scroll_enabled(mut self, enabled: bool) -> Self {
+        self.horizontal_scroll_enabled = enabled;
+        self
+    }
+
     pub(crate) fn command_mark_gutter_width(mut self, width: f32) -> Self {
         self.command_mark_gutter_width = width.max(0.0);
         self
@@ -907,13 +916,14 @@ impl TerminalElement {
 
     #[allow(dead_code)]
     pub(crate) fn layout(&self) -> TerminalElementLayout {
-        self.layout_for_rows(0..self.painted_row_limit(), None, None)
+        self.layout_for_rows(0..self.painted_row_limit(), None, None, None)
     }
 
     pub(crate) fn layout_for_bounds(&self, bounds: Bounds<Pixels>) -> TerminalElementLayout {
         self.layout_for_rows(
             self.visible_rows_for_bounds(bounds),
             Some(f32::from(bounds.size.height)),
+            Some(f32::from(bounds.size.width)),
             None,
         )
     }
@@ -937,12 +947,35 @@ impl TerminalElement {
         rows
     }
 
+    fn visible_column_window(&self, viewport_width: Option<f32>) -> Range<usize> {
+        if !self.horizontal_scroll_enabled {
+            return 0..self.snapshot.cols;
+        }
+        let Some(viewport_width) = viewport_width else {
+            return 0..self.snapshot.cols;
+        };
+        let cell_width = self.metrics.cell_width_f32().max(f32::EPSILON);
+        let first = (f32::from(self.scroll_x_offset) / cell_width).floor() as usize;
+        let last = ((f32::from(self.scroll_x_offset) + viewport_width.max(0.0)) / cell_width).ceil()
+            as usize;
+        let start = first.saturating_sub(TERMINAL_COLUMN_CACHE_QUANTUM)
+            / TERMINAL_COLUMN_CACHE_QUANTUM
+            * TERMINAL_COLUMN_CACHE_QUANTUM;
+        let end = last
+            .saturating_add(TERMINAL_COLUMN_CACHE_QUANTUM)
+            .div_ceil(TERMINAL_COLUMN_CACHE_QUANTUM)
+            * TERMINAL_COLUMN_CACHE_QUANTUM;
+        start.min(self.snapshot.cols)..end.min(self.snapshot.cols)
+    }
+
     fn layout_for_rows(
         &self,
         visible_rows: Range<usize>,
         viewport_height: Option<f32>,
+        viewport_width: Option<f32>,
         mut cache: Option<&mut TerminalLayoutCache>,
     ) -> TerminalElementLayout {
+        let visible_columns = self.visible_column_window(viewport_width);
         if let Some(cache) = cache.as_deref_mut() {
             let metrics = [
                 self.metrics.font_size,
@@ -992,6 +1025,7 @@ impl TerminalElement {
         let search_matches = map_rects_to_visual(
             &self.snapshot,
             self.bidi_enabled,
+            &visible_columns,
             if !self.search_matches_precomputed && self.search_matches.is_empty() {
                 search_match_rects_for_rows(
                     &self.snapshot,
@@ -1002,7 +1036,7 @@ impl TerminalElement {
                 visible_search_match_rects(
                     &self.snapshot,
                     &self.search_matches,
-                    self.snapshot.display_offset,
+                    self.snapshot.window_display_offset(),
                     visible_rows.clone(),
                     self.selected_search_match,
                 )
@@ -1011,6 +1045,7 @@ impl TerminalElement {
         let selection_matches = map_rects_to_visual(
             &self.snapshot,
             self.bidi_enabled,
+            &visible_columns,
             crate::terminal_view::highlight::selection_match_rects(
                 &self.snapshot,
                 self.selection_highlight_query
@@ -1036,6 +1071,9 @@ impl TerminalElement {
                 image.snapshot.row < self.painted_row_limit()
                     && image.snapshot.row + image.snapshot.rows > visible_rows.start
                     && image.snapshot.row < visible_rows.end
+                    && image.snapshot.col < visible_columns.end
+                    && image.snapshot.col.saturating_add(image.snapshot.cols)
+                        > visible_columns.start
             })
             .cloned()
             .map(|image| TerminalImageLayout { image })
@@ -1103,6 +1141,7 @@ impl TerminalElement {
                     logical_line,
                     semantic_role,
                     &row_style_hasher,
+                    &visible_columns,
                 );
                 let row_layout = cache.get_or_insert_row_with(
                     key,
@@ -1131,6 +1170,7 @@ impl TerminalElement {
                             &link_ranges,
                             terminal_background,
                             previous,
+                            &visible_columns,
                         )
                     },
                 );
@@ -1155,6 +1195,7 @@ impl TerminalElement {
                     &link_ranges,
                     terminal_background,
                     None,
+                    &visible_columns,
                 );
                 append_cached_row_layout(
                     row_index,
@@ -1165,9 +1206,11 @@ impl TerminalElement {
                     &mut cursor,
                 );
             }
-            if let Some(timestamp_run) =
-                self.timestamp_run_for_row(row_index, terminal_row_timestamp_identity(row), line_digits)
-            {
+            if let Some(timestamp_run) = self.timestamp_run_for_row(
+                row_index,
+                terminal_row_timestamp_identity(row),
+                line_digits,
+            ) {
                 timestamp_runs.push(timestamp_run);
             }
         }
@@ -1180,16 +1223,19 @@ impl TerminalElement {
             highlight_backgrounds: map_rects_to_visual(
                 &self.snapshot,
                 self.bidi_enabled,
+                &visible_columns,
                 highlight_layout.backgrounds,
             ),
             highlight_underlines: map_rects_to_visual(
                 &self.snapshot,
                 self.bidi_enabled,
+                &visible_columns,
                 highlight_layout.underlines,
             ),
             highlight_outlines: map_rects_to_visual(
                 &self.snapshot,
                 self.bidi_enabled,
+                &visible_columns,
                 highlight_layout.outlines,
             ),
             search_scrollbar_markers: if self
@@ -1233,7 +1279,7 @@ impl TerminalElement {
         let line_number = self
             .snapshot
             .scrollback_lines
-            .saturating_sub(self.snapshot.display_offset)
+            .saturating_sub(self.snapshot.window_display_offset())
             + row_index
             + 1;
         let combined_label = format!("{time_label} {line_number:>line_digits$}");
@@ -1257,6 +1303,7 @@ impl TerminalElement {
         Arc::new(self.layout_for_rows(
             visible_rows,
             Some(f32::from(bounds.size.height)),
+            Some(f32::from(bounds.size.width)),
             Some(&mut cache),
         ))
     }
@@ -1403,6 +1450,7 @@ impl TerminalElement {
         link_ranges: &[TerminalLinkRange],
         terminal_background: Hsla,
         previous: Option<&TerminalRowLayout>,
+        visible_columns: &Range<usize>,
     ) -> TerminalRowLayout {
         // Visible link ranges are ordered by row. Restrict cell styling to this row so output in
         // other rows cannot multiply every character lookup in a link-dense terminal.
@@ -1421,11 +1469,31 @@ impl TerminalElement {
         let visual_line = visual_line_for_row_with_bidi(row, self.bidi_enabled);
         let default_background = terminal_color_from_hex(self.theme.background);
 
-        for (col_index, cell) in row.cells.iter().enumerate() {
+        let mut first_column = if visual_line.is_some() {
+            0
+        } else {
+            visible_columns.start.min(row.cells.len())
+        };
+        if first_column > 0 && row.cells[first_column - 1].wide {
+            first_column -= 1;
+        }
+        let last_column = if visual_line.is_some() {
+            row.cells.len()
+        } else {
+            visible_columns.end.min(row.cells.len())
+        };
+        for col_index in first_column..last_column {
+            let cell = &row.cells[col_index];
             let paint_col = visual_line
                 .as_ref()
                 .map(|line| line.visual_col_for_logical_col(col_index))
                 .unwrap_or(col_index);
+            let cell_width = if cell.wide { 2 } else { 1 };
+            if paint_col >= visible_columns.end
+                || paint_col.saturating_add(cell_width) <= visible_columns.start
+            {
+                continue;
+            }
             if self.grid_cursor_visible()
                 && cell.cursor
                 && self.snapshot.cursor_shape != TerminalCursorShape::Hidden
@@ -1446,8 +1514,6 @@ impl TerminalElement {
             } else {
                 to_hsla(cell.bg)
             };
-            let cell_width = if cell.wide { 2 } else { 1 };
-
             let cutout = powerline_background_cutout(
                 cell,
                 self.transparent_background,
@@ -1483,7 +1549,11 @@ impl TerminalElement {
             }
 
             if self.selection.is_some_and(|selection| {
-                selection.contains_viewport_cell(row_index, col_index, self.snapshot.display_offset)
+                selection.contains_viewport_cell(
+                    row_index,
+                    col_index,
+                    self.snapshot.window_display_offset(),
+                )
             }) {
                 extend_or_push_row_rect(
                     &mut current_selection,
@@ -1583,6 +1653,7 @@ impl TerminalElement {
                 &self.theme,
                 self.transparent_background,
                 highlight_layout,
+                visible_columns,
                 &mut text_runs,
             );
         }
@@ -1658,8 +1729,11 @@ impl TerminalElement {
         logical_line: &TerminalLogicalLine,
         semantic_role: Option<SemanticLineRole>,
         style_hasher: &DefaultHasher,
+        visible_columns: &Range<usize>,
     ) -> TerminalRowLayoutCacheKey {
         let mut hasher = style_hasher.clone();
+        visible_columns.start.hash(&mut hasher);
+        visible_columns.end.hash(&mut hasher);
         if let Some(row) = self.snapshot.lines.get(row_index) {
             row.line_id.hash(&mut hasher);
             row.signature.hash(&mut hasher);
@@ -1682,7 +1756,7 @@ impl TerminalElement {
         hash_selection_for_row(
             self.selection,
             row_index,
-            self.snapshot.display_offset,
+            self.snapshot.window_display_offset(),
             self.snapshot.cols,
             &mut hasher,
         );
@@ -1799,7 +1873,7 @@ impl TerminalElement {
         let viewport_start = self
             .snapshot
             .scrollback_lines
-            .saturating_sub(self.snapshot.display_offset);
+            .saturating_sub(self.snapshot.window_display_offset());
         // Layout already resolved wrapped ranges; sharing them avoids rescanning
         // the same logical line for each physical row in the viewport.
         for line in &logical_lines.lines {
@@ -2243,7 +2317,7 @@ fn command_mark_overlays_for_rows(
 ) -> Vec<TerminalCommandMarkOverlay> {
     let viewport_start = snapshot
         .scrollback_lines
-        .saturating_sub(snapshot.display_offset);
+        .saturating_sub(snapshot.window_display_offset());
     let viewport_end = viewport_start.saturating_add(snapshot.lines.len().saturating_sub(1));
     let mut overlays = Vec::new();
 
@@ -2288,7 +2362,7 @@ fn snapshot_absolute_cursor_line(snapshot: &TerminalSnapshot) -> usize {
     snapshot
         .scrollback_lines
         .saturating_add(snapshot.cursor_row)
-        .saturating_sub(snapshot.display_offset)
+        .saturating_sub(snapshot.window_display_offset())
 }
 
 fn snapshot_prompt_block_start_line(snapshot: &TerminalSnapshot, command_line: usize) -> usize {
@@ -2310,7 +2384,7 @@ fn snapshot_prompt_block_start_line(snapshot: &TerminalSnapshot, command_line: u
 fn snapshot_line_text(snapshot: &TerminalSnapshot, absolute_line: usize) -> Option<String> {
     let viewport_start = snapshot
         .scrollback_lines
-        .saturating_sub(snapshot.display_offset);
+        .saturating_sub(snapshot.window_display_offset());
     let row = absolute_line.checked_sub(viewport_start)?;
     snapshot.lines.get(row).map(|line| line.text())
 }
@@ -2390,11 +2464,17 @@ fn push_visual_text_runs(
     theme: &TerminalUiTheme,
     transparent_background: bool,
     highlight_layout: &TerminalHighlightLayout,
+    visible_columns: &Range<usize>,
     text_runs: &mut Vec<PendingTerminalRowTextRun>,
 ) {
     let mut current_run: Option<PendingTerminalRowTextRun> = None;
     let mut current_run_is_drawing = false;
     for cluster in &visual_line.clusters {
+        if cluster.visual_col >= visible_columns.end
+            || cluster.visual_col.saturating_add(cluster.cells) <= visible_columns.start
+        {
+            continue;
+        }
         let Some(cell) = row.cells.get(cluster.logical_col) else {
             continue;
         };
@@ -2494,6 +2574,7 @@ fn push_visual_text_runs(
 fn map_rects_to_visual(
     snapshot: &TerminalSnapshot,
     bidi_enabled: bool,
+    visible_columns: &Range<usize>,
     rects: Vec<TerminalRect>,
 ) -> Vec<TerminalRect> {
     let mut mapped = Vec::with_capacity(rects.len());
@@ -2524,6 +2605,22 @@ fn map_rects_to_visual(
         }
     }
     mapped
+        .into_iter()
+        .filter_map(|mut rect| {
+            let rect_end = rect.col.saturating_add(rect.cells);
+            if rect.col >= visible_columns.end || rect_end <= visible_columns.start {
+                return None;
+            }
+            let clipped_start = rect.col.max(visible_columns.start);
+            let clipped_end = rect_end.min(visible_columns.end);
+            if clipped_start != rect.col {
+                rect.powerline_cutout = None;
+            }
+            rect.col = clipped_start;
+            rect.cells = clipped_end.saturating_sub(clipped_start);
+            Some(rect)
+        })
+        .collect()
 }
 
 fn cell_text(cell: &oxideterm_terminal::TerminalCell) -> String {
@@ -2631,8 +2728,11 @@ impl Element for TerminalElement {
         }
         let max_lines = (self.snapshot.scrollback_lines + self.snapshot.rows).max(1);
         let timestamp_cells = terminal_timestamp_label_cells(max_lines);
-        let timestamp_gutter_width =
-            terminal_timestamp_gutter_width(&self.metrics, self.row_timestamps.is_some(), timestamp_cells);
+        let timestamp_gutter_width = terminal_timestamp_gutter_width(
+            &self.metrics,
+            self.row_timestamps.is_some(),
+            timestamp_cells,
+        );
         let viewport_timestamp_origin =
             bounds.origin + point(px(TERMINAL_CONTENT_PADDING), px(TERMINAL_CONTENT_PADDING));
         let timestamp_origin = viewport_timestamp_origin + point(px(0.0), self.scroll_y_offset);
@@ -2661,9 +2761,10 @@ impl Element for TerminalElement {
                         paint_text_run(run, timestamp_origin, &self.metrics, window, cx);
                     }
                     let divider_x = viewport_timestamp_origin.x
-                        + px((timestamp_cells as f32
-                            + TERMINAL_TIMESTAMP_GUTTER_GAP_CELLS / 2.0)
-                            * self.metrics.cell_width_f32());
+                        + px(
+                            (timestamp_cells as f32 + TERMINAL_TIMESTAMP_GUTTER_GAP_CELLS / 2.0)
+                                * self.metrics.cell_width_f32(),
+                        );
                     let divider_bounds = Bounds::new(
                         point(divider_x, viewport_timestamp_origin.y),
                         size(
@@ -2891,12 +2992,14 @@ impl Element for TerminalElement {
             ));
         }
         let cell_width = self.metrics.cell_width_f32();
-        let available_grid_width = (f32::from(bounds.size.width)
-            - TERMINAL_CONTENT_PADDING * 2.0
-            - grid_gutter_width)
-            .max(cell_width * 2.0);
-        let content_width = self.snapshot.cols as f32 * cell_width;
-        let max_scroll = (content_width - available_grid_width).max(0.0);
+        let available_grid_width =
+            (f32::from(bounds.size.width) - TERMINAL_CONTENT_PADDING * 2.0 - grid_gutter_width)
+                .max(cell_width * 2.0);
+        let max_scroll = if self.horizontal_scroll_enabled {
+            (self.snapshot.cols as f32 * cell_width - available_grid_width).max(0.0)
+        } else {
+            0.0
+        };
         if let Some(horizontal_scrollbar) = terminal_horizontal_scrollbar_for_viewport(
             f32::from(grid_viewport_width),
             max_scroll,
@@ -2982,6 +3085,7 @@ mod cache_tests {
             absolute_line,
             cells: Arc::new(cells),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: true,
             signature: 0,
         };
@@ -2993,6 +3097,7 @@ mod cache_tests {
         TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols: 1,
             rows: lines.len(),
             cursor_col: 0,
@@ -3018,6 +3123,35 @@ mod cache_tests {
             None,
             None,
         )
+    }
+
+    #[test]
+    fn horizontal_layout_clips_to_the_column_bucket_without_splitting_a_wide_cell() {
+        let mut row = row_with_text_and_cursor(0, "abcdefg  ijklmnopqrstuvwxyz0123456789", 0);
+        row.cells_mut()[7].ch = '界';
+        row.cells_mut()[7].wide = true;
+        row.refresh_signature();
+        let mut input = snapshot(0, vec![row]);
+        input.cols = 45;
+        let mut view = element(input)
+            .horizontal_scroll_enabled(true)
+            .scroll_x_offset(px(128.0));
+        let bounds = Bounds::new(point(px(0.0), px(0.0)), size(px(32.0), px(10.0)));
+        assert_eq!(view.visible_column_window(Some(32.0)), 8..32);
+        let layout = view.layout_for_bounds(bounds);
+        assert_eq!(
+            layout
+                .text_runs
+                .iter()
+                .map(|run| run.text.as_ref())
+                .collect::<String>(),
+            "界ijklmnopqrstuvwxyz01234"
+        );
+
+        view.scroll_x_offset = px(129.0);
+        assert_eq!(view.visible_column_window(Some(32.0)), 8..32);
+        view.scroll_x_offset = px(192.0);
+        assert_eq!(view.visible_column_window(Some(32.0)), 16..40);
     }
 
     #[test]

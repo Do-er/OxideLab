@@ -71,7 +71,7 @@ pub(crate) fn grid_point_for_viewport_point(
     point: TerminalPoint,
 ) -> Option<TerminalGridPoint> {
     (point.row < snapshot.rows).then_some(TerminalGridPoint {
-        line: grid_line_for_viewport_row(point.row, snapshot.display_offset),
+        line: grid_line_for_viewport_row(point.row, snapshot.window_display_offset()),
         col: point.col.min(snapshot.cols.saturating_sub(1)),
     })
 }
@@ -81,7 +81,7 @@ fn grid_line_for_viewport_row(row: usize, display_offset: usize) -> i32 {
 }
 
 fn snapshot_row_for_grid_line(snapshot: &TerminalSnapshot, line: i32) -> Option<usize> {
-    let row = i64::from(line) + i64::try_from(snapshot.display_offset).ok()?;
+    let row = i64::from(line) + i64::try_from(snapshot.window_display_offset()).ok()?;
     usize::try_from(row)
         .ok()
         .filter(|row| *row < snapshot.lines.len())

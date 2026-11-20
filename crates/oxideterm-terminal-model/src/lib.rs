@@ -212,6 +212,8 @@ pub struct TerminalRow {
     pub absolute_line: i64,
     pub cells: Arc<Vec<TerminalCell>>,
     pub wrapped: bool,
+    /// A leading wide-char spacer at the wrap boundary is not display content.
+    pub trailing_wide_char_spacer: bool,
     pub active_input: bool,
     pub signature: u64,
 }
@@ -239,6 +241,7 @@ impl TerminalRow {
     pub fn compute_signature(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.wrapped.hash(&mut hasher);
+        self.trailing_wide_char_spacer.hash(&mut hasher);
         self.active_input.hash(&mut hasher);
         self.cells.hash(&mut hasher);
         hasher.finish()
@@ -253,6 +256,7 @@ impl TerminalRow {
         if self.signature != previous.signature
             || !same_line
             || self.wrapped != previous.wrapped
+            || self.trailing_wide_char_spacer != previous.trailing_wide_char_spacer
             || self.active_input != previous.active_input
             || self.cells.as_ref() != previous.cells.as_ref()
         {
@@ -339,6 +343,7 @@ mod tests {
             absolute_line: 0,
             cells: Arc::new(vec![test_cell('a')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };

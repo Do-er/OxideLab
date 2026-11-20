@@ -622,6 +622,10 @@
       "ssh_shell": "SSH (canale Shell)",
       "agent_installing": "Installazione agente: {{percent}}% ({{transferred}} / {{total}} KiB)",
       "agent_starting": "Avvio dell’agente…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "Disattiva il ritorno a capo",
+      "disabled_tooltip": "Attiva il ritorno a capo"
     }
   },
   "search": {

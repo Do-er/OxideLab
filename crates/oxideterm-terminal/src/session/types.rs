@@ -42,8 +42,7 @@ pub enum SerialControlLine {
     RequestToSend,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 pub enum SerialLineEnding {
     Lf,
     CrLf,
@@ -52,9 +51,7 @@ pub enum SerialLineEnding {
     None,
 }
 
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 pub enum SerialDisplayMode {
     #[default]
     Text,
@@ -62,15 +59,12 @@ pub enum SerialDisplayMode {
     Mixed,
 }
 
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 pub enum SerialSendMode {
     #[default]
     Text,
     Hex,
 }
-
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct SerialRuntimeOptions {
@@ -180,11 +174,7 @@ pub trait TerminalSessionBackend: Send {
     fn serial_control_state(&self) -> Option<SerialControlState> {
         None
     }
-    fn set_serial_control_line(
-        &mut self,
-        _line: SerialControlLine,
-        _asserted: bool,
-    ) -> Result<()> {
+    fn set_serial_control_line(&mut self, _line: SerialControlLine, _asserted: bool) -> Result<()> {
         bail!("Serial control lines are only supported by serial sessions")
     }
     fn send_serial_break(&mut self) -> Result<()> {
@@ -241,8 +231,17 @@ pub trait TerminalSessionBackend: Send {
     fn tmux_state(&self) -> Option<crate::TmuxUiState> {
         None
     }
-    fn tmux_action(&mut self, _action: crate::TmuxAction, audit: oxideterm_audit::AuditOperation) -> Result<bool> {
-        audit.finish(oxideterm_audit::AuditOutcome::Unchanged, oxideterm_audit::AuditEvidence::Dispatch, None, None);
+    fn tmux_action(
+        &mut self,
+        _action: crate::TmuxAction,
+        audit: oxideterm_audit::AuditOperation,
+    ) -> Result<bool> {
+        audit.finish(
+            oxideterm_audit::AuditOutcome::Unchanged,
+            oxideterm_audit::AuditEvidence::Dispatch,
+            None,
+            None,
+        );
         Ok(false)
     }
     fn tmux_separator_at(&self, _col: usize, _row: usize) -> Option<crate::TmuxSeparator> {
@@ -261,6 +260,9 @@ pub trait TerminalSessionBackend: Send {
         self.resize_with_cell_size(resize)
     }
     fn scroll_lines(&mut self, delta: i32);
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        self.scroll_lines(delta);
+    }
     fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -306,15 +308,69 @@ pub trait TerminalSessionBackend: Send {
         let _ = previous;
         self.snapshot()
     }
+    fn snapshot_incremental_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        window: crate::SnapshotWindow,
+    ) -> TerminalSnapshot {
+        if window == crate::SnapshotWindow::Viewport {
+            return self.snapshot_incremental(previous);
+        }
+        self.snapshot_with_display_offset_and_window(
+            self.display_offset(),
+            previous.rows,
+            window,
+            Some(previous),
+        )
+    }
     /// Background parsers may defer a render without consuming pending grid damage.
     /// Disable deferral after a bounded interval to request a fair turn under continuous output.
     fn try_render_snapshot(
         &self,
         previous: &TerminalSnapshot,
         allow_defer: bool,
-    ) -> Option<(TerminalSnapshot, Option<crate::TerminalSelectionRange>, TermMode)> {
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
         let _ = allow_defer;
-        Some((self.snapshot_incremental(previous), self.selection(), self.mode()))
+        Some((
+            self.snapshot_incremental(previous),
+            self.selection(),
+            self.mode(),
+        ))
+    }
+    fn try_render_snapshot_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        allow_defer: bool,
+        window: crate::SnapshotWindow,
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
+        if window == crate::SnapshotWindow::Viewport {
+            return self.try_render_snapshot(previous, allow_defer);
+        }
+        let snapshot = self.snapshot_with_display_offset_and_window(
+            self.display_offset(),
+            previous.rows,
+            window,
+            Some(previous),
+        );
+        Some((snapshot, self.selection(), self.mode()))
+    }
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        let _ = window;
+        self.snapshot_with_display_offset(display_offset, rows, previous)
     }
     fn snapshot_with_display_offset(
         &self,
@@ -328,7 +384,9 @@ pub trait TerminalSessionBackend: Send {
     fn terminate_active_task(&mut self) -> Result<()>;
     fn kill_active_task(&mut self) -> Result<()>;
     fn shutdown(&mut self);
-    fn audit_context(&self) -> Option<oxideterm_audit::AuditContext> { None }
+    fn audit_context(&self) -> Option<oxideterm_audit::AuditContext> {
+        None
+    }
     fn ssh_connection_handle(&self) -> Option<SshConnectionHandle> {
         None
     }

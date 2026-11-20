@@ -133,7 +133,11 @@ impl TerminalSessionBackend for LocalPtySession {
         LocalPtySession::tmux_state(self)
     }
 
-    fn tmux_action(&mut self, action: crate::TmuxAction, audit: oxideterm_audit::AuditOperation) -> Result<bool> {
+    fn tmux_action(
+        &mut self,
+        action: crate::TmuxAction,
+        audit: oxideterm_audit::AuditOperation,
+    ) -> Result<bool> {
         LocalPtySession::tmux_action(self, action, audit)
     }
 
@@ -163,6 +167,10 @@ impl TerminalSessionBackend for LocalPtySession {
 
     fn scroll_lines(&mut self, delta: i32) {
         LocalPtySession::scroll_lines(self, delta);
+    }
+
+    fn scroll_logical_lines(&mut self, delta: i32) {
+        LocalPtySession::scroll_logical_lines(self, delta);
     }
 
     fn scroll_lines_snapshot_incremental(
@@ -257,8 +265,41 @@ impl TerminalSessionBackend for LocalPtySession {
         &self,
         previous: &TerminalSnapshot,
         allow_defer: bool,
-    ) -> Option<(TerminalSnapshot, Option<crate::TerminalSelectionRange>, TermMode)> {
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
         LocalPtySession::try_render_snapshot(self, previous, allow_defer)
+    }
+
+    fn try_render_snapshot_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        allow_defer: bool,
+        window: crate::SnapshotWindow,
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
+        LocalPtySession::try_render_snapshot_with_window(self, previous, allow_defer, window)
+    }
+
+    fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: crate::SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        LocalPtySession::snapshot_with_display_offset_and_window(
+            self,
+            display_offset,
+            rows,
+            window,
+            previous,
+        )
     }
 
     fn snapshot_with_display_offset(

@@ -622,6 +622,10 @@
       "ssh_shell": "SSH (Shell-Kanal)",
       "agent_installing": "Agent wird installiert: {{percent}}% ({{transferred}} / {{total}} KiB)",
       "agent_starting": "Agent wird gestartet…"
+    },
+    "line_wrap": {
+      "enabled_tooltip": "Zeilenumbruch deaktivieren",
+      "disabled_tooltip": "Zeilenumbruch aktivieren"
     }
   },
   "search": {

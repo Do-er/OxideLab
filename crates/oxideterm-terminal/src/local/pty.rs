@@ -131,10 +131,7 @@ impl LocalPtySession {
         {
             anyhow::bail!("local terminal startup directory is unavailable");
         }
-        if !direct_command
-            && shell.path.is_absolute()
-            && !crate::is_shell_executable(&shell.path)
-        {
+        if !direct_command && shell.path.is_absolute() && !crate::is_shell_executable(&shell.path) {
             anyhow::bail!("local terminal shell executable is unavailable");
         }
 
@@ -180,14 +177,13 @@ impl LocalPtySession {
             .or_else(|| env::var_os("USERPROFILE").map(PathBuf::from))
             .or_else(|| env::current_dir().ok());
         #[cfg(target_os = "windows")]
-        let working_directory =
-            if !direct_command
-                && (shell.id.starts_with("wsl") || matches!(shell.id.as_str(), "powershell" | "pwsh"))
-            {
-                None
-            } else {
-                cwd.clone()
-            };
+        let working_directory = if !direct_command
+            && (shell.id.starts_with("wsl") || matches!(shell.id.as_str(), "powershell" | "pwsh"))
+        {
+            None
+        } else {
+            cwd.clone()
+        };
         #[cfg(not(target_os = "windows"))]
         let working_directory = cwd.clone();
         let pty = tty::new(
@@ -222,8 +218,7 @@ impl LocalPtySession {
         let pty_master = None;
         let process = ProcessState::new(shell_pid, pty_master, cwd);
         // The PTY reader owns output capture even while its pane is not draining events.
-        let recording_sink = audit
-            .map(oxideterm_audit::AuditContext::recording_sink);
+        let recording_sink = audit.map(oxideterm_audit::AuditContext::recording_sink);
         if let Some(sink) = &recording_sink {
             sink.resize(size.cols as u16, size.rows as u16);
         }
@@ -1010,6 +1005,12 @@ impl LocalPtySession {
         }
     }
 
+    pub fn scroll_logical_lines(&mut self, delta: i32) {
+        if delta != 0 {
+            scroll_display_logical(&mut self.display_term().lock(), delta);
+        }
+    }
+
     pub fn scroll_lines_snapshot_incremental(
         &mut self,
         delta: i32,
@@ -1159,6 +1160,70 @@ impl LocalPtySession {
         Some((snapshot, selection, *term.mode()))
     }
 
+    pub fn try_render_snapshot_with_window(
+        &self,
+        previous: &TerminalSnapshot,
+        allow_defer: bool,
+        window: SnapshotWindow,
+    ) -> Option<(
+        TerminalSnapshot,
+        Option<crate::TerminalSelectionRange>,
+        TermMode,
+    )> {
+        if window == SnapshotWindow::Viewport {
+            return self.try_render_snapshot(previous, allow_defer);
+        }
+        if self.resize_pending() {
+            return None;
+        }
+        if self.tmux_display.is_active() {
+            return Some((
+                self.snapshot_incremental(previous),
+                self.selection(),
+                self.mode(),
+            ));
+        }
+        let mut term = if allow_defer {
+            self.term.try_lock_unfair()?
+        } else {
+            self.term.lock()
+        };
+        let snapshot = incremental_snapshot_from_term_with_window(
+            &mut term,
+            self.size,
+            &self.graphics,
+            &self.palette,
+            previous,
+            window,
+        );
+        let selection = crate::selection::term_selection(&term);
+        Some((snapshot, selection, *term.mode()))
+    }
+
+    pub fn snapshot_with_display_offset_and_window(
+        &self,
+        display_offset: usize,
+        rows: usize,
+        window: SnapshotWindow,
+        previous: Option<&TerminalSnapshot>,
+    ) -> TerminalSnapshot {
+        if window == SnapshotWindow::Viewport || self.tmux_display.is_active() {
+            return self.snapshot_with_display_offset(display_offset, rows, previous);
+        }
+        let term = self.display_term();
+        let term = term.lock();
+        snapshot_from_term_with_window(
+            &term,
+            self.size,
+            &self.graphics,
+            &self.palette,
+            display_offset,
+            rows,
+            window,
+            previous,
+        )
+    }
+
     pub fn snapshot_with_display_offset(
         &self,
         display_offset: usize,
@@ -1204,6 +1269,106 @@ pub(crate) fn snapshot_from_term<T: EventListener>(
         term.grid().display_offset(),
         size.rows,
         None,
+    )
+}
+
+pub(crate) fn snapshot_from_term_with_window<T: EventListener>(
+    term: &Term<T>,
+    size: TerminalSize,
+    graphics: &TerminalGraphicsState,
+    palette: &TerminalPalette,
+    display_offset: usize,
+    rows: usize,
+    window: SnapshotWindow,
+    previous: Option<&TerminalSnapshot>,
+) -> TerminalSnapshot {
+    let (window_offset, rows) = resolve_snapshot_window(term, display_offset, rows, window);
+    let mut snapshot = snapshot_from_term_with_display_offset(
+        term,
+        size,
+        graphics,
+        palette,
+        window_offset,
+        rows,
+        previous,
+    );
+    snapshot.display_offset = display_offset.min(snapshot.scrollback_lines);
+    snapshot
+}
+
+fn resolve_snapshot_window<T: EventListener>(
+    term: &Term<T>,
+    display_offset: usize,
+    rows: usize,
+    window: SnapshotWindow,
+) -> (usize, usize) {
+    let SnapshotWindow::LogicalLines { count } = window else {
+        return (display_offset, rows);
+    };
+    let history = term.grid().history_size() as i32;
+    let screen_lines = term.screen_lines() as i32;
+    let wraps = |line: i32| {
+        term.grid()[Line(line)]
+            .last()
+            .is_some_and(|cell| cell.flags.contains(Flags::WRAPLINE))
+    };
+    let count = count.max(1);
+    if display_offset == 0 {
+        let mut top = screen_lines - 1;
+        while top > -history && wraps(top - 1) {
+            top -= 1;
+        }
+        let mut chains = 1;
+        while chains < count && top > -history {
+            top -= 1;
+            while top > -history && wraps(top - 1) {
+                top -= 1;
+            }
+            chains += 1;
+        }
+        return ((-top) as usize, (screen_lines - top).max(1) as usize);
+    }
+
+    let mut top = -(display_offset.min(history as usize) as i32);
+    while top > -history && wraps(top - 1) {
+        top -= 1;
+    }
+    let mut end = top;
+    let mut chains = 0;
+    while end < screen_lines {
+        if end > top && !wraps(end - 1) && chains >= count {
+            break;
+        }
+        if end == top || !wraps(end - 1) {
+            chains += 1;
+        }
+        end += 1;
+    }
+    ((-top) as usize, (end - top).max(1) as usize)
+}
+
+pub(crate) fn incremental_snapshot_from_term_with_window<T: EventListener>(
+    term: &mut Term<T>,
+    size: TerminalSize,
+    graphics: &TerminalGraphicsState,
+    palette: &TerminalPalette,
+    previous: &TerminalSnapshot,
+    window: SnapshotWindow,
+) -> TerminalSnapshot {
+    if window == SnapshotWindow::Viewport {
+        return incremental_snapshot_from_term(term, size, graphics, palette, previous);
+    }
+    term.reset_damage();
+    let display_offset = term.grid().display_offset();
+    snapshot_from_term_with_window(
+        term,
+        size,
+        graphics,
+        palette,
+        display_offset,
+        previous.rows,
+        window,
+        Some(previous),
     )
 }
 
@@ -1364,6 +1529,44 @@ fn snapshot_from_term_after_scroll_up<T: EventListener>(
     snapshot
 }
 
+pub(crate) fn scroll_display_logical<T: EventListener>(term: &mut Term<T>, delta: i32) {
+    let wraps = |line: i32| {
+        term.grid()[Line(line)]
+            .last()
+            .is_some_and(|cell| cell.flags.contains(Flags::WRAPLINE))
+    };
+    let history = term.grid().history_size() as i32;
+    let screen_lines = term.screen_lines() as i32;
+    let original_offset = term.grid().display_offset() as i32;
+    let mut top = -original_offset;
+    for _ in 0..delta.unsigned_abs() {
+        while top > -history && wraps(top - 1) {
+            top -= 1;
+        }
+        if delta > 0 {
+            if top == -history {
+                break;
+            }
+            top -= 1;
+            while top > -history && wraps(top - 1) {
+                top -= 1;
+            }
+        } else {
+            if top >= 0 {
+                break;
+            }
+            while top < screen_lines && wraps(top) {
+                top += 1;
+            }
+            top = (top + 1).min(0);
+        }
+    }
+    let physical_delta = -top - original_offset;
+    if physical_delta != 0 {
+        term.scroll_display(Scroll::Delta(physical_delta));
+    }
+}
+
 pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
     term: &mut Term<T>,
     size: TerminalSize,
@@ -1458,6 +1661,7 @@ pub(crate) fn scroll_snapshot_from_term<T: EventListener>(
     let mut snapshot = TerminalSnapshot {
         logical_context: previous.logical_context.clone(),
         generation: 0,
+        buffer_reset_generation: term.buffer_reset_generation(),
         cols: size.cols,
         rows: size.rows,
         cursor_col: previous.cursor_col,
@@ -1515,6 +1719,7 @@ pub(crate) fn snapshot_from_term_with_display_offset<T: EventListener>(
         logical_context: previous
             .map_or_else(Vec::new, |snapshot| snapshot.logical_context.clone()),
         generation: 0,
+        buffer_reset_generation: term.buffer_reset_generation(),
         cols: size.cols,
         rows: size.rows,
         cursor_col,
@@ -1553,6 +1758,7 @@ struct SnapshotRowSource {
     source_id: usize,
     populated_cols: usize,
     wrapped: bool,
+    trailing_wide_char_spacer: bool,
 }
 
 fn snapshot_row_source<T: EventListener>(
@@ -1583,6 +1789,11 @@ fn snapshot_row_source<T: EventListener>(
         source_id: terminal_row.identity(),
         populated_cols,
         wrapped,
+        trailing_wide_char_spacer: terminal_row
+            .iter()
+            .take(size.cols)
+            .last()
+            .is_some_and(|cell| cell.flags.contains(Flags::LEADING_WIDE_CHAR_SPACER)),
     })
 }
 
@@ -1683,6 +1894,7 @@ fn snapshot_row_from_source<T: EventListener>(
         source_id: source.source_id,
         absolute_line: i64::from(grid_line),
         wrapped: source.wrapped,
+        trailing_wide_char_spacer: source.trailing_wide_char_spacer,
         active_input: false,
         signature: 0,
         cells: Arc::new(cells),
@@ -1700,6 +1912,7 @@ pub(crate) fn blank_snapshot_row(
         source_id: 0,
         absolute_line: row as i64 - display_offset as i64,
         wrapped: false,
+        trailing_wide_char_spacer: false,
         active_input: false,
         signature: 0,
         cells: Arc::new(vec![blank; size.cols]),
@@ -1783,10 +1996,89 @@ fn refresh_snapshot_metadata<T: EventListener>(
 
 #[cfg(test)]
 mod incremental_snapshot_tests {
-    use alacritty_terminal::{event::VoidListener, index::Column};
     use alacritty_terminal::vte::ansi::{Processor, StdSyncHandler};
+    use alacritty_terminal::{event::VoidListener, index::Column};
 
     use super::*;
+
+    #[test]
+    fn logical_window_anchors_limit_complete_chains_to_requested_count() {
+        let size = TerminalSize {
+            cols: 5,
+            rows: 2,
+            cell_width: 8,
+            cell_height: 16,
+        };
+        let mut term = Term::new(Config::default(), &size, VoidListener);
+        let mut parser = Processor::<StdSyncHandler>::new();
+        parser.advance(&mut term, b"one\r\nabcdefghij\r\nxy");
+        let bottom = snapshot_from_term_with_window(
+            &term,
+            size,
+            &TerminalGraphicsState::default(),
+            &TerminalPalette::default(),
+            0,
+            2,
+            SnapshotWindow::LogicalLines { count: 2 },
+            None,
+        );
+        assert_eq!(bottom.display_offset, 0);
+        assert_eq!(bottom.window_display_offset(), 1);
+        assert_eq!(bottom.rows, 2);
+        assert_eq!(bottom.cursor_row, 2);
+        assert_eq!(
+            bottom
+                .lines
+                .iter()
+                .map(|row| row.text().trim_end().to_owned())
+                .collect::<Vec<_>>(),
+            ["abcde", "fghij", "xy"]
+        );
+
+        let historical = snapshot_from_term_with_window(
+            &term,
+            size,
+            &TerminalGraphicsState::default(),
+            &TerminalPalette::default(),
+            2,
+            2,
+            SnapshotWindow::LogicalLines { count: 2 },
+            None,
+        );
+        assert_eq!(historical.display_offset, 2);
+        assert_eq!(historical.window_display_offset(), 2);
+        assert_eq!(historical.rows, 2);
+        assert_eq!(
+            historical
+                .lines
+                .iter()
+                .map(|row| row.text().trim_end().to_owned())
+                .collect::<Vec<_>>(),
+            ["one", "abcde", "fghij"]
+        );
+    }
+
+    #[test]
+    fn wrap_boundary_preserves_leading_wide_char_spacer_metadata() {
+        let size = TerminalSize {
+            cols: 5,
+            rows: 3,
+            cell_width: 8,
+            cell_height: 16,
+        };
+        let mut term = Term::new(Config::default(), &size, VoidListener);
+        let mut parser = Processor::<StdSyncHandler>::new();
+        parser.advance(&mut term, "abcd界".as_bytes());
+        let snapshot = snapshot_from_term(
+            &term,
+            size,
+            &TerminalGraphicsState::default(),
+            &TerminalPalette::default(),
+        );
+        assert!(snapshot.lines[0].trailing_wide_char_spacer);
+        assert!(snapshot.lines[0].wrapped);
+        assert_eq!(snapshot.lines[1].text().trim_end(), "界");
+    }
 
     #[test]
     fn predecessor_wrap_changes_invalidate_an_unchanged_logical_line() {
@@ -1855,21 +2147,38 @@ mod incremental_snapshot_tests {
 
     #[test]
     fn snapshot_preserves_powerline_default_background_through_reverse_video() {
-        let size = TerminalSize { cols: 4, rows: 1, cell_width: 0, cell_height: 0 };
+        let size = TerminalSize {
+            cols: 4,
+            rows: 1,
+            cell_width: 0,
+            cell_height: 0,
+        };
         let (listener, _events) = local_event_channel();
         let mut term = Term::new(Config::default(), &size, listener);
         let mut parser = Processor::<StdSyncHandler>::new();
         // Oh My Posh's transparent foreground uses SGR 49 followed by SGR 7.
         // The second cell explicitly requests the same RGB and must remain opaque.
-        parser.advance(&mut term, "\x1b[0m\x1b[36;49m\x1b[7m\u{e0b0}\x1b[0m\x1b[36;48;2;13;15;18m\x1b[7m\u{e0b0}\x1b[27m".as_bytes());
+        parser.advance(
+            &mut term,
+            "\x1b[0m\x1b[36;49m\x1b[7m\u{e0b0}\x1b[0m\x1b[36;48;2;13;15;18m\x1b[7m\u{e0b0}\x1b[27m"
+                .as_bytes(),
+        );
         let snapshot = snapshot_from_term(
-            &term, size, &TerminalGraphicsState::default(), &TerminalPalette::default(),
+            &term,
+            size,
+            &TerminalGraphicsState::default(),
+            &TerminalPalette::default(),
         );
         let cells = &snapshot.lines[0].cells;
         for cell in &cells[..2] {
-            assert_eq!((cell.ch, cell.fg, cell.bg), (
-                '\u{e0b0}', TerminalColor::rgb(13, 15, 18), TerminalColor::rgb(0x56, 0xc7, 0xda),
-            ));
+            assert_eq!(
+                (cell.ch, cell.fg, cell.bg),
+                (
+                    '\u{e0b0}',
+                    TerminalColor::rgb(13, 15, 18),
+                    TerminalColor::rgb(0x56, 0xc7, 0xda),
+                )
+            );
         }
         assert!(cells[0].style_origin.foreground_is_default_background());
         assert!(!cells[1].style_origin.foreground_is_default_background());

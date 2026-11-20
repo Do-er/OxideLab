@@ -10,9 +10,19 @@ pub use oxideterm_terminal_model::{
     TerminalAttrs, TerminalCell, TerminalColor, TerminalRow, TerminalStyleOrigin,
 };
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum SnapshotWindow {
+    #[default]
+    Viewport,
+    LogicalLines {
+        count: usize,
+    },
+}
+
 #[derive(Clone, Debug)]
 pub struct TerminalSnapshot {
     pub generation: u64,
+    pub buffer_reset_generation: u64,
     pub cols: usize,
     pub rows: usize,
     pub cursor_col: usize,
@@ -63,6 +73,18 @@ impl std::fmt::Debug for TerminalLogicalContext {
 }
 
 impl TerminalSnapshot {
+    /// Logical-line windows can start above the user's scroll anchor to include a complete chain.
+    pub fn window_display_offset(&self) -> usize {
+        self.lines
+            .first()
+            .filter(|row| row.absolute_line < 0)
+            .map_or(self.display_offset, |row| {
+                usize::try_from(-row.absolute_line)
+                    .unwrap_or(self.display_offset)
+                    .min(self.scrollback_lines)
+            })
+    }
+
     pub fn logical_context_for_row(&self, row: usize) -> Option<&TerminalLogicalContext> {
         let source = self.lines.get(row)?.source_id;
         if source == 0 {
@@ -205,6 +227,7 @@ mod tests {
             absolute_line: 0,
             cells: Arc::new(vec![test_cell('a')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -213,6 +236,7 @@ mod tests {
         let previous = TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols: 1,
             rows: 1,
             cursor_col: 0,
@@ -250,6 +274,7 @@ mod tests {
             absolute_line: -1,
             cells: Arc::new(vec![test_cell('a')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -260,6 +285,7 @@ mod tests {
             absolute_line: 0,
             cells: Arc::new(vec![test_cell('b')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -267,6 +293,7 @@ mod tests {
         let previous = TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 1,
+            buffer_reset_generation: 0,
             cols: 1,
             rows: 2,
             cursor_col: 0,
@@ -284,6 +311,7 @@ mod tests {
             absolute_line: -1,
             cells: Arc::new(vec![test_cell('b')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -294,6 +322,7 @@ mod tests {
             absolute_line: 1,
             cells: Arc::new(vec![test_cell('c')]),
             wrapped: false,
+            trailing_wide_char_spacer: false,
             active_input: false,
             signature: 0,
         };
@@ -301,6 +330,7 @@ mod tests {
         let mut next = TerminalSnapshot {
             logical_context: Vec::new(),
             generation: 0,
+            buffer_reset_generation: 0,
             cols: 1,
             rows: 2,
             cursor_col: 0,
