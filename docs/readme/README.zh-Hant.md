@@ -1,23 +1,21 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab：在一個工作區中管理你的伺服器" width="920">
-
-# ⚡ OxideLab
+# OxideLab
 
 **免費的原生 SSH 用戶端與遠端維運工作區，內建使用自備金鑰的 AI 助手。**
 
 SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內建編輯器，整合在同一個 GPU 繪製的應用程式中。
 無需帳號，無需訂閱，不蒐集遙測，不使用 Electron。
 
-[![最新版本](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[![最新版本](https://img.shields.io/github/v/release/Do-er/OxideLab?label=release)](https://github.com/Do-er/OxideLab/releases/latest)
 [![平台](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)
 [![授權條款](https://img.shields.io/badge/license-GPL--3.0-blue)](../../LICENSE)
-[![Stars](https://img.shields.io/github/stars/AnalyseDeCircuit/oxideterm?style=social)](https://github.com/AnalyseDeCircuit/oxideterm/stargazers)
+[![Stars](https://img.shields.io/github/stars/Do-er/OxideLab?style=social)](https://github.com/Do-er/OxideLab/stargazers)
 
-[**下載**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) ·
+[**下載**](https://github.com/Do-er/OxideLab/releases/latest) ·
 [**文件**](https://oxideterm.app) ·
 [**更新紀錄**](../../.github/release-notes/stable-changelog.md) ·
-[**報告問題**](https://github.com/AnalyseDeCircuit/oxideterm/issues)
+[**報告問題**](https://github.com/Do-er/OxideLab/issues)
 
 [English](../../README.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt-BR.md) | [Tiếng Việt](README.vi.md)
 
@@ -27,7 +25,7 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 
 ## 快速上手
 
-1. **安裝 OxideLab。** 從[最新發布頁面](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)下載安裝套件；各平台的說明見下方[安裝](#install)一節。
+1. **安裝 OxideLab。** 從[最新發布頁面](https://github.com/Do-er/OxideLab/releases/latest)下載安裝套件；各平台的說明見下方[安裝](#install)一節。
 2. **新增伺服器。** 開啟工作階段管理，新增 SSH 連線，或從 `~/.ssh/config` 匯入主機。
 3. **連線伺服器。** 開啟終端。主機金鑰會與 `~/.ssh/known_hosts` 中的記錄核對。
 4. **使用工作區中的其他功能。** 在同一節點上開啟 SFTP、連接埠轉送或內建編輯器。預設情況下，它們共用一個 SSH 連線。
@@ -82,6 +80,10 @@ SSH · Mosh · Telnet · 序列埠 · RDP/VNC · SFTP · 連接埠轉送 · 內�
 ---
 
 ## 螢幕截圖
+
+| 帶工作階段側邊欄的終端工作區 | 外觀設定與圖示選擇器 |
+|---|---|
+| ![帶工作階段側邊欄和 OxideSens AI 的終端工作區](../../docs/screenshots/workspace/terminal-workspace.png) | ![可選應用程式圖示變體的外觀設定](../../docs/screenshots/workspace/appearance-settings.png) |
 
 | 帶 OxideSens 的 SSH 終端 | SFTP 檔案管理器 |
 |---|---|
@@ -155,7 +157,7 @@ OxideLab 支援三種外掛方式：
 安裝前，請瞭解以下情況：
 
 - 僅支援桌面平台（macOS、Windows、Linux），沒有行動版應用程式。
-- 專案更新較快，發布頻繁。請參閱[更新紀錄](../../.github/release-notes/stable-changelog.md)和[未解決的問題](https://github.com/AnalyseDeCircuit/oxideterm/issues)。
+- 專案更新較快，發布頻繁。請參閱[更新紀錄](../../.github/release-notes/stable-changelog.md)和[未解決的問題](https://github.com/Do-er/OxideLab/issues)。
 - 稽核與工作階段錄製需主動啟用，且只反映 OxideLab 自身能夠觀察到的活動。
 - 行程外掛不受作業系統沙箱隔離。
 - 如果繪製器在你的機器上無法正常執行，可嘗試相容模式：`OXIDELAB_RENDER_PROFILE=compatibility`。
@@ -279,7 +281,7 @@ SFTP 工作階段帶有連線世代識別碼：重新連線後，符合條件的
 
 ## 安裝
 
-[**下載最新版本**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[**下載最新版本**](https://github.com/Do-er/OxideLab/releases/latest)
 
 | 作業系統 | x64 | ARM64 |
 |---|---|---|
@@ -338,8 +340,8 @@ cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 感謝每一位幫助 OxideLab 變得更好的貢獻者。
 
 <p align="center">
-  <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab 貢獻者">
+  <a href="https://github.com/Do-er/OxideLab/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Do-er/OxideLab" alt="OxideLab 貢獻者">
   </a>
 </p>
 
@@ -353,10 +355,10 @@ cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=AnalyseDeCircuit%2Foxideterm&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=Do-er%2FOxideLab&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
  </picture>
 </a>

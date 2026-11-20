@@ -7,15 +7,15 @@
 Serial · SSH · Mosh · Telnet · SFTP · port forwarding · quick command composer · built-in editor, all in one GPU-rendered app.
 No account. No subscription. No telemetry. No Electron. Forked from [OxideTerm](https://github.com/AnalyseDeCircuit/oxideterm) (GPL-3.0).
 
-[![Latest release](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/Do-er/OxideLab?label=release)](https://github.com/Do-er/OxideLab/releases/latest)
 [![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/AnalyseDeCircuit/oxideterm?style=social)](https://github.com/AnalyseDeCircuit/oxideterm/stargazers)
+[![Stars](https://img.shields.io/github/stars/Do-er/OxideLab?style=social)](https://github.com/Do-er/OxideLab/stargazers)
 
-[**Download**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) ·
+[**Download**](https://github.com/Do-er/OxideLab/releases/latest) ·
 [**Documentation**](https://oxideterm.app) ·
 [**Changelog**](.github/release-notes/stable-changelog.md) ·
-[**Report an issue**](https://github.com/AnalyseDeCircuit/oxideterm/issues)
+[**Report an issue**](https://github.com/Do-er/OxideLab/issues)
 
 [English](README.md) | [简体中文](docs/readme/README.zh-Hans.md) | [繁體中文](docs/readme/README.zh-Hant.md) | [日本語](docs/readme/README.ja.md) | [한국어](docs/readme/README.ko.md) | [Français](docs/readme/README.fr.md) | [Deutsch](docs/readme/README.de.md) | [Español](docs/readme/README.es.md) | [Italiano](docs/readme/README.it.md) | [Português](docs/readme/README.pt-BR.md) | [Tiếng Việt](docs/readme/README.vi.md)
 
@@ -25,7 +25,7 @@ No account. No subscription. No telemetry. No Electron. Forked from [OxideTerm](
 
 ## Quick start
 
-1. **Install OxideLab.** Grab a package from the [latest release](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); platform notes are in [Install](#install) below.
+1. **Install OxideLab.** Grab a package from the [latest release](https://github.com/Do-er/OxideLab/releases/latest); platform notes are in [Install](#install) below.
 2. **Add a server.** Open the Session Manager and create an SSH connection, or import hosts from your `~/.ssh/config`.
 3. **Connect.** Open a terminal. Host keys are checked against `~/.ssh/known_hosts`.
 4. **Use the rest of the workspace.** Open SFTP, port forwarding, or the built-in editor on the same node. By default they share one SSH connection.
@@ -80,6 +80,10 @@ The old version's total includes OxideLab and its associated WebView processes. 
 ---
 
 ## Screenshots
+
+| Terminal workspace with session sidebar | Appearance settings and app icon picker |
+|---|---|
+| ![Terminal workspace with session sidebar and OxideSens AI](docs/screenshots/workspace/terminal-workspace.png) | ![Appearance settings showing the configurable application icon variants](docs/screenshots/workspace/appearance-settings.png) |
 
 | SSH terminal with OxideSens | SFTP file manager |
 |---|---|
@@ -151,7 +155,7 @@ Legacy Tauri (1.x) ESM plugins may be listed but are not executed by the native 
 We would rather you know before installing:
 
 - Desktop only (macOS, Windows, Linux). There is no mobile app.
-- The project moves quickly, with frequent releases. See the [changelog](.github/release-notes/stable-changelog.md) and [open issues](https://github.com/AnalyseDeCircuit/oxideterm/issues).
+- The project moves quickly, with frequent releases. See the [changelog](.github/release-notes/stable-changelog.md) and [open issues](https://github.com/Do-er/OxideLab/issues).
 - Auditing and session recording are opt-in, and only reflect what OxideLab itself can observe.
 - Process plugins are not sandboxed by the OS.
 - If the renderer fails on your machine, try the compatibility profile: `OXIDELAB_RENDER_PROFILE=compatibility`.
@@ -271,7 +275,7 @@ SFTP sessions carry a connection generation: after a reconnect, an eligible sess
 
 ## Install
 
-[**Download the latest release**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[**Download the latest release**](https://github.com/Do-er/OxideLab/releases/latest)
 
 | OS | x64 | ARM64 |
 |---|---|---|
@@ -330,8 +334,8 @@ Reproducible bugs and regressions are prioritized. Feature requests are reviewed
 Thanks to everyone who helps make OxideLab better.
 
 <p align="center">
-  <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab contributors">
+  <a href="https://github.com/Do-er/OxideLab/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Do-er/OxideLab" alt="OxideLab contributors">
   </a>
 </p>
 
@@ -345,10 +349,10 @@ Thanks to everyone who helps make OxideLab better.
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=AnalyseDeCircuit%2Foxideterm&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=Do-er%2FOxideLab&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
  </picture>
 </a>

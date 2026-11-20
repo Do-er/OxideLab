@@ -1,23 +1,21 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab：サーバー管理をひとつのワークスペースに" width="920">
-
-# ⚡ OxideLab
+# OxideLab
 
 **無料のネイティブ SSH クライアントとリモート運用ワークスペース。自分の API キーで使える AI アシスタントも搭載。**
 
 SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · 内蔵エディターを、GPU 描画のアプリひとつに。
 アカウント不要。サブスクリプションなし。テレメトリーなし。Electron 不使用。
 
-[![最新リリース](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[![最新リリース](https://img.shields.io/github/v/release/Do-er/OxideLab?label=release)](https://github.com/Do-er/OxideLab/releases/latest)
 [![対応プラットフォーム](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)
 [![ライセンス](https://img.shields.io/badge/license-GPL--3.0-blue)](../../LICENSE)
-[![スター](https://img.shields.io/github/stars/AnalyseDeCircuit/oxideterm?style=social)](https://github.com/AnalyseDeCircuit/oxideterm/stargazers)
+[![スター](https://img.shields.io/github/stars/Do-er/OxideLab?style=social)](https://github.com/Do-er/OxideLab/stargazers)
 
-[**ダウンロード**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) ·
+[**ダウンロード**](https://github.com/Do-er/OxideLab/releases/latest) ·
 [**ドキュメント**](https://oxideterm.app) ·
 [**変更履歴**](../../.github/release-notes/stable-changelog.md) ·
-[**問題を報告**](https://github.com/AnalyseDeCircuit/oxideterm/issues)
+[**問題を報告**](https://github.com/Do-er/OxideLab/issues)
 
 [English](../../README.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt-BR.md) | [Tiếng Việt](README.vi.md)
 
@@ -27,7 +25,7 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 
 ## クイックスタート
 
-1. **OxideLab をインストール。** [最新リリース](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)からパッケージをダウンロードしてください。プラットフォームごとの注意事項は、下の[インストール](#install)にあります。
+1. **OxideLab をインストール。** [最新リリース](https://github.com/Do-er/OxideLab/releases/latest)からパッケージをダウンロードしてください。プラットフォームごとの注意事項は、下の[インストール](#install)にあります。
 2. **サーバーを追加。** セッションマネージャーで SSH 接続を作成するか、`~/.ssh/config` からホストをインポートします。
 3. **接続。** ターミナルを開きます。ホスト鍵は `~/.ssh/known_hosts` と照合されます。
 4. **ほかの機能も活用。** 同じノードで SFTP、ポート転送、内蔵エディターを開けます。既定では、これらの機能はひとつの SSH 接続を共有します。
@@ -82,6 +80,10 @@ SSH · Mosh · Telnet · シリアル · RDP/VNC · SFTP · ポート転送 · �
 ---
 
 ## スクリーンショット
+
+| セッションサイドバー付きターミナルワークスペース | 外観設定とアイコン選択 |
+|---|---|
+| ![セッションサイドバーと OxideSens AI を備えたターミナルワークスペース](../../docs/screenshots/workspace/terminal-workspace.png) | ![選択可能なアプリアイコンの外観設定](../../docs/screenshots/workspace/appearance-settings.png) |
 
 | OxideSens を搭載した SSH ターミナル | SFTP ファイルマネージャー |
 |---|---|
@@ -155,7 +157,7 @@ OxideLab は次の 3 種類のプラグインに対応します。
 インストール前に、次の点をご確認ください。
 
 - デスクトップ専用です（macOS、Windows、Linux）。モバイルアプリはありません。
-- 開発は速いペースで進んでおり、頻繁にリリースされます。[変更履歴](../../.github/release-notes/stable-changelog.md)と[未解決の課題](https://github.com/AnalyseDeCircuit/oxideterm/issues)をご覧ください。
+- 開発は速いペースで進んでおり、頻繁にリリースされます。[変更履歴](../../.github/release-notes/stable-changelog.md)と[未解決の課題](https://github.com/Do-er/OxideLab/issues)をご覧ください。
 - 監査とセッション録画は任意で有効化する機能であり、OxideLab 自身が観測できる範囲だけを記録します。
 - プロセスプラグインは OS のサンドボックスで隔離されません。
 - 描画に問題がある場合は、互換プロファイルを試してください：`OXIDELAB_RENDER_PROFILE=compatibility`。
@@ -279,7 +281,7 @@ SFTP セッションには接続の世代情報が含まれます。再接続後
 
 ## インストール
 
-[**最新リリースをダウンロード**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[**最新リリースをダウンロード**](https://github.com/Do-er/OxideLab/releases/latest)
 
 | OS | x64 | ARM64 |
 |---|---|---|
@@ -338,8 +340,8 @@ cargo run -p oxideterm-cli -- report --bundle ./oxideterm-report.zip
 OxideLab をより良くするために協力してくださる皆さんに感謝します。
 
 <p align="center">
-  <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="OxideLab の貢献者">
+  <a href="https://github.com/Do-er/OxideLab/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Do-er/OxideLab" alt="OxideLab の貢献者">
   </a>
 </p>
 
@@ -353,10 +355,10 @@ OxideLab をより良くするために協力してくださる皆さんに感�
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=AnalyseDeCircuit%2Foxideterm&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=Do-er%2FOxideLab&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
  </picture>
 </a>

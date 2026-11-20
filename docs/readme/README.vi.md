@@ -1,23 +1,21 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab: các máy chủ của bạn, một không gian làm việc" width="920">
-
-# ⚡ OxideLab
+# OxideLab
 
 **Trình khách SSH miễn phí, chạy trực tiếp trên hệ điều hành, kết hợp không gian làm việc cho hoạt động từ xa và trợ lý AI dùng khóa của riêng bạn.**
 
 SSH · Mosh · Telnet · Serial · RDP/VNC · SFTP · chuyển tiếp cổng · trình biên tập tích hợp, tất cả trong một ứng dụng kết xuất bằng GPU.
 Không cần tài khoản. Không cần đăng ký thuê bao. Không thu thập dữ liệu đo từ xa. Không dùng Electron.
 
-[![Bản phát hành mới nhất](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[![Bản phát hành mới nhất](https://img.shields.io/github/v/release/Do-er/OxideLab?label=release)](https://github.com/Do-er/OxideLab/releases/latest)
 [![Nền tảng](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)
 [![Giấy phép](https://img.shields.io/badge/license-GPL--3.0-blue)](../../LICENSE)
-[![Lượt gắn sao](https://img.shields.io/github/stars/AnalyseDeCircuit/oxideterm?style=social)](https://github.com/AnalyseDeCircuit/oxideterm/stargazers)
+[![Lượt gắn sao](https://img.shields.io/github/stars/Do-er/OxideLab?style=social)](https://github.com/Do-er/OxideLab/stargazers)
 
-[**Tải xuống**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) ·
+[**Tải xuống**](https://github.com/Do-er/OxideLab/releases/latest) ·
 [**Tài liệu**](https://oxideterm.app) ·
 [**Lịch sử thay đổi**](../../.github/release-notes/stable-changelog.md) ·
-[**Báo cáo sự cố**](https://github.com/AnalyseDeCircuit/oxideterm/issues)
+[**Báo cáo sự cố**](https://github.com/Do-er/OxideLab/issues)
 
 [English](../../README.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt-BR.md) | [Tiếng Việt](README.vi.md)
 
@@ -27,7 +25,7 @@ Không cần tài khoản. Không cần đăng ký thuê bao. Không thu thập 
 
 ## Bắt đầu nhanh
 
-1. **Cài đặt OxideLab.** Tải gói cài đặt từ [bản phát hành mới nhất](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); hướng dẫn cho từng nền tảng nằm trong phần [Cài đặt](#install) bên dưới.
+1. **Cài đặt OxideLab.** Tải gói cài đặt từ [bản phát hành mới nhất](https://github.com/Do-er/OxideLab/releases/latest); hướng dẫn cho từng nền tảng nằm trong phần [Cài đặt](#install) bên dưới.
 2. **Thêm máy chủ.** Mở Trình quản lý phiên và tạo kết nối SSH hoặc nhập máy chủ từ `~/.ssh/config`.
 3. **Kết nối.** Mở một terminal. Khóa máy chủ được đối chiếu với `~/.ssh/known_hosts`.
 4. **Sử dụng các phần còn lại của không gian làm việc.** Mở SFTP, chuyển tiếp cổng hoặc trình biên tập tích hợp trên cùng một nút. Theo mặc định, các thành phần này dùng chung một kết nối SSH.
@@ -82,6 +80,10 @@ Tổng bộ nhớ của phiên bản cũ bao gồm OxideLab và các tiến trì
 ---
 
 ## Ảnh chụp màn hình
+
+| Không gian làm việc terminal với thanh bên phiên | Cài đặt giao diện và bộ chọn biểu tượng |
+|---|---|
+| ![Không gian làm việc terminal với thanh bên phiên và AI OxideSens](../../docs/screenshots/workspace/terminal-workspace.png) | ![Cài đặt giao diện với các biến thể biểu tượng ứng dụng](../../docs/screenshots/workspace/appearance-settings.png) |
 
 | Terminal SSH với OxideSens | Trình quản lý tệp SFTP |
 |---|---|
@@ -154,7 +156,7 @@ Plugin ESM cũ của Tauri (1.x) có thể xuất hiện trong danh sách nhưng
 Những điều bạn nên biết trước khi cài đặt:
 
 - Chỉ dành cho máy tính (macOS, Windows, Linux). Không có ứng dụng di động.
-- Dự án phát triển nhanh và phát hành thường xuyên. Xem [lịch sử thay đổi](../../.github/release-notes/stable-changelog.md) và [các sự cố đang mở](https://github.com/AnalyseDeCircuit/oxideterm/issues).
+- Dự án phát triển nhanh và phát hành thường xuyên. Xem [lịch sử thay đổi](../../.github/release-notes/stable-changelog.md) và [các sự cố đang mở](https://github.com/Do-er/OxideLab/issues).
 - Kiểm tra hoạt động và ghi lại phiên cần được bật chủ động, và chỉ phản ánh những gì chính OxideLab có thể quan sát.
 - Plugin dạng tiến trình không được hệ điều hành cô lập.
 - Nếu bộ kết xuất không hoạt động trên máy của bạn, hãy thử cấu hình tương thích: `OXIDELAB_RENDER_PROFILE=compatibility`.
@@ -276,7 +278,7 @@ Phiên SFTP mang số thế hệ kết nối: sau khi kết nối lại, một p
 <a id="install"></a>
 ## Cài đặt
 
-[**Tải bản phát hành mới nhất**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[**Tải bản phát hành mới nhất**](https://github.com/Do-er/OxideLab/releases/latest)
 
 | Hệ điều hành | x64 | ARM64 |
 |---|---|---|
@@ -335,8 +337,8 @@ Lỗi có thể tái hiện và lỗi hồi quy được ưu tiên. Đề xuất
 Cảm ơn tất cả những người giúp OxideLab ngày càng tốt hơn.
 
 <p align="center">
-  <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Những người đóng góp cho OxideLab">
+  <a href="https://github.com/Do-er/OxideLab/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Do-er/OxideLab" alt="Những người đóng góp cho OxideLab">
   </a>
 </p>
 
@@ -350,10 +352,10 @@ Cảm ơn tất cả những người giúp OxideLab ngày càng tốt hơn.
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=AnalyseDeCircuit%2Foxideterm&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=Do-er%2FOxideLab&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
  </picture>
 </a>

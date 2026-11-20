@@ -1,23 +1,21 @@
 <div align="center">
 
-<img src="../../docs/media/oxideterm-native-hero.png" alt="OxideLab: seus servidores, um só espaço de trabalho" width="920">
-
-# ⚡ OxideLab
+# OxideLab
 
 **Um cliente SSH nativo e gratuito e um espaço de trabalho para operações remotas, com um assistente de IA que usa sua própria chave.**
 
 SSH · Mosh · Telnet · Serial · RDP/VNC · SFTP · encaminhamento de portas · editor integrado, tudo em um único aplicativo com renderização por GPU.
 Sem conta. Sem assinatura. Sem telemetria. Sem Electron.
 
-[![Última versão](https://img.shields.io/github/v/release/AnalyseDeCircuit/oxideterm?label=release)](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[![Última versão](https://img.shields.io/github/v/release/Do-er/OxideLab?label=release)](https://github.com/Do-er/OxideLab/releases/latest)
 [![Plataformas](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue)](#install)
 [![Licença](https://img.shields.io/badge/license-GPL--3.0-blue)](../../LICENSE)
-[![Estrelas](https://img.shields.io/github/stars/AnalyseDeCircuit/oxideterm?style=social)](https://github.com/AnalyseDeCircuit/oxideterm/stargazers)
+[![Estrelas](https://img.shields.io/github/stars/Do-er/OxideLab?style=social)](https://github.com/Do-er/OxideLab/stargazers)
 
-[**Baixar**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) ·
+[**Baixar**](https://github.com/Do-er/OxideLab/releases/latest) ·
 [**Documentação**](https://oxideterm.app) ·
 [**Histórico de alterações**](../../.github/release-notes/stable-changelog.md) ·
-[**Relatar um problema**](https://github.com/AnalyseDeCircuit/oxideterm/issues)
+[**Relatar um problema**](https://github.com/Do-er/OxideLab/issues)
 
 [English](../../README.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt-BR.md) | [Tiếng Việt](README.vi.md)
 
@@ -27,7 +25,7 @@ Sem conta. Sem assinatura. Sem telemetria. Sem Electron.
 
 ## Primeiros passos
 
-1. **Instale o OxideLab.** Baixe um pacote da [última versão](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest); as orientações por plataforma estão em [Instalação](#install), abaixo.
+1. **Instale o OxideLab.** Baixe um pacote da [última versão](https://github.com/Do-er/OxideLab/releases/latest); as orientações por plataforma estão em [Instalação](#install), abaixo.
 2. **Adicione um servidor.** Abra o Gerenciador de Sessões e crie uma conexão SSH ou importe os hosts do seu `~/.ssh/config`.
 3. **Conecte-se.** Abra um terminal. As chaves dos hosts são verificadas em relação ao `~/.ssh/known_hosts`.
 4. **Use os outros recursos do espaço de trabalho.** Abra o SFTP, o encaminhamento de portas ou o editor integrado no mesmo nó. Por padrão, eles compartilham uma única conexão SSH.
@@ -82,6 +80,10 @@ O total da versão antiga inclui o OxideLab e os processos WebView associados. A
 ---
 
 ## Capturas de tela
+
+| Área de trabalho do terminal com barra lateral de sessões | Configurações de aparência e seletor de ícones |
+|---|---|
+| ![Área de trabalho do terminal com barra lateral de sessões e IA OxideSens](../../docs/screenshots/workspace/terminal-workspace.png) | ![Configurações de aparência com as variantes de ícone disponíveis](../../docs/screenshots/workspace/appearance-settings.png) |
 
 | Terminal SSH com OxideSens | Gerenciador de arquivos SFTP |
 |---|---|
@@ -154,7 +156,7 @@ Plugins ESM legados do Tauri (1.x) podem aparecer na lista, mas não são execut
 É melhor saber antes de instalar:
 
 - Apenas para desktop (macOS, Windows, Linux). Não há aplicativo móvel.
-- O projeto evolui rapidamente, com lançamentos frequentes. Consulte o [histórico de alterações](../../.github/release-notes/stable-changelog.md) e os [problemas em aberto](https://github.com/AnalyseDeCircuit/oxideterm/issues).
+- O projeto evolui rapidamente, com lançamentos frequentes. Consulte o [histórico de alterações](../../.github/release-notes/stable-changelog.md) e os [problemas em aberto](https://github.com/Do-er/OxideLab/issues).
 - Auditoria e gravação de sessões precisam ser ativadas e refletem apenas o que o próprio OxideLab consegue observar.
 - Plugins de processo não têm isolamento pelo sistema operacional.
 - Se a renderização falhar na sua máquina, tente o perfil de compatibilidade: `OXIDELAB_RENDER_PROFILE=compatibility`.
@@ -276,7 +278,7 @@ As sessões SFTP carregam uma geração de conexão: após uma reconexão, uma s
 <a id="install"></a>
 ## Instalação
 
-[**Baixar a última versão**](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest)
+[**Baixar a última versão**](https://github.com/Do-er/OxideLab/releases/latest)
 
 | Sistema operacional | x64 | ARM64 |
 |---|---|---|
@@ -335,8 +337,8 @@ Bugs reproduzíveis e regressões têm prioridade. Solicitações de recursos s�
 Obrigado a todos que ajudam a tornar o OxideLab melhor.
 
 <p align="center">
-  <a href="https://github.com/AnalyseDeCircuit/oxideterm/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=AnalyseDeCircuit/oxideterm" alt="Colaboradores do OxideLab">
+  <a href="https://github.com/Do-er/OxideLab/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Do-er/OxideLab" alt="Colaboradores do OxideLab">
   </a>
 </p>
 
@@ -350,10 +352,10 @@ Obrigado a todos que ajudam a tornar o OxideLab melhor.
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=AnalyseDeCircuit%2Foxideterm&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=Do-er%2FOxideLab&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AnalyseDeCircuit/oxideterm&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Do-er/OxideLab&type=date&legend=top-left" />
  </picture>
 </a>
