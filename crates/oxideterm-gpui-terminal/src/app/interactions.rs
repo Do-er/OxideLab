@@ -1005,17 +1005,17 @@ impl TerminalPane {
         mode: TermMode,
         cx: &mut Context<Self>,
     ) -> bool {
-        if !free_type_mode_allows_command_edit(
-            self.settings.free_type_mode,
-            mode,
-            Modifiers::default(),
-        ) {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             return false;
         }
         let Some(selection) = self.selection else {
             return false;
         };
-        let input_state = self.input_tracker.state();
+        // Only an observed command line yields a correct slice; otherwise the
+        // ordinary terminal copy path must keep ownership of the shortcut.
+        let Some(input_state) = self.input_tracker.tracked_state() else {
+            return false;
+        };
         let Some(text) = free_type_selected_command_text(&self.snapshot, selection, &input_state)
         else {
             return false;
@@ -1039,13 +1039,7 @@ impl TerminalPane {
         mode: TermMode,
         cx: &mut Context<Self>,
     ) -> bool {
-        if !self.terminal_accepts_input()
-            || !free_type_mode_allows_command_edit(
-                self.settings.free_type_mode,
-                mode,
-                Modifiers::default(),
-            )
-        {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             return false;
         }
         let Some(selection) = self.selection else {
@@ -1054,7 +1048,9 @@ impl TerminalPane {
         if self.selection_uses_display_coordinates {
             return false;
         }
-        let input_state = self.input_tracker.state();
+        let Some(input_state) = self.input_tracker.tracked_state() else {
+            return false;
+        };
         let Some((text, bytes)) =
             free_type_selection_cut_payload(&self.snapshot, selection, &input_state, mode)
         else {
@@ -1072,16 +1068,12 @@ impl TerminalPane {
     }
 
     fn free_type_active_command_accepts_clipboard_paste(&self, mode: TermMode) -> bool {
-        if !self.terminal_accepts_input()
-            || !free_type_mode_allows_command_edit(
-                self.settings.free_type_mode,
-                mode,
-                Modifiers::default(),
-            )
-        {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             return false;
         }
-        let input_state = self.input_tracker.state();
+        let Some(input_state) = self.input_tracker.tracked_state() else {
+            return false;
+        };
         let cursor_row_is_active = self
             .snapshot
             .lines
@@ -2173,6 +2165,25 @@ impl TerminalPane {
         }
     }
 
+    // Free Type edits must target the live shell line, so they share the same
+    // prompt and input-mode evidence as shell suggestions instead of merely
+    // reconstructing plausible text from the screen grid.
+    fn free_type_edit_allowed(&self, mode: TermMode, modifiers: Modifiers) -> bool {
+        free_type_mode_allows_command_edit(self.settings.free_type_mode, mode, modifiers)
+            && self.terminal_accepts_input()
+            && self.history_input_available(mode)
+    }
+
+    // Cursor positioning only moves inside the emulator's active input rows, so
+    // it can fall back to the visible grid when the shell reports no prompt
+    // markers. Once integration exists, its lifecycle decides whether a running
+    // command, not the prompt, owns the active row.
+    fn free_type_cursor_positioning_allowed(&self, mode: TermMode, modifiers: Modifiers) -> bool {
+        free_type_mode_allows_command_edit(self.settings.free_type_mode, mode, modifiers)
+            && self.terminal_accepts_input()
+            && (!self.shell_integration_status.detected || self.autosuggest_prompt_active)
+    }
+
     fn start_free_type_drag_candidate(&mut self, event: &MouseDownEvent, mode: TermMode) -> bool {
         if !free_type_drag_candidate_allowed(self.settings.free_type_mode, mode, event.modifiers) {
             return false;
@@ -2293,18 +2304,13 @@ impl TerminalPane {
         let Some(target) = self.physical_terminal_point(target) else {
             return false;
         };
-        if !self.terminal_accepts_input() {
-            return false;
-        }
         let mode = self.terminal.lock().mode();
-        if !free_type_mode_allows_command_edit(
-            self.settings.free_type_mode,
-            mode,
-            Modifiers::default(),
-        ) {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             return false;
         }
-        let input_state = self.input_tracker.state();
+        let Some(input_state) = self.input_tracker.tracked_state() else {
+            return false;
+        };
         let Some(bytes) =
             free_type_selection_move_bytes(&self.snapshot, selection, target, &input_state, mode)
         else {
@@ -2331,7 +2337,10 @@ impl TerminalPane {
         mode: TermMode,
         cx: &mut Context<Self>,
     ) -> bool {
-        if !free_type_mode_allows_command_edit(self.settings.free_type_mode, mode, modifiers) {
+        // Cursor positioning stays available without prompt markers because it
+        // only moves within the emulator's active input rows; edits that rewrite
+        // command text require tracked input separately.
+        if !self.free_type_cursor_positioning_allowed(mode, modifiers) {
             log_free_type_terminal(format_args!(
                 "click rejected: {}",
                 free_type_mode_command_edit_rejection_reason(
@@ -2339,7 +2348,7 @@ impl TerminalPane {
                     mode,
                     modifiers,
                 )
-                .unwrap_or("unknown")
+                .unwrap_or("no editable input prompt")
             ));
             return false;
         }
@@ -2348,6 +2357,8 @@ impl TerminalPane {
         let Some(target) = self.physical_terminal_point(target) else {
             return false;
         };
+        // History search renders its own accepted line; other prompt clicks may
+        // fall back to visible-grid movement when no byte history was observed.
         let input_state = self.input_tracker.tracked_state();
         if input_state.is_none()
             && let Some(range) = history_search_command_range(&self.snapshot)
@@ -2398,11 +2409,7 @@ impl TerminalPane {
         mode: TermMode,
         cx: &mut Context<Self>,
     ) -> bool {
-        if !free_type_mode_allows_command_edit(
-            self.settings.free_type_mode,
-            mode,
-            Modifiers::default(),
-        ) {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             log_free_type_terminal(format_args!(
                 "selection delete rejected: {}",
                 free_type_mode_command_edit_rejection_reason(
@@ -2410,7 +2417,7 @@ impl TerminalPane {
                     mode,
                     Modifiers::default(),
                 )
-                .unwrap_or("unknown")
+                .unwrap_or("no editable input prompt")
             ));
             return false;
         }
@@ -2419,7 +2426,10 @@ impl TerminalPane {
             log_free_type_terminal(format_args!("selection delete rejected: no selection"));
             return false;
         };
-        let input_state = self.input_tracker.state();
+        let Some(input_state) = self.input_tracker.tracked_state() else {
+            log_free_type_terminal(format_args!("selection delete rejected: no tracked input"));
+            return false;
+        };
         let Some(bytes) =
             free_type_selection_delete_bytes(&self.snapshot, selection, &input_state, mode)
         else {
@@ -2472,20 +2482,12 @@ impl TerminalPane {
         replace_current_command: bool,
     ) -> Option<Vec<u8>> {
         let target = self.physical_terminal_point(target)?;
-        if !self.terminal_accepts_input() {
-            return None;
-        }
-
         let mode = self.terminal.lock().mode();
-        if !free_type_mode_allows_command_edit(
-            self.settings.free_type_mode,
-            mode,
-            Modifiers::default(),
-        ) {
+        if !self.free_type_edit_allowed(mode, Modifiers::default()) {
             return None;
         }
 
-        let input_state = self.input_tracker.state();
+        let input_state = self.input_tracker.tracked_state()?;
         free_type_command_edit_bytes(
             &self.snapshot,
             target,
@@ -5660,6 +5662,50 @@ mod tests {
         .ok_or_else(|| "Free Type move bytes were not generated".to_string())?;
         submit_real_pty_command(session, move_command, &move_bytes)?;
         wait_for_real_pty_text(session, "OT_MOVE:efabcd")?;
+
+        let delete_command = "printf 'OT_DELETE:%s\\n' abXcd";
+        let delete_target = delete_command
+            .rfind('X')
+            .ok_or_else(|| "delete fixture is missing its marker".to_string())?;
+        let delete_snapshot = test_snapshot_with_cursor(
+            vec![test_row(delete_command, true)],
+            0,
+            delete_command.len(),
+            160,
+        );
+        let delete_selection = TerminalSelection {
+            anchor: TerminalGridPoint {
+                line: 0,
+                col: delete_target,
+            },
+            head: TerminalGridPoint {
+                line: 0,
+                col: delete_target,
+            },
+            // A single-cell Simple selection is empty by contract; Semantic
+            // expresses the one glyph a user double-clicked inside a token.
+            mode: TerminalSelectionMode::Semantic,
+        };
+        let delete_state = TerminalAutosuggestInputState {
+            value: delete_command.to_string(),
+            cursor_index: delete_command.len(),
+            is_cursor_at_end: true,
+        };
+        let delete_bytes = free_type_selection_delete_bytes(
+            &delete_snapshot,
+            delete_selection,
+            &delete_state,
+            session.mode(),
+        )
+        .ok_or_else(|| "Free Type selection delete bytes were not generated".to_string())?;
+        assert!(
+            free_type_selected_command_text(&delete_snapshot, delete_selection, &delete_state)
+                .as_deref()
+                == Some("X"),
+            "the delete fixture must select exactly the removable marker"
+        );
+        submit_real_pty_command(session, delete_command, &delete_bytes)?;
+        wait_for_real_pty_text(session, "OT_DELETE:abcd")?;
         for (index, query) in ["gts", "设置", "e\u{301}"].into_iter().enumerate() {
             let state = TerminalAutosuggestInputState {
                 value: query.into(),
@@ -6447,6 +6493,97 @@ mod tests {
                 "selection mode={mode:?}"
             );
         }
+    }
+
+    #[gpui::test]
+    fn free_type_selection_delete_requires_live_tracked_prompt_input(cx: &mut TestAppContext) {
+        let (_, cx) = cx.add_window_view(|_window, _cx| TerminalScrollTestRoot);
+        let pane = cx.update(|window, cx| {
+            let preferences = TerminalUiPreferences {
+                free_type_mode: true,
+                ..TerminalUiPreferences::default()
+            };
+            cx.new(|cx| {
+                TerminalPane::new_recording_playback(20, 4, preferences, window, cx)
+                    .expect("test terminal pane")
+            })
+        });
+
+        pane.update(cx, |pane, cx| {
+            pane.test_accepts_input = true;
+            pane.autosuggest_prompt_active = true;
+            let snapshot = {
+                let mut terminal = pane.terminal.lock();
+                terminal.feed_recording_output(b"$ abc");
+                terminal.snapshot()
+            };
+            pane.snapshot = pane.stamp_snapshot(snapshot);
+            pane.observe_autosuggest_input_bytes(b"abc", cx);
+
+            let attempted = Arc::new(std::sync::Mutex::new(Vec::<Vec<u8>>::new()));
+            let writes = attempted.clone();
+            pane.set_plugin_input_interceptor(Some(Arc::new(move |bytes| {
+                writes.lock().unwrap().push(bytes.to_vec());
+                super::super::TerminalInputInterceptorResult::Suppress
+            })));
+            let select_command = |pane: &mut TerminalPane| {
+                pane.set_selection(Some(TerminalSelection {
+                    anchor: TerminalGridPoint { line: 0, col: 2 },
+                    head: TerminalGridPoint { line: 0, col: 5 },
+                    mode: TerminalSelectionMode::Simple,
+                }));
+            };
+
+            select_command(pane);
+            assert!(
+                pane.delete_free_type_selection_if_active(TermMode::default(), cx),
+                "a tracked prompt command must still accept selection deletion"
+            );
+            assert_eq!(
+                attempted.lock().unwrap().as_slice(),
+                vec![vec![0x08, 0x08, 0x08]]
+            );
+
+            // Completion and history interfaces invalidate the tracked command,
+            // so a stale selection must reach the shell as no synthesized edit.
+            pane.input_tracker.reset();
+            pane.observe_autosuggest_input_bytes(b"\tabc", cx);
+            select_command(pane);
+            assert!(!pane.delete_free_type_selection_if_active(TermMode::default(), cx));
+            assert_eq!(attempted.lock().unwrap().len(), 1);
+
+            // Input recovered from the screen is suggestion-only evidence. The
+            // same rule keeps its selection from editing the command.
+            pane.input_tracker
+                .recover(zeroize::Zeroizing::new("abc".to_string()));
+            select_command(pane);
+            assert!(!pane.delete_free_type_selection_if_active(TermMode::default(), cx));
+            assert_eq!(attempted.lock().unwrap().len(), 1);
+
+            // Once the shell reports output, the prompt is gone even if the old
+            // line still looks editable on screen. Keep a tracked-looking value
+            // so the assertion fails if the prompt guard alone is removed.
+            pane.input_tracker.reset();
+            pane.input_tracker.value = "abc".to_string();
+            pane.input_tracker.cursor_index = 3;
+            pane.handle_terminal_event(
+                TerminalEvent::ShellIntegration(oxideterm_terminal::ShellIntegrationEvent {
+                    kind: oxideterm_terminal::ShellIntegrationEventKind::OutputStart,
+                    source: oxideterm_terminal::ShellIntegrationSource::Osc133,
+                    line: 0,
+                    col: 2,
+                    sequence: "C".into(),
+                    raw: "133;C".into(),
+                    command: None,
+                    exit_code: None,
+                }),
+                cx,
+            );
+            assert!(pane.input_tracker.tracked_state().is_some());
+            select_command(pane);
+            assert!(!pane.delete_free_type_selection_if_active(TermMode::default(), cx));
+            assert_eq!(attempted.lock().unwrap().len(), 1);
+        });
     }
 
     #[test]
