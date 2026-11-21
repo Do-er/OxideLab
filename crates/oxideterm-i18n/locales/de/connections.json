@@ -138,6 +138,7 @@
         "shell_ready": "Shell wird gestartet",
         "ssh_handshake": "SSH-Handshake"
       },
+      "cancel_all": "Alle abbrechen",
       "target_unknown": "Ziel"
     }
   }

@@ -138,6 +138,7 @@
         "shell_ready": "Démarrage du shell",
         "ssh_handshake": "Négociation SSH"
       },
+      "cancel_all": "Tout annuler",
       "target_unknown": "cible"
     }
   }

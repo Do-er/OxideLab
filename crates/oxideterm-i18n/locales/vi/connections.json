@@ -138,6 +138,7 @@
         "shell_ready": "Đang khởi động shell",
         "ssh_handshake": "Bắt tay SSH"
       },
+      "cancel_all": "Hủy tất cả",
       "target_unknown": "đích"
     }
   }

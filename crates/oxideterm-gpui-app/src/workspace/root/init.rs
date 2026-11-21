@@ -899,6 +899,7 @@ impl WorkspaceApp {
             terminal,
             overlay,
             _overlay_observation: overlay_observation,
+            connection_queue_expanded: false,
         };
         let workspace_window_bounds = cx.observe_window_bounds(window, |this, window, cx| {
             this.clamp_sidebar_widths_to_viewport(current_window_size(window).0, cx);

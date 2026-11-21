@@ -1065,6 +1065,7 @@ pub(crate) struct WorkspaceApp {
     terminal: Entity<WorkspaceTerminalEntity>,
     overlay: Entity<WorkspaceOverlayEntity>,
     _overlay_observation: Subscription,
+    connection_queue_expanded: bool,
     // Producers release before the writer, so their final cancellation records can drain.
     audit: audit::AuditState,
 }

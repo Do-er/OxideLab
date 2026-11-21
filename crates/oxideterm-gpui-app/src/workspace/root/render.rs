@@ -334,7 +334,6 @@ impl WorkspaceApp {
             .has_keyboard_interactive_challenge();
         let overlay_layers = {
             let tokens = self.tokens;
-            let i18n = &self.i18n;
             let mono_font_family = settings_mono_font_family(self.settings_store.settings());
             let control_exit_duration = oxideterm_gpui_ui::motion::duration(
                 &tokens,
@@ -344,10 +343,8 @@ impl WorkspaceApp {
                 overlay.set_control_exit_duration(control_exit_duration, cx);
                 overlay.render_layers(
                     &tokens,
-                    i18n,
                     mono_font_family,
                     native_update_notification,
-                    show_connection_cards,
                     cx,
                 )
             })
@@ -1182,6 +1179,10 @@ impl WorkspaceApp {
                             .when(!zen_mode, |main| {
                                 main.child(self.render_tab_bar(window, cx))
                             })
+                            .when_some(
+                                self.render_connection_status_bar(show_connection_cards, cx),
+                                |main, bar| main.child(bar),
+                            )
                             .child(
                                 div().flex_1().relative().overflow_hidden().child(
                                     div()
@@ -1854,5 +1855,422 @@ impl WorkspaceApp {
             WorkspaceOverlayIntent::ConnectionTraceEvents(vec![event]),
             cx,
         );
+    }
+
+    fn cancel_connection_from_status_bar(
+        &mut self,
+        node_id: &NodeId,
+        attempt_id: &str,
+        cx: &mut Context<Self>,
+    ) {
+        let disconnected_nodes = self.workspace_runtime.update(cx, |runtime, cx| {
+            runtime.disconnect_node_runtime_subtree(node_id, cx)
+        });
+        for disconnected_node_id in disconnected_nodes {
+            if let Some(node) = self.ssh_nodes.get_mut(&disconnected_node_id) {
+                node.readiness = NodeReadiness::Disconnected;
+            }
+        }
+        let now = cx.background_executor().now();
+        self.overlay.update(cx, |overlay, cx| {
+            if overlay.dismiss_connection_trace(attempt_id, now) {
+                overlay.schedule_next_deadline(cx);
+                cx.notify();
+            }
+        });
+        cx.notify();
+    }
+
+    fn cancel_all_connections_from_status_bar(
+        &mut self,
+        targets: Vec<(NodeId, String)>,
+        cx: &mut Context<Self>,
+    ) {
+        let now = cx.background_executor().now();
+        for (node_id, attempt_id) in targets {
+            let disconnected_nodes = self.workspace_runtime.update(cx, |runtime, cx| {
+                runtime.disconnect_node_runtime_subtree(&node_id, cx)
+            });
+            for disconnected_node_id in disconnected_nodes {
+                if let Some(node) = self.ssh_nodes.get_mut(&disconnected_node_id) {
+                    node.readiness = NodeReadiness::Disconnected;
+                }
+            }
+            self.overlay.update(cx, |overlay, cx| {
+                if overlay.dismiss_connection_trace(&attempt_id, now) {
+                    overlay.schedule_next_deadline(cx);
+                    cx.notify();
+                }
+            });
+        }
+        self.connection_queue_expanded = false;
+        cx.notify();
+    }
+
+    fn retry_connection_from_status_bar(
+        &mut self,
+        node_id: &NodeId,
+        attempt_id: &str,
+        cx: &mut Context<Self>,
+    ) {
+        let now = cx.background_executor().now();
+        self.overlay.update(cx, |overlay, cx| {
+            if overlay.dismiss_connection_trace(attempt_id, now) {
+                overlay.schedule_next_deadline(cx);
+                cx.notify();
+            }
+        });
+        self.ensure_node_connection_started(node_id, cx);
+        cx.notify();
+    }
+
+    fn dismiss_connection_from_status_bar(&mut self, attempt_id: &str, cx: &mut Context<Self>) {
+        let now = cx.background_executor().now();
+        self.overlay.update(cx, |overlay, cx| {
+            if overlay.dismiss_connection_trace(attempt_id, now) {
+                overlay.schedule_next_deadline(cx);
+                cx.notify();
+            }
+        });
+    }
+
+    fn render_connection_status_bar_actions(
+        &self,
+        entry: &overlay::ConnectionTraceBarEntry,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let tokens = &self.tokens;
+        let node_id = entry.node_id.clone();
+        let attempt_id = entry.attempt_id.clone();
+        match entry.status {
+            ConnectionTraceStatus::Running => {
+                let cancel_label = self.i18n.t("common.actions.cancel");
+                oxideterm_gpui_ui::button::button_with(
+                    tokens,
+                    cancel_label,
+                    oxideterm_gpui_ui::button::ButtonOptions {
+                        variant: oxideterm_gpui_ui::button::ButtonVariant::Ghost,
+                        size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                        ..Default::default()
+                    },
+                )
+                .h(px(22.0))
+                .px(px(8.0))
+                .text_xs()
+                .on_mouse_down(
+                    MouseButton::Left,
+                    cx.listener(move |this, _event, _window, cx| {
+                        this.cancel_connection_from_status_bar(&node_id, &attempt_id, cx);
+                        cx.stop_propagation();
+                    }),
+                )
+                .into_any_element()
+            }
+            ConnectionTraceStatus::Failed => {
+                let retry_label = self.i18n.t("common.actions.retry");
+                let retry_node_id = node_id;
+                let retry_attempt_id = attempt_id.clone();
+                let close_attempt_id = attempt_id;
+                div()
+                    .flex()
+                    .flex_none()
+                    .items_center()
+                    .gap(px(4.0))
+                    .child(
+                        oxideterm_gpui_ui::button::button_with(
+                            tokens,
+                            retry_label,
+                            oxideterm_gpui_ui::button::ButtonOptions {
+                                variant: oxideterm_gpui_ui::button::ButtonVariant::Outline,
+                                size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                                ..Default::default()
+                            },
+                        )
+                        .h(px(22.0))
+                        .px(px(8.0))
+                        .text_xs()
+                        .on_mouse_down(
+                            MouseButton::Left,
+                            cx.listener(move |this, _event, _window, cx| {
+                                this.retry_connection_from_status_bar(
+                                    &retry_node_id,
+                                    &retry_attempt_id,
+                                    cx,
+                                );
+                                cx.stop_propagation();
+                            }),
+                        ),
+                    )
+                    .child(
+                        oxideterm_gpui_ui::toast::toast_close(tokens)
+                            .debug_selector(|| "connection-card-close".to_string())
+                            .on_mouse_down(
+                                MouseButton::Left,
+                                cx.listener(move |this, _event, _window, cx| {
+                                    this.dismiss_connection_from_status_bar(&close_attempt_id, cx);
+                                    cx.stop_propagation();
+                                }),
+                            ),
+                    )
+                    .into_any_element()
+            }
+            ConnectionTraceStatus::Ready | ConnectionTraceStatus::Cancelled => {
+                div().into_any_element()
+            }
+        }
+    }
+
+    fn render_connection_status_bar(
+        &self,
+        show_connection_cards: bool,
+        cx: &mut Context<Self>,
+    ) -> Option<AnyElement> {
+        if !show_connection_cards {
+            return None;
+        }
+        let entries = self.overlay.read(cx).connection_trace_bar_entries(&self.i18n);
+        let primary = entries.first()?;
+        let tokens = &self.tokens;
+
+        let dot_color = match primary.status {
+            ConnectionTraceStatus::Running => tokens.ui.accent,
+            ConnectionTraceStatus::Ready => tokens.ui.success,
+            ConnectionTraceStatus::Failed => tokens.ui.error,
+            ConnectionTraceStatus::Cancelled => tokens.ui.text_muted,
+        };
+        let border_color = match primary.status {
+            ConnectionTraceStatus::Failed => tokens.ui.error,
+            _ => tokens.ui.border,
+        };
+        let summary_text = match primary.status {
+            ConnectionTraceStatus::Failed => match primary.detail.as_deref() {
+                Some(detail) if !detail.is_empty() => format!("{} · {}", primary.title, detail),
+                _ => primary.title.clone(),
+            },
+            _ => format!("{} · {}", primary.title, primary.status_text),
+        };
+
+        let extra_count = entries.len().saturating_sub(1);
+        let queue_expanded = self.connection_queue_expanded && extra_count > 0;
+        let running_targets = entries
+            .iter()
+            .filter(|entry| entry.status == ConnectionTraceStatus::Running)
+            .map(|entry| (entry.node_id.clone(), entry.attempt_id.clone()))
+            .collect::<Vec<_>>();
+
+        let bar = div()
+            .w_full()
+            .h(px(30.0))
+            .px(px(12.0))
+            .flex()
+            .flex_row()
+            .items_center()
+            .justify_between()
+            .gap(px(10.0))
+            .bg(self.workspace_chrome_background(tokens.ui.bg_panel))
+            .border_b_1()
+            .border_color(self.workspace_divider_color(border_color, 0xff))
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .flex()
+                    .flex_row()
+                    .items_center()
+                    .gap(px(8.0))
+                    .child(
+                        div()
+                            .flex_none()
+                            .w(px(6.0))
+                            .h(px(6.0))
+                            .rounded_full()
+                            .bg(rgb(dot_color)),
+                    )
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .text_xs()
+                            .text_color(rgb(if primary.status == ConnectionTraceStatus::Failed {
+                                tokens.ui.error
+                            } else {
+                                tokens.ui.text
+                            }))
+                            .truncate()
+                            .child(summary_text),
+                    ),
+            )
+            .child(
+                div()
+                    .flex_none()
+                    .flex()
+                    .flex_row()
+                    .items_center()
+                    .gap(px(8.0))
+                    .when_some(primary.progress, |row, value| {
+                        row.child(
+                            div()
+                                .w(px(88.0))
+                                .flex_none()
+                                .child(oxideterm_gpui_ui::progress::progress(tokens, Some(value), false)),
+                        )
+                    })
+                    .when(extra_count > 0, |row| {
+                        row.child(
+                            oxideterm_gpui_ui::button::button_with(
+                                tokens,
+                                format!("+{extra_count}"),
+                                oxideterm_gpui_ui::button::ButtonOptions {
+                                    variant: if queue_expanded {
+                                        oxideterm_gpui_ui::button::ButtonVariant::Secondary
+                                    } else {
+                                        oxideterm_gpui_ui::button::ButtonVariant::Outline
+                                    },
+                                    size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                                    ..Default::default()
+                                },
+                            )
+                            .h(px(20.0))
+                            .px(px(6.0))
+                            .text_xs()
+                            .on_mouse_down(
+                                MouseButton::Left,
+                                cx.listener(|this, _event, _window, cx| {
+                                    this.connection_queue_expanded = !this.connection_queue_expanded;
+                                    cx.notify();
+                                    cx.stop_propagation();
+                                }),
+                            ),
+                        )
+                    })
+                    .child(self.render_connection_status_bar_actions(primary, cx)),
+            );
+
+        let mut container = div().w_full().flex().flex_col().child(bar);
+        if queue_expanded {
+            let queue_rows = entries
+                .iter()
+                .map(|entry| {
+                    let entry_dot_color = match entry.status {
+                        ConnectionTraceStatus::Running => tokens.ui.accent,
+                        ConnectionTraceStatus::Ready => tokens.ui.success,
+                        ConnectionTraceStatus::Failed => tokens.ui.error,
+                        ConnectionTraceStatus::Cancelled => tokens.ui.text_muted,
+                    };
+                    let entry_text = match entry.status {
+                        ConnectionTraceStatus::Failed => match entry.detail.as_deref() {
+                            Some(detail) if !detail.is_empty() => {
+                                format!("{} · {}", entry.title, detail)
+                            }
+                            _ => entry.title.clone(),
+                        },
+                        _ => format!("{} · {}", entry.title, entry.status_text),
+                    };
+                    div()
+                        .w_full()
+                        .h(px(28.0))
+                        .px(px(12.0))
+                        .flex()
+                        .flex_row()
+                        .items_center()
+                        .justify_between()
+                        .gap(px(10.0))
+                        .border_b_1()
+                        .border_color(self.workspace_divider_color(tokens.ui.border, 0x80))
+                        .child(
+                            div()
+                                .flex_1()
+                                .min_w_0()
+                                .flex()
+                                .flex_row()
+                                .items_center()
+                                .gap(px(8.0))
+                                .child(
+                                    div()
+                                        .flex_none()
+                                        .w(px(5.0))
+                                        .h(px(5.0))
+                                        .rounded_full()
+                                        .bg(rgb(entry_dot_color)),
+                                )
+                                .child(
+                                    div()
+                                        .flex_1()
+                                        .min_w_0()
+                                        .text_xs()
+                                        .text_color(rgb(tokens.ui.text_muted))
+                                        .truncate()
+                                        .child(entry_text),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .flex_none()
+                                .flex()
+                                .flex_row()
+                                .items_center()
+                                .gap(px(8.0))
+                                .when_some(entry.progress, |row, value| {
+                                    row.child(div().w(px(72.0)).flex_none().child(
+                                        oxideterm_gpui_ui::progress::progress(
+                                            tokens,
+                                            Some(value),
+                                            false,
+                                        ),
+                                    ))
+                                })
+                                .child(self.render_connection_status_bar_actions(entry, cx)),
+                        )
+                })
+                .collect::<Vec<_>>();
+            let mut list = div()
+                .w_full()
+                .flex()
+                .flex_col()
+                .bg(self.workspace_chrome_background(tokens.ui.bg_panel))
+                .children(queue_rows);
+            if running_targets.len() > 1 {
+                let cancel_all_label = self.i18n.t("connections.trace.cancel_all");
+                list = list.child(
+                    div()
+                        .w_full()
+                        .h(px(28.0))
+                        .px(px(12.0))
+                        .flex()
+                        .flex_row()
+                        .items_center()
+                        .justify_end()
+                        .border_b_1()
+                        .border_color(self.workspace_divider_color(tokens.ui.border, 0xff))
+                        .child(
+                            oxideterm_gpui_ui::button::button_with(
+                                tokens,
+                                cancel_all_label,
+                                oxideterm_gpui_ui::button::ButtonOptions {
+                                    variant: oxideterm_gpui_ui::button::ButtonVariant::Ghost,
+                                    size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                                    ..Default::default()
+                                },
+                            )
+                            .h(px(20.0))
+                            .px(px(8.0))
+                            .text_xs()
+                            .on_mouse_down(
+                                MouseButton::Left,
+                                cx.listener(move |this, _event, _window, cx| {
+                                    this.cancel_all_connections_from_status_bar(
+                                        running_targets.clone(),
+                                        cx,
+                                    );
+                                    cx.stop_propagation();
+                                }),
+                            ),
+                        ),
+                );
+            }
+            container = container.child(list);
+        }
+
+        Some(container.into_any_element())
     }
 }

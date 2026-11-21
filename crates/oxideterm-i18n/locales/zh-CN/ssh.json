@@ -309,6 +309,7 @@
       "reconnecting_chain": "正在重连 {{current}}/{{total}}: {{label}}",
       "failed": "连接失败：{{label}}",
       "connected": "已连接 · {{elapsed}}",
+      "cancel_all": "全部取消",
       "target_unknown": "目标",
       "diagnostics": {
         "kind": {

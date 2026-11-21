@@ -138,6 +138,7 @@
         "shell_ready": "シェルを開始中",
         "ssh_handshake": "SSH ハンドシェイク"
       },
+      "cancel_all": "すべてキャンセル",
       "target_unknown": "ターゲット"
     }
   }

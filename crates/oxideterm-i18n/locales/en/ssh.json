@@ -309,6 +309,7 @@
       "reconnecting_chain": "Reconnecting {{current}}/{{total}}: {{label}}",
       "failed": "Connection failed: {{label}}",
       "connected": "Connected · {{elapsed}}",
+      "cancel_all": "Cancel all",
       "target_unknown": "target",
       "diagnostics": {
         "kind": {
