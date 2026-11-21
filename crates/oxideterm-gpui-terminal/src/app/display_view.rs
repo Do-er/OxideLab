@@ -54,7 +54,6 @@ impl DisplayView {
         }
         self.source_generation = base.generation;
         self.source_scrollback_lines = base.scrollback_lines;
-        self.max_display_cols = self.max_display_cols.max(base.cols);
         self.rows.clear();
 
         let mut result = base.clone();
@@ -235,7 +234,7 @@ impl DisplayView {
 fn display_width(row: &TerminalRow) -> usize {
     row.cells
         .iter()
-        .rposition(|cell| cell.ch != ' ' || cell.cursor || cell.extra.is_some())
+        .rposition(|cell| cell.cursor || terminal_cell_has_content(cell))
         .map_or(0, |column| column + 1)
 }
 
@@ -325,6 +324,21 @@ mod tests {
         view.refresh(&base, true);
         assert_ne!(view.snapshot().unwrap().lines[0].signature, before);
         assert_eq!(view.snapshot().unwrap().lines[0].text(), "abcdxfgh");
+    }
+
+    #[test]
+    fn no_wrap_width_ignores_blank_grid_and_keeps_styled_blanks() {
+        let mut base = snapshot(vec![row(0, "ab   ", false, false)]);
+        let mut view = DisplayView::default();
+        view.refresh(&base, true);
+        assert_eq!(view.snapshot().unwrap().cols, 2);
+
+        base.generation = 2;
+        base.lines[0].cells_mut()[4].style_origin =
+            oxideterm_terminal::TerminalStyleOrigin::new(false, true);
+        base.lines[0].refresh_signature();
+        view.refresh(&base, true);
+        assert_eq!(view.snapshot().unwrap().cols, 5);
     }
 
     #[test]

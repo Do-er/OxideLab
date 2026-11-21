@@ -522,7 +522,7 @@ impl Render for TerminalPane {
         .scrollbar_active(self.scrollbar_hovered || self.scrollbar_drag.is_some())
         .scroll_y_offset(smooth_scroll_y_offset)
         .scroll_x_offset(self.horizontal_scroll_offset_px)
-        .horizontal_scroll_enabled(self.wrap_disabled)
+        .horizontal_scroll_limit(self.terminal_horizontal_scroll_limit())
         .performance_metrics_enabled(performance_metrics_enabled)
         .command_mark_gutter_width(self.command_mark_gutter_width())
         .scrollbar_dragging(

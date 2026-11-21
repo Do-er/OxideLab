@@ -6205,7 +6205,7 @@ mod tests {
             assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
         });
 
-        // Width changes only alter horizontal overflow while no-wrap is active.
+        // Width changes do not invent horizontal overflow when short content still fits.
         let narrow = gpui::Bounds::new(
             gpui::point(px(0.0), px(0.0)),
             gpui::size(px(480.0), px(400.0)),
@@ -6217,7 +6217,7 @@ mod tests {
         pane.read_with(cx, |pane, _| {
             assert_eq!(pane.snapshot.cols, settled);
             assert_eq!(pane.terminal.lock().snapshot().cols, settled);
-            assert!(pane.terminal_horizontal_scroll_limit() > px(0.0));
+            assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
         });
 
         pane.update(cx, |pane, cx| pane.apply_viewport_bounds(wide, 1.0, cx));
@@ -6228,6 +6228,34 @@ mod tests {
             assert_eq!(pane.snapshot.cols, settled);
             assert_eq!(pane.terminal.lock().snapshot().cols, settled);
             assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+        });
+
+        let bounds = pane.read_with(cx, |pane, _| pane.bounds.expect("terminal viewport"));
+        let mut preferences = pane.read_with(cx, |pane, _| pane.preferences.clone());
+        preferences.font_size *= 3.0;
+        pane.update(cx, |pane, cx| pane.set_preferences(preferences, cx));
+        cx.update(|window, cx| {
+            pane.update(cx, |pane, cx| {
+                let _ = pane.render(window, cx).into_any_element();
+                assert_eq!(pane.snapshot.cols, settled);
+                assert_eq!(pane.terminal_horizontal_scroll_limit(), px(0.0));
+            })
+        });
+
+        let cell_width = pane.read_with(cx, |pane, _| pane.metrics.cell_width_f32());
+        let available_width = pane.read_with(cx, |pane, _| {
+            f32::from(bounds.size.width) - TERMINAL_CONTENT_PADDING * 2.0
+        });
+        let overflowing_cols = whole_cells_in_span(available_width, cell_width).max(1) + 2;
+        pane.update(cx, |pane, cx| {
+            pane.feed_recording_output("x".repeat(overflowing_cols).as_bytes(), cx);
+        });
+        cx.update(|window, cx| {
+            pane.update(cx, |pane, cx| {
+                let _ = pane.render(window, cx).into_any_element();
+                assert_eq!(pane.snapshot.cols, settled);
+                assert!(pane.terminal_horizontal_scroll_limit() > px(0.0));
+            })
         });
 
         // Restoring wrapping adopts the current viewport again.

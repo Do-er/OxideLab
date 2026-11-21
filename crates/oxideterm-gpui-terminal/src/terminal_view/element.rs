@@ -94,8 +94,8 @@ pub(crate) struct TerminalElement {
     scrollbar_active: bool,
     scroll_y_offset: Pixels,
     scroll_x_offset: Pixels,
-    // Wrapping derives its columns from the viewport; only the no-wrap view exposes overflow.
-    horizontal_scroll_enabled: bool,
+    // The pane owns overflow geometry so painting and pointer dragging use the same range.
+    horizontal_scroll_limit: Pixels,
     command_mark_gutter_width: f32,
     command_mark_decorations: bool,
     collapsed_commands: HashSet<String>,
@@ -734,7 +734,7 @@ impl TerminalElement {
             scrollbar_active: false,
             scroll_y_offset: px(0.0),
             scroll_x_offset: px(0.0),
-            horizontal_scroll_enabled: false,
+            horizontal_scroll_limit: px(0.0),
             command_mark_gutter_width: 0.0,
             command_mark_decorations: true,
             collapsed_commands: HashSet::new(),
@@ -869,8 +869,8 @@ impl TerminalElement {
         self
     }
 
-    pub(crate) fn horizontal_scroll_enabled(mut self, enabled: bool) -> Self {
-        self.horizontal_scroll_enabled = enabled;
+    pub(crate) fn horizontal_scroll_limit(mut self, limit: Pixels) -> Self {
+        self.horizontal_scroll_limit = limit.max(px(0.0));
         self
     }
 
@@ -948,7 +948,7 @@ impl TerminalElement {
     }
 
     fn visible_column_window(&self, viewport_width: Option<f32>) -> Range<usize> {
-        if !self.horizontal_scroll_enabled {
+        if f32::from(self.horizontal_scroll_limit) <= 0.0 {
             return 0..self.snapshot.cols;
         }
         let Some(viewport_width) = viewport_width else {
@@ -2991,18 +2991,9 @@ impl Element for TerminalElement {
                 rgb(color),
             ));
         }
-        let cell_width = self.metrics.cell_width_f32();
-        let available_grid_width =
-            (f32::from(bounds.size.width) - TERMINAL_CONTENT_PADDING * 2.0 - grid_gutter_width)
-                .max(cell_width * 2.0);
-        let max_scroll = if self.horizontal_scroll_enabled {
-            (self.snapshot.cols as f32 * cell_width - available_grid_width).max(0.0)
-        } else {
-            0.0
-        };
         if let Some(horizontal_scrollbar) = terminal_horizontal_scrollbar_for_viewport(
             f32::from(grid_viewport_width),
-            max_scroll,
+            f32::from(self.horizontal_scroll_limit),
             f32::from(self.scroll_x_offset),
         ) {
             paint_horizontal_scrollbar(
@@ -3134,7 +3125,7 @@ mod cache_tests {
         let mut input = snapshot(0, vec![row]);
         input.cols = 45;
         let mut view = element(input)
-            .horizontal_scroll_enabled(true)
+            .horizontal_scroll_limit(px(128.0))
             .scroll_x_offset(px(128.0));
         let bounds = Bounds::new(point(px(0.0), px(0.0)), size(px(32.0), px(10.0)));
         assert_eq!(view.visible_column_window(Some(32.0)), 8..32);
