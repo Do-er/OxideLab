@@ -627,8 +627,25 @@ impl WorkspaceApp {
         cx: &mut Context<Self>,
     ) {
         if self.connection_flow.read(cx).has_active_proxy_connect_run() {
+            // Clicking the same saved host twice must join the chain that is
+            // already authenticating it instead of surfacing a busy error.
+            let duplicate_request = matches!(
+                (
+                    self.connection_flow.read(cx).active_proxy_connect_intent(),
+                    &intent,
+                ),
+                (
+                    Some(SshConnectionIntent::ConnectSaved {
+                        id: active_id, ..
+                    }),
+                    SshConnectionIntent::ConnectSaved { id, .. },
+                ) if active_id == id
+            );
+            if duplicate_request {
+                return;
+            }
             self.report_proxy_session_tree_error(
-                "CHAIN_LOCK_BUSY: Another connection chain is in progress".to_string(),
+                self.i18n.t("connections.errors.chain_busy_desc"),
                 cx,
             );
             return;
@@ -688,6 +705,15 @@ impl WorkspaceApp {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> bool {
+        // The pending chain opens this node's terminal itself when it finishes,
+        // so a duplicate click joins it instead of queueing a second tab.
+        if self
+            .connection_flow
+            .read(cx)
+            .active_proxy_connect_opens_node_terminal(&target_node_id)
+        {
+            return true;
+        }
         if self.connection_flow.read(cx).has_active_proxy_connect_run()
             || self
                 .workspace_runtime
@@ -695,7 +721,7 @@ impl WorkspaceApp {
                 .has_active_connection_chain()
         {
             self.report_proxy_session_tree_error(
-                "CHAIN_LOCK_BUSY: Another connection chain is in progress".to_string(),
+                self.i18n.t("connections.errors.chain_busy_desc"),
                 cx,
             );
             return true;
@@ -726,7 +752,7 @@ impl WorkspaceApp {
             .any_connecting_node_is_locked(&nodes_to_connect)
         {
             self.report_proxy_session_tree_error(
-                "NODE_LOCK_BUSY: Node is already connecting".to_string(),
+                self.i18n.t("connections.errors.node_connecting_desc"),
                 cx,
             );
             return true;

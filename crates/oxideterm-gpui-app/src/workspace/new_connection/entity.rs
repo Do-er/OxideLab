@@ -205,6 +205,30 @@ impl ConnectionFlowEntity {
         self.active_proxy_connect_run.is_some()
     }
 
+    /// A second click on the connection that already owns the chain is a
+    /// duplicate request, not a conflict; the caller joins the pending run.
+    pub(in crate::workspace) fn active_proxy_connect_intent(&self) -> Option<&SshConnectionIntent> {
+        self.active_proxy_connect_run
+            .as_ref()
+            .map(|run| &run.intent)
+    }
+
+    /// Reports whether the pending chain will open this node's terminal when it
+    /// completes, so a duplicate click joins it instead of starting a second
+    /// chain. Intermediate hops are excluded because only the target gets a tab.
+    /// A pending test must also not swallow a real connect request.
+    pub(in crate::workspace) fn active_proxy_connect_opens_node_terminal(
+        &self,
+        node_id: &oxideterm_ssh::NodeId,
+    ) -> bool {
+        self.active_proxy_connect_run.as_ref().is_some_and(|run| {
+            matches!(
+                &run.intent,
+                SshConnectionIntent::Connect(_) | SshConnectionIntent::ConnectSaved { .. }
+            ) && run.plan.target_node_id == *node_id
+        })
+    }
+
     pub(in crate::workspace) fn start_proxy_connect_run(
         &mut self,
         mut run: NativeProxyConnectRun,
@@ -1264,6 +1288,15 @@ mod tests {
             assert_eq!(context.generation, 1);
             assert_eq!(context.step_index, 0);
             assert!(entity.restore_proxy_connect_preflight_context(context, cx));
+
+            // Only the target node gets a tab from this chain; a duplicate click
+            // on a hop must still be treated as a new request.
+            assert!(entity.active_proxy_connect_opens_node_terminal(&target_node_id));
+            assert!(!entity.active_proxy_connect_opens_node_terminal(&NodeId::new("elsewhere")));
+            assert!(matches!(
+                entity.active_proxy_connect_intent(),
+                Some(SshConnectionIntent::Connect(_))
+            ));
 
             let replacement = oxideterm_ssh::HostKeyReplacement {
                 host: "target.example.test".to_string(),
