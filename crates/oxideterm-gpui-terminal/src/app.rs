@@ -6214,6 +6214,13 @@ mod tests {
         cx.run_until_parked();
         cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
         cx.run_until_parked();
+        // The display view recomputes its content width during render, so the
+        // overflow check needs a painted frame before reading the limit.
+        cx.update(|window, cx| {
+            pane.update(cx, |pane, cx| {
+                let _ = pane.render(window, cx).into_any_element();
+            })
+        });
         pane.read_with(cx, |pane, _| {
             assert_eq!(pane.snapshot.cols, settled);
             assert_eq!(pane.terminal.lock().snapshot().cols, settled);
@@ -6258,16 +6265,22 @@ mod tests {
             })
         });
 
-        // Restoring wrapping adopts the current viewport again.
+        // Restoring wrapping adopts the current viewport again. The enlarged
+        // font settled at fewer columns than the original wide layout.
+        let restored_cols =
+            pane.read_with(cx, |pane, _| pane.grid_size_for_viewport(bounds, 1.0).0);
         pane.update(cx, |pane, cx| pane.toggle_terminal_wrap(cx));
         cx.run_until_parked();
         cx.executor().advance_clock(PTY_RESIZE_DEBOUNCE);
         cx.run_until_parked();
-        pane.read_with(cx, |pane, _| {
-            assert!(!pane.terminal_wrap_disabled());
-            assert_eq!(pane.snapshot.cols, settled);
-            assert_eq!(pane.terminal.lock().snapshot().cols, pane.snapshot.cols);
-            assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+        cx.update(|window, cx| {
+            pane.update(cx, |pane, cx| {
+                let _ = pane.render(window, cx).into_any_element();
+                assert!(!pane.terminal_wrap_disabled());
+                assert_eq!(pane.snapshot.cols, restored_cols);
+                assert_eq!(pane.terminal.lock().snapshot().cols, pane.snapshot.cols);
+                assert!(pane.terminal_horizontal_scroll_limit() <= px(1.0));
+            })
         });
     }
 
@@ -6280,6 +6293,14 @@ mod tests {
             pane.feed_recording_output(b"one\r\nabcdefghij\r\nxy", cx);
             pane.tick(cx);
             pane.toggle_terminal_wrap(cx);
+        });
+        // Snapshots and the display view are materialized by a painted frame.
+        cx.update(|window, cx| {
+            pane.update(cx, |pane, cx| {
+                let _ = pane.render(window, cx).into_any_element();
+            })
+        });
+        pane.update(cx, |pane, cx| {
             pane.refresh_display_view();
             assert_eq!(pane.snapshot.display_offset, 0);
             assert!(pane.snapshot.window_display_offset() > 0);

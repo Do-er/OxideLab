@@ -241,11 +241,12 @@ fn display_width(row: &TerminalRow) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use oxideterm_terminal::{TerminalAttrs, TerminalColor, TerminalStyleOrigin};
 
     fn row(absolute_line: i64, text: &str, wrapped: bool, trailing_spacer: bool) -> TerminalRow {
         let mut row = TerminalRow {
-            line_id: absolute_line as u64 + 1,
-            source_id: absolute_line as usize + 1,
+            line_id: absolute_line.max(0) as u64 + 1,
+            source_id: absolute_line.max(0) as usize + 1,
             absolute_line,
             cells: Arc::new(
                 text.chars()
