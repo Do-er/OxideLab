@@ -201,6 +201,15 @@ impl WorkspaceApp {
                     saved_proxy_hop_auth,
                 )
             };
+            let host_key_alias = proxy_chain
+                .as_deref()
+                .and_then(|chain| {
+                    oxideterm_session_adapter::routed_host_key_alias(
+                        host.as_str(),
+                        port.unwrap_or(22),
+                        chain,
+                    )
+                });
             let config = SshConfig {
                 totp: this
                     .connection_store
@@ -209,6 +218,7 @@ impl WorkspaceApp {
                 port: port.unwrap_or(22),
                 username: username.clone(),
                 auth,
+                host_key_alias,
                 timeout_secs: form.connect_timeout_seconds,
                 agent_forwarding: !form.ssh_channel_strategy.requires_dedicated_consumers()
                     && form.agent_forwarding,
@@ -547,6 +557,12 @@ impl WorkspaceApp {
                 self.continue_verified_ssh_flow(config, title, intent, window, cx)
             }
             HostKeyStatus::Unknown { .. } | HostKeyStatus::Changed { .. } => {
+                // The routed preflight authenticates every hop, so the reported
+                // host may be a bastion. Only the target carries this config's
+                // alias; naming a bastion after it would misplace the entry.
+                let host_key_alias = (config.host == host && config.port == port)
+                    .then(|| config.host_key_alias.clone())
+                    .flatten();
                 if self.auto_replace_host_keys_enabled() {
                     // Reflashed lab devices keep their address but not their key. The
                     // toast keeps the fingerprint visible without blocking the login.
@@ -559,6 +575,7 @@ impl WorkspaceApp {
                         session_tree_challenge: false,
                         host,
                         port,
+                        host_key_alias,
                     };
                     self.auto_accept_host_key_challenge(challenge, window, cx);
                     return;
@@ -573,6 +590,7 @@ impl WorkspaceApp {
                     session_tree_challenge: false,
                     host,
                     port,
+                    host_key_alias,
                 };
                 self.connection_flow.update(cx, |connection_flow, cx| {
                     connection_flow.open_host_key_challenge(challenge, cx);
@@ -767,10 +785,16 @@ impl WorkspaceApp {
                 );
                 return true;
             };
-            endpoints.push(NativeSessionTreeConnectEndpoint::new(
-                node.endpoint.host.clone(),
-                node.endpoint.port,
-            ));
+            // Reconnecting an existing tree reuses the alias already stored on
+            // the node config, so the target keeps its own trust entry.
+            let host_key_alias = self
+                .node_router
+                .node_runtime_snapshot(node_id)
+                .and_then(|snapshot| snapshot.config.host_key_alias);
+            endpoints.push(
+                NativeSessionTreeConnectEndpoint::new(node.endpoint.host.clone(), node.endpoint.port)
+                    .with_host_key_alias(host_key_alias),
+            );
         }
 
         let upstream_proxy = nodes_to_connect.first().and_then(|node_id| {
@@ -963,6 +987,7 @@ impl WorkspaceApp {
                                         .preflight_host_key_via_direct_tcpip(
                                             &step.host,
                                             step.port,
+                                            step.host_key_alias.as_deref(),
                                             connect_timeout_seconds,
                                             legacy_compatibility,
                                             &algorithms,

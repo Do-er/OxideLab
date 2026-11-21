@@ -8,6 +8,8 @@ use crate::{HostKeyStatus, NodeId, NodeTreeExpansion};
 pub struct NativeSessionTreeConnectEndpoint {
     pub host: String,
     pub port: u16,
+    /// Trust name when this endpoint is only reachable through a jump path.
+    pub host_key_alias: Option<String>,
 }
 
 impl NativeSessionTreeConnectEndpoint {
@@ -16,7 +18,13 @@ impl NativeSessionTreeConnectEndpoint {
         Self {
             host: host.into(),
             port,
+            host_key_alias: None,
         }
+    }
+
+    pub fn with_host_key_alias(mut self, alias: Option<String>) -> Self {
+        self.host_key_alias = alias;
+        self
     }
 }
 
@@ -26,6 +34,7 @@ pub struct NativeSessionTreeConnectStep {
     pub node_id: NodeId,
     pub host: String,
     pub port: u16,
+    pub host_key_alias: Option<String>,
     pub trust_host_key: Option<bool>,
     pub expected_host_key_fingerprint: Option<String>,
     pub host_key_replacement: Option<crate::HostKeyReplacement>,
@@ -92,6 +101,7 @@ impl NativeSessionTreeConnectPlan {
                 node_id,
                 host: endpoint.host,
                 port: endpoint.port,
+                host_key_alias: endpoint.host_key_alias,
                 trust_host_key: None,
                 expected_host_key_fingerprint: None,
                 host_key_replacement: None,

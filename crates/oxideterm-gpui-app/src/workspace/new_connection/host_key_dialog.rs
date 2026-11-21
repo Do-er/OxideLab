@@ -31,6 +31,8 @@ pub(in crate::workspace) struct HostKeyChallenge {
     pub(in crate::workspace) session_tree_challenge: bool,
     pub(in crate::workspace) host: String,
     pub(in crate::workspace) port: u16,
+    /// Trust name of the endpoint behind a jump path; `None` is a plain entry.
+    pub(in crate::workspace) host_key_alias: Option<String>,
 }
 
 impl WorkspaceApp {
@@ -131,6 +133,9 @@ impl WorkspaceApp {
                 Some(HostKeyReplacement {
                     host: challenge.host.clone(),
                     port: challenge.port,
+                    // The replacement must land on the same trust entry the check
+                    // used, otherwise a routed target overwrites the shared address.
+                    alias: challenge.host_key_alias.clone(),
                     key_type: key_type.clone(),
                     previous_fingerprint: expected_fingerprint.clone(),
                     fingerprint: actual_fingerprint.clone(),

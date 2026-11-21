@@ -115,6 +115,13 @@ pub struct SshConfig {
     pub trust_host_key: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expected_host_key_fingerprint: Option<String>,
+    /// Trust name used instead of the address for this server's host key.
+    ///
+    /// Several appliances can sit at the same private address behind different
+    /// jump hosts, so the address cannot identify which unit answered. The route
+    /// names this target while the bastion keeps its own unique address.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub host_key_alias: Option<String>,
     // Replacement authority belongs to this connection attempt, never persisted profiles.
     #[serde(skip)]
     pub host_key_replacement: Option<crate::HostKeyReplacement>,
@@ -621,6 +628,7 @@ impl Default for SshConfig {
             strict_host_key_checking: false,
             trust_host_key: None,
             expected_host_key_fingerprint: None,
+            host_key_alias: None,
             host_key_replacement: None,
             agent_forwarding: false,
             identity_agent: None,

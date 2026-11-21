@@ -24,7 +24,7 @@ pub use runtime_settings::{
     terminal_encoding_from_settings,
 };
 pub use ssh::{
-    proxy_chain_config_from_saved_connection, proxy_command_from_value,
+    proxy_chain_config_from_saved_connection, proxy_command_from_value, routed_host_key_alias,
     ssh_config_for_saved_connection_hop, ssh_config_from_saved_connection,
     ssh_config_from_saved_connection_with_auth,
     ssh_config_from_saved_connection_with_runtime_secrets,

@@ -219,10 +219,13 @@ impl SshConnectionHandle {
         }
     }
 
+    /// Verifies a child host key through the connected parent, trusting it under
+    /// `host_key_alias` when the same private address is shared by several units.
     pub async fn preflight_host_key_via_direct_tcpip(
         &self,
         host: &str,
         port: u16,
+        host_key_alias: Option<&str>,
         timeout_secs: u64,
         legacy_compatibility: bool,
         algorithms: &oxideterm_connections::SshAlgorithmPreferences,
@@ -241,15 +244,15 @@ impl SshConnectionHandle {
         }
 
         let handle = &pooled.target;
+        let trust = HostKeyTrust::routed(host, port, host_key_alias.map(str::to_string));
         // Tauri `preflightTreeNode` verifies a child host key through the
         // already-connected parent node. Keep the stream type inside the SSH
         // crate so GPUI can request node-scoped preflight without depending on
         // russh internals.
         match open_direct_tcpip_stream_with_origin(handle, host, port, "127.0.0.1", 0).await {
             Ok(stream) => {
-                check_host_key_via_stream(
-                    host,
-                    port,
+                check_host_key_via_stream_for(
+                    &trust,
                     stream,
                     timeout_secs,
                     legacy_compatibility,

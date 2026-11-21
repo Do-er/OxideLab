@@ -56,9 +56,12 @@ fn validate_proxy_chain_depth(chain: &[ProxyHopConfig]) -> Result<(), SshTranspo
 }
 
 fn proxy_hop_handler(hop: &ProxyHopConfig) -> Result<NativeClientHandler, SshTransportError> {
+    // A bastion is directly reachable at its own address, so it needs no route
+    // alias; only targets reached through it share an ambiguous address.
     NativeClientHandler::new(
         hop.host.clone(),
         hop.port,
+        None,
         hop.strict_host_key_checking,
         hop.trust_host_key,
         hop.expected_host_key_fingerprint.clone(),
@@ -110,6 +113,7 @@ struct NativeClientHandler {
     audit: Option<oxideterm_audit::AuditContext>,
     host: String,
     port: u16,
+    host_key_alias: Option<String>,
     strict: bool,
     trust_host_key: Option<bool>,
     expected_host_key_fingerprint: Option<String>,
@@ -132,6 +136,7 @@ impl NativeClientHandler {
     fn new(
         host: String,
         port: u16,
+        host_key_alias: Option<String>,
         strict: bool,
         trust_host_key: Option<bool>,
         expected_host_key_fingerprint: Option<String>,
@@ -155,6 +160,7 @@ impl NativeClientHandler {
             audit: None,
             host,
             port,
+            host_key_alias,
             strict,
             trust_host_key,
             expected_host_key_fingerprint,
@@ -204,6 +210,11 @@ impl NativeClientHandler {
             return Ok(false);
         };
         let actual_fingerprint = public_key_fingerprint(server_public_key);
+        let trust = HostKeyTrust::routed(
+            self.host.clone(),
+            self.port,
+            self.host_key_alias.clone(),
+        );
         if let Some(replacement) = self.host_key_replacement.take() {
             replacement.apply(server_public_key)?;
             self.expected_host_key_fingerprint = Some(replacement.fingerprint);
@@ -233,9 +244,9 @@ impl NativeClientHandler {
                 });
             }
             if let Some(trust_host_key) = self.trust_host_key {
-                accept_host_key_for_session(&self.host, self.port, actual_fingerprint);
+                accept_host_key_for_session_for(&trust, actual_fingerprint);
                 if trust_host_key {
-                    learn_host_key(&self.host, self.port, server_public_key)?;
+                    learn_host_key_for(&trust, server_public_key)?;
                 }
                 tracing::debug!(
                     host = self.host.as_str(),
@@ -247,7 +258,7 @@ impl NativeClientHandler {
             }
         }
 
-        match verify_host_key(&self.host, self.port, server_public_key)? {
+        match verify_host_key_for(&trust, server_public_key)? {
             HostKeyVerification::Verified => {
                 tracing::debug!(
                     host = self.host.as_str(),
@@ -258,9 +269,9 @@ impl NativeClientHandler {
             }
             HostKeyVerification::Unknown { fingerprint, .. } => {
                 if let Some(trust_host_key) = self.trust_host_key {
-                    accept_host_key_for_session(&self.host, self.port, fingerprint);
+                    accept_host_key_for_session_for(&trust, fingerprint);
                     if trust_host_key {
-                        learn_host_key(&self.host, self.port, server_public_key)?;
+                        learn_host_key_for(&trust, server_public_key)?;
                     }
                     tracing::debug!(
                         host = self.host.as_str(),
@@ -284,7 +295,7 @@ impl NativeClientHandler {
                         key_type: server_public_key.algorithm().as_str().to_string(),
                     })
                 } else {
-                    learn_host_key(&self.host, self.port, server_public_key)?;
+                    learn_host_key_for(&trust, server_public_key)?;
                     tracing::debug!(
                         host = self.host.as_str(),
                         port = self.port,

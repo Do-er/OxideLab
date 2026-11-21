@@ -23,6 +23,9 @@ pub struct KnownHostsSnapshot {
 pub struct HostKeyReplacement {
     pub host: String,
     pub port: u16,
+    /// Trust name of the same endpoint, so a routed target replaces its own
+    /// entry instead of the shared plain-address one.
+    pub alias: Option<String>,
     pub key_type: String,
     pub previous_fingerprint: String,
     pub fingerprint: String,
@@ -263,17 +266,16 @@ impl HostKeyReplacement {
             Some(&self.host),
             None,
         );
+        let trust = HostKeyTrust::routed(self.host.clone(), self.port, self.alias.clone());
         let result = (|| {
             // A completed attempt can be retried with the same runtime configuration.
-            if KnownHostsStore::new()?.verify(&self.host, self.port, key)
-                == HostKeyVerification::Verified
-            {
-                accept_host_key_for_session(&self.host, self.port, self.fingerprint.clone());
+            if KnownHostsStore::new()?.verify(&trust, key) == HostKeyVerification::Verified {
+                accept_host_key_for_session_for(&trust, self.fingerprint.clone());
                 return Ok(());
             }
             let replaced = rewrite_key(
                 &default_known_hosts_path()?,
-                &[KnownHostsStore::make_key(&self.host, self.port)],
+                &[trust.known_hosts_name()],
                 &self.key_type,
                 &self.previous_fingerprint,
                 Some(key),
@@ -283,8 +285,8 @@ impl HostKeyReplacement {
                     "The saved host key changed; check the host again".into(),
                 ));
             }
-            HOST_KEY_CACHE.invalidate(&self.host, self.port);
-            accept_host_key_for_session(&self.host, self.port, self.fingerprint.clone());
+            HOST_KEY_CACHE.invalidate(&trust);
+            accept_host_key_for_session_for(&trust, self.fingerprint.clone());
             Ok(())
         })();
         audit.result(&result);

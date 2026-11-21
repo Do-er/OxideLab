@@ -71,6 +71,92 @@ pub fn public_key_fingerprint(key: &PublicKey) -> String {
     key.fingerprint(HashAlg::Sha256).to_string()
 }
 
+/// Names the server identity whose key is trusted.
+///
+/// Address alone is not an identity when several devices are reachable at the
+/// same private address through different jump hosts: each unit's BMC is
+/// `192.168.1.10`, so they would share one trust entry and keep overwriting
+/// each other. A route alias gives such a target its own entry while the
+/// bastion it passes through stays under its own real address.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct HostKeyTrust {
+    /// Address used to reach the server.
+    pub host: String,
+    pub port: u16,
+    /// Trust name for a target reached through a jump host; `None` keeps the
+    /// plain `host` / `[host]:port` entry.
+    pub alias: Option<String>,
+}
+
+impl HostKeyTrust {
+    pub fn endpoint(host: impl Into<String>, port: u16) -> Self {
+        Self {
+            host: host.into(),
+            port,
+            alias: None,
+        }
+    }
+
+    pub fn routed(host: impl Into<String>, port: u16, alias: Option<String>) -> Self {
+        Self {
+            host: host.into(),
+            port,
+            alias: alias.filter(|alias| !alias.is_empty()),
+        }
+    }
+
+    /// Names a target that is only reachable through a jump path.
+    ///
+    /// The jump endpoints are what differ between units whose inner devices all
+    /// answer on the same private address, so they are part of the name. With no
+    /// jump path the address itself is already unique and is used unchanged.
+    /// The name avoids `[` and `]:`, which known_hosts reserves for `[host]:port`.
+    pub fn for_route(host: &str, port: u16, jump_hosts: &[&str]) -> Self {
+        let alias =
+            (!jump_hosts.is_empty()).then(|| format!("{host}_{port}_via_{}", jump_hosts.join("_")));
+        Self::routed(host, port, alias)
+    }
+
+    /// Produces the first field of a known_hosts line.
+    pub(super) fn known_hosts_name(&self) -> String {
+        match &self.alias {
+            // Aliases are generated locally from route endpoints, so they only
+            // need to stay inside the hosts-field grammar: no whitespace or comma.
+            Some(alias) => sanitize_alias(alias),
+            None => {
+                let host = self.host.to_lowercase();
+                if self.port == 22 {
+                    host
+                } else {
+                    format!("[{host}]:{}", self.port)
+                }
+            }
+        }
+    }
+
+    fn cache_key(&self) -> String {
+        match &self.alias {
+            Some(alias) => format!("{}|{}", sanitize_alias(alias), self.port),
+            None => format!("{}:{}", self.host.to_lowercase(), self.port),
+        }
+    }
+}
+
+fn sanitize_alias(alias: &str) -> String {
+    // known_hosts reads the hosts field up to whitespace or comment and splits
+    // aliases on commas, so anything else that could change meaning is folded.
+    alias
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '_' | '-') {
+                ch.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect()
+}
+
 pub fn public_key_type(key: &PublicKey) -> String {
     match key.algorithm().as_str() {
         "ssh-ed25519" => "ssh-ed25519",
@@ -100,8 +186,8 @@ impl HostKeyCache {
         }
     }
 
-    fn get_verified(&self, host: &str, port: u16) -> Option<String> {
-        let key = host_key_cache_key(host, port);
+    fn get_verified(&self, trust: &HostKeyTrust) -> Option<String> {
+        let key = trust.cache_key();
         let entry = self.cache.get(&key)?;
         let elapsed = entry.verified_at.elapsed().ok()?;
         if elapsed.as_secs() < CACHE_TTL_SECS {
@@ -112,7 +198,7 @@ impl HostKeyCache {
         None
     }
 
-    fn set_verified(&self, host: &str, port: u16, fingerprint: String) {
+    fn set_verified(&self, trust: &HostKeyTrust, fingerprint: String) {
         if self.cache.len() >= MAX_CACHE_ENTRIES {
             self.evict_expired();
         }
@@ -128,7 +214,7 @@ impl HostKeyCache {
             }
         }
         self.cache.insert(
-            host_key_cache_key(host, port),
+            trust.cache_key(),
             CacheEntry {
                 fingerprint,
                 verified_at: SystemTime::now(),
@@ -136,8 +222,8 @@ impl HostKeyCache {
         );
     }
 
-    fn invalidate(&self, host: &str, port: u16) {
-        self.cache.remove(&host_key_cache_key(host, port));
+    fn invalidate(&self, trust: &HostKeyTrust) {
+        self.cache.remove(&trust.cache_key());
     }
 
     fn evict_expired(&self) {
@@ -166,10 +252,6 @@ impl HostKeyCache {
 }
 
 static HOST_KEY_CACHE: LazyLock<HostKeyCache> = LazyLock::new(HostKeyCache::new);
-
-fn host_key_cache_key(host: &str, port: u16) -> String {
-    format!("{}:{}", host.to_lowercase(), port)
-}
 
 #[derive(Clone, Debug)]
 struct HostKeyEntry {
@@ -235,8 +317,8 @@ impl KnownHostsStore {
         Ok(())
     }
 
-    fn verify(&self, host: &str, port: u16, key: &PublicKey) -> HostKeyVerification {
-        let lookup_key = Self::make_key(host, port);
+    fn verify(&self, trust: &HostKeyTrust, key: &PublicKey) -> HostKeyVerification {
+        let lookup_key = trust.known_hosts_name();
         let actual_key_b64 = key.public_key_base64();
         let actual_key_type = public_key_type(key);
         let fingerprint = public_key_fingerprint(key);
@@ -259,13 +341,8 @@ impl KnownHostsStore {
         }
     }
 
-    fn add_host(
-        &mut self,
-        host: &str,
-        port: u16,
-        key: &PublicKey,
-    ) -> Result<(), SshTransportError> {
-        let lookup_key = Self::make_key(host, port);
+    fn add_host(&mut self, trust: &HostKeyTrust, key: &PublicKey) -> Result<(), SshTransportError> {
+        let lookup_key = trust.known_hosts_name();
         let key_type = public_key_type(key);
         let key_data = key.public_key_base64();
         self.hosts
@@ -298,7 +375,7 @@ impl KnownHostsStore {
 
         self.hosts.clear();
         self.load()?;
-        HOST_KEY_CACHE.invalidate(host, port);
+        HOST_KEY_CACHE.invalidate(&HostKeyTrust::endpoint(host, port));
         Ok(())
     }
 
@@ -388,40 +465,43 @@ fn rewrite_without_host_key(
     )
 }
 
-pub fn verify_host_key(
-    host: &str,
-    port: u16,
+pub fn verify_host_key_for(
+    trust: &HostKeyTrust,
     server_public_key: &PublicKey,
 ) -> Result<HostKeyVerification, SshTransportError> {
-    if HOST_KEY_CACHE.get_verified(host, port).as_deref()
+    if HOST_KEY_CACHE.get_verified(trust).as_deref()
         == Some(public_key_fingerprint(server_public_key).as_str())
     {
         return Ok(HostKeyVerification::Verified);
     }
-    Ok(KnownHostsStore::new()?.verify(host, port, server_public_key))
+    Ok(KnownHostsStore::new()?.verify(trust, server_public_key))
 }
 
-pub(crate) fn accept_host_key_for_session(host: &str, port: u16, fingerprint: String) {
-    HOST_KEY_CACHE.set_verified(host, port, fingerprint);
+pub(crate) fn accept_host_key_for_session_for(trust: &HostKeyTrust, fingerprint: String) {
+    HOST_KEY_CACHE.set_verified(trust, fingerprint);
 }
 
-pub fn learn_host_key(
-    host: &str,
-    port: u16,
+pub fn learn_host_key_for(
+    trust: &HostKeyTrust,
     server_public_key: &PublicKey,
 ) -> Result<(), SshTransportError> {
     let fingerprint = public_key_fingerprint(server_public_key);
+    let audit_host = trust.alias.as_deref().unwrap_or(&trust.host);
     let mut audit = oxideterm_audit::AuditOperation::begin(
         oxideterm_audit::AuditCategory::Security,
         "host_trust_add",
-        Some(host),
+        Some(audit_host),
         None,
     );
-    audit.summary(&format!("port={port},fingerprint={fingerprint}"));
+    audit.summary(&format!(
+        "port={},fingerprint={fingerprint},alias={}",
+        trust.port,
+        trust.alias.as_deref().is_some()
+    ));
     let audit_result = (|| {
         let mut store = KnownHostsStore::new()?;
-        store.add_host(host, port, server_public_key)?;
-        accept_host_key_for_session(host, port, fingerprint);
+        store.add_host(trust, server_public_key)?;
+        accept_host_key_for_session_for(trust, fingerprint);
         Ok(())
     })();
     audit.result(&audit_result);
@@ -460,16 +540,14 @@ fn known_hosts_path_from_ssh_dir(ssh_dir: Option<PathBuf>) -> PathBuf {
 }
 
 struct PreflightHandler {
-    host: String,
-    port: u16,
+    trust: HostKeyTrust,
     status: Arc<Mutex<Option<HostKeyStatus>>>,
 }
 
 impl PreflightHandler {
-    fn new(host: String, port: u16) -> Self {
+    fn new(trust: HostKeyTrust) -> Self {
         Self {
-            host,
-            port,
+            trust,
             status: Arc::new(Mutex::new(None)),
         }
     }
@@ -492,7 +570,7 @@ impl client::Handler for PreflightHandler {
             // silently bypass that trust policy.
             return Ok(false);
         };
-        let status = match verify_host_key(&self.host, self.port, server_public_key)? {
+        let status = match verify_host_key_for(&self.trust, server_public_key)? {
             HostKeyVerification::Verified => HostKeyStatus::Verified,
             HostKeyVerification::Unknown {
                 fingerprint,
@@ -571,6 +649,25 @@ pub async fn check_host_key_with_route(
     legacy_compatibility: bool,
     algorithms: &SshAlgorithmPreferences,
 ) -> HostKeyStatus {
+    check_host_key_with_route_for(
+        &HostKeyTrust::endpoint(host, port),
+        timeout_secs,
+        upstream_proxy,
+        proxy_command,
+        legacy_compatibility,
+        algorithms,
+    )
+    .await
+}
+
+pub async fn check_host_key_with_route_for(
+    trust: &HostKeyTrust,
+    timeout_secs: u64,
+    upstream_proxy: Option<&UpstreamProxyConfig>,
+    proxy_command: Option<&ProxyCommandConfig>,
+    legacy_compatibility: bool,
+    algorithms: &SshAlgorithmPreferences,
+) -> HostKeyStatus {
     let stream: Result<BoxedSshForwardStream, SshTransportError> = match proxy_command {
         Some(_) if upstream_proxy.is_some() => Err(SshTransportError::ConnectionFailed(
             "ProxyCommand cannot be combined with an upstream proxy".to_string(),
@@ -578,7 +675,7 @@ pub async fn check_host_key_with_route(
         Some(command) => dial_proxy_command(command)
             .await
             .map(|stream| Box::new(stream) as BoxedSshForwardStream),
-        None => dial_initial_tcp(host, port, timeout_secs, upstream_proxy)
+        None => dial_initial_tcp(&trust.host, trust.port, timeout_secs, upstream_proxy)
             .await
             .map(|stream| Box::new(stream) as BoxedSshForwardStream),
     };
@@ -591,7 +688,7 @@ pub async fn check_host_key_with_route(
         }
     };
 
-    let handler = PreflightHandler::new(host.to_string(), port);
+    let handler = PreflightHandler::new(trust.clone());
     let status = Arc::clone(&handler.status);
     let config = match preflight_client_config(timeout_secs, legacy_compatibility, algorithms) {
         Ok(config) => config,
@@ -628,15 +725,14 @@ pub async fn check_host_key_with_route(
     }
 }
 
-pub async fn check_host_key_via_stream(
-    host: &str,
-    port: u16,
+pub async fn check_host_key_via_stream_for(
+    trust: &HostKeyTrust,
     stream: russh::ChannelStream<client::Msg>,
     timeout_secs: u64,
     legacy_compatibility: bool,
     algorithms: &SshAlgorithmPreferences,
 ) -> HostKeyStatus {
-    let handler = PreflightHandler::new(host.to_string(), port);
+    let handler = PreflightHandler::new(trust.clone());
     let status = Arc::clone(&handler.status);
     let config = match preflight_client_config(timeout_secs, legacy_compatibility, algorithms) {
         Ok(config) => config,
@@ -723,11 +819,11 @@ mod tests {
         let store = KnownHostsStore::with_path(path.clone()).unwrap();
 
         assert_eq!(
-            store.verify("alias.example.com", 22, &key),
+            store.verify(&HostKeyTrust::endpoint("alias.example.com", 22), &key),
             HostKeyVerification::Verified
         );
         assert_eq!(
-            store.verify("example.com", 2222, &key),
+            store.verify(&HostKeyTrust::endpoint("example.com", 2222), &key),
             HostKeyVerification::Unknown {
                 fingerprint: public_key_fingerprint(&key),
                 key_type: public_key_type(&key),
@@ -735,7 +831,7 @@ mod tests {
         );
         let alternate = alternate_public_key();
         assert_eq!(
-            store.verify("example.com", 22, &alternate),
+            store.verify(&HostKeyTrust::endpoint("example.com", 22), &alternate),
             HostKeyVerification::Changed {
                 expected_fingerprint: public_key_fingerprint(&key),
                 actual_fingerprint: public_key_fingerprint(&alternate),
@@ -743,6 +839,70 @@ mod tests {
             }
         );
         let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn routed_target_keeps_its_own_entry_when_units_share_one_address() {
+        // Two units expose their BMC at the same private address. Each route
+        // reaches a different unit, so both keys must stay trusted at once.
+        let path = temp_known_hosts_path("routed-alias");
+        let first = sample_public_key();
+        let second = alternate_public_key();
+        let mut store = KnownHostsStore::with_path(path.clone()).unwrap();
+
+        let unit_a = HostKeyTrust::for_route("192.168.1.10", 22, &["10.0.0.1"]);
+        let unit_b = HostKeyTrust::for_route("192.168.1.10", 22, &["10.0.0.2"]);
+        assert_ne!(unit_a.known_hosts_name(), unit_b.known_hosts_name());
+        assert!(!unit_a.known_hosts_name().contains('['));
+        assert!(!unit_a.known_hosts_name().contains(' '));
+
+        store.add_host(&unit_a, &first).unwrap();
+        store.add_host(&unit_b, &second).unwrap();
+
+        let reloaded = KnownHostsStore::with_path(path.clone()).unwrap();
+        assert_eq!(
+            reloaded.verify(&unit_a, &first),
+            HostKeyVerification::Verified,
+            "unit A must still accept its own key"
+        );
+        assert_eq!(
+            reloaded.verify(&unit_b, &second),
+            HostKeyVerification::Verified,
+            "unit B must still accept its own key"
+        );
+        assert_eq!(
+            reloaded.verify(&unit_b, &first),
+            HostKeyVerification::Changed {
+                expected_fingerprint: public_key_fingerprint(&second),
+                actual_fingerprint: public_key_fingerprint(&first),
+                key_type: public_key_type(&first),
+            },
+            "a route must still detect a swapped key"
+        );
+        // The shared plain address is not polluting a direct entry.
+        assert_eq!(
+            reloaded.verify(&HostKeyTrust::endpoint("192.168.1.10", 22), &first),
+            HostKeyVerification::Unknown {
+                fingerprint: public_key_fingerprint(&first),
+                key_type: public_key_type(&first),
+            },
+            "routed trust must not write the bare address entry"
+        );
+        let written = fs::read_to_string(&path).unwrap();
+        assert!(
+            written
+                .lines()
+                .all(|line| !line.starts_with("192.168.1.10 ")),
+            "no bare address line may be written for a routed target: {written}"
+        );
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn direct_connection_keeps_the_plain_address_entry() {
+        let trust = HostKeyTrust::for_route("board.example.com", 2222, &[]);
+        assert_eq!(trust.alias, None);
+        assert_eq!(trust.known_hosts_name(), "[board.example.com]:2222");
     }
 
     #[test]
@@ -796,10 +956,11 @@ mod tests {
             let new_public_key = new_key.public_key().clone();
             let expected = public_key_fingerprint(&old_key);
             let actual = public_key_fingerprint(&new_public_key);
-            learn_host_key("127.0.0.1", port, &old_key).unwrap();
+            let trust = HostKeyTrust::endpoint("127.0.0.1", port);
+            learn_host_key_for(&trust, &old_key).unwrap();
             let original = fs::read_to_string(&path).unwrap();
             assert_eq!(
-                verify_host_key("127.0.0.1", port, &old_key).unwrap(),
+                verify_host_key_for(&trust, &old_key).unwrap(),
                 HostKeyVerification::Verified
             );
             let server = tokio::spawn(async move {
@@ -833,6 +994,7 @@ mod tests {
             config.host_key_replacement = Some(HostKeyReplacement {
                 host: config.host.clone(),
                 port,
+                alias: None,
                 key_type: "ssh-ed25519".into(),
                 previous_fingerprint: expected.clone(),
                 fingerprint: expected.clone(),

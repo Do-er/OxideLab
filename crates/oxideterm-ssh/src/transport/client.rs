@@ -978,6 +978,7 @@ impl SshTransportClient {
             let handler = NativeClientHandler::new(
                 self.config.host.clone(),
                 self.config.port,
+                self.config.host_key_alias.clone(),
                 self.config.strict_host_key_checking,
                 self.config.trust_host_key,
                 self.config.expected_host_key_fingerprint.clone(),
@@ -1186,6 +1187,7 @@ impl SshTransportClient {
         let handler = NativeClientHandler::new(
             config.host.clone(),
             config.port,
+            config.host_key_alias.clone(),
             config.strict_host_key_checking,
             config.trust_host_key,
             config.expected_host_key_fingerprint.clone(),
@@ -1472,6 +1474,7 @@ impl SshTransportClient {
         let handler = NativeClientHandler::new(
             self.config.host.clone(),
             self.config.port,
+            self.config.host_key_alias.clone(),
             self.config.strict_host_key_checking,
             self.config.trust_host_key,
             self.config.expected_host_key_fingerprint.clone(),

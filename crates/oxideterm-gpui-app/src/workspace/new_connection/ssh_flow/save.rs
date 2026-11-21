@@ -2784,6 +2784,13 @@ impl WorkspaceApp {
         }
         let config = config.expect("credential form handles unavailable configurations");
         let title = conn.display_name().into_owned();
+        // Repeating an open on a connection that is already up adds one more
+        // terminal on the same target node, jump path included; it must not
+        // expand a second tree or start a second connection chain.
+        if self.open_extra_terminal_for_connected_saved_connection(id, &config, window, cx) {
+            cx.notify();
+            return;
+        }
         self.start_saved_connection_flow(id.to_string(), config, title, None, window, cx);
     }
 
@@ -3548,19 +3555,27 @@ impl WorkspaceApp {
                             .preflight_route_host_keys(),
                     )
                 }
-                Ok(runtime) => (
-                    host.clone(),
-                    port,
-                    runtime.block_on(check_host_key_with_route(
-                        &host,
+                Ok(runtime) => {
+                    // The direct-outlet preflight must trust the same name the
+                    // routed connect will use, or the two checks disagree.
+                    let trust = HostKeyTrust::routed(
+                        host.clone(),
                         port,
-                        connect_timeout_seconds,
-                        upstream_proxy.as_ref(),
-                        worker_config.proxy_command.as_ref(),
-                        worker_config.legacy_ssh_compatibility,
-                        &worker_config.ssh_algorithms,
-                    )),
-                ),
+                        worker_config.host_key_alias.clone(),
+                    );
+                    (
+                        host.clone(),
+                        port,
+                        runtime.block_on(check_host_key_with_route_for(
+                            &trust,
+                            connect_timeout_seconds,
+                            upstream_proxy.as_ref(),
+                            worker_config.proxy_command.as_ref(),
+                            worker_config.legacy_ssh_compatibility,
+                            &worker_config.ssh_algorithms,
+                        )),
+                    )
+                }
                 Err(error) => (
                     host.clone(),
                     port,
@@ -3847,21 +3862,61 @@ mod saved_connection_open_tests {
                 Some(&SecretString::from("later-global-secret")),
             )
             .unwrap();
-        let mut source: SavedConnection = serde_json::from_value(serde_json::json!({
-            "id": "source",
-            "name": "Source",
-            "host": "target.example.com",
-            "username": "target-user",
-            "auth": {"type": "password"},
-            "created_at": "2026-11-21T00:00:00Z",
-            "proxy_chain": [{
-                "host": "old-jump.example.com",
-                "username": "jump-user",
-                "auth": {"type": "password"},
-                "account_credential_id": credential_id,
-            }]
-        }))
-        .unwrap();
+        // The source must exist in the store: the duplicate resolves its saved
+        // hop secret through that store, not through a detached record.
+        store
+            .upsert(SaveConnectionRequest {
+                totp_credential_id: None,
+                account_credential_id: None,
+                id: Some("source".to_string()),
+                name: "Source".to_string(),
+                group: None,
+                notes: None,
+                host: "target.example.com".to_string(),
+                port: 22,
+                username: "target-user".to_string(),
+                auth: SavedAuth::Password {
+                    empty_password: false,
+                    keychain_id: None,
+                    plaintext_password: None,
+                },
+                proxy_chain: vec![SavedProxyHop {
+                    totp_credential_id: None,
+                    account_credential_id: Some(credential_id.clone()),
+                    host: "old-jump.example.com".to_string(),
+                    port: 22,
+                    username: "jump-user".to_string(),
+                    auth: SavedAuth::Password {
+                        empty_password: false,
+                        keychain_id: None,
+                        plaintext_password: None,
+                    },
+                    agent_forwarding: false,
+                    identity_agent: None,
+                    agent_forwarding_socket: None,
+                    legacy_ssh_compatibility: false,
+                    ssh_algorithms: Default::default(),
+                }],
+                upstream_proxy: oxideterm_connections::SavedUpstreamProxyPolicy::UseGlobal,
+                proxy_command: None,
+                color: None,
+                icon_background_color: None,
+                icon: None,
+                tags: Vec::new(),
+                connect_timeout_seconds:
+                    oxideterm_connections::DEFAULT_SSH_CONNECT_TIMEOUT_SECONDS,
+                agent_forwarding: false,
+                identity_agent: None,
+                agent_forwarding_socket: None,
+                legacy_ssh_compatibility: false,
+                ssh_algorithms: Default::default(),
+                dedicated_new_terminal_connection: false,
+                ssh_channel_strategy: Default::default(),
+                x11_forwarding: Default::default(),
+                post_connect_command: None,
+                terminal: Default::default(),
+            })
+            .unwrap();
         store
             .store_connection_credential(
                 "source",

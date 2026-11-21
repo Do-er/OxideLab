@@ -87,6 +87,19 @@ fn saved_node_route_matches_endpoints(
         )
 }
 
+/// Connection policy of one node, independent of the route that reaches it.
+///
+/// A routed target is materialized as its own node with the proxy chain
+/// removed, and an upstream proxy is attached to the root hop only when that
+/// hop connects. Both therefore describe the route, not this node's identity,
+/// so they must not take part in deciding whether a node can be reused.
+fn route_neutral_connection_key(config: &SshConfig) -> String {
+    let mut neutral = config.clone();
+    neutral.proxy_chain = None;
+    neutral.upstream_proxy = None;
+    neutral.connection_key()
+}
+
 fn saved_node_route_matches_config(
     node_router: &NodeRouter,
     node_id: &NodeId,
@@ -100,7 +113,9 @@ fn saved_node_route_matches_config(
     };
     // A changed negotiation policy needs a new physical connection while the
     // old node remains available to its existing terminal and tool consumers.
-    if runtime_config.connection_key() != requested_config.connection_key() {
+    if route_neutral_connection_key(&runtime_config)
+        != route_neutral_connection_key(requested_config)
+    {
         return false;
     }
     let proxy_hops = requested_config
@@ -110,7 +125,7 @@ fn saved_node_route_matches_config(
         .iter()
         .map(|hop| (hop.host.as_str(), hop.port, hop.username.as_str()))
         .collect::<Vec<_>>();
-    saved_node_route_matches_endpoints(
+    if !saved_node_route_matches_endpoints(
         node_router,
         node_id,
         &proxy_hops,
@@ -119,7 +134,36 @@ fn saved_node_route_matches_config(
             requested_config.port,
             requested_config.username.as_str(),
         ),
-    )
+    ) {
+        return false;
+    }
+
+    // Every hop is its own node with its own transport policy; a changed hop
+    // policy needs that hop reconnected rather than a second copy of the tree.
+    let Ok(path) = node_router.path_to_node(node_id) else {
+        return false;
+    };
+    let requested_hops = requested_config
+        .proxy_chain
+        .as_deref()
+        .unwrap_or_default()
+        .iter()
+        .cloned()
+        .map(|hop| ssh_config_from_proxy_hop(hop, requested_config.timeout_secs))
+        .collect::<Vec<_>>();
+    if path.len() != requested_hops.len() + 1 {
+        return false;
+    }
+    path.iter()
+        .zip(&requested_hops)
+        .all(|(hop_node_id, requested_hop)| {
+            node_router
+                .node_runtime_snapshot(hop_node_id)
+                .is_some_and(|snapshot| {
+                    route_neutral_connection_key(&snapshot.config)
+                        == route_neutral_connection_key(requested_hop)
+                })
+        })
 }
 
 fn saved_connection_proxy_route<'a>(
@@ -841,17 +885,8 @@ impl WorkspaceApp {
                 node.dedicated_new_terminal_connection = saved_dedicated_new_terminal_connection;
                 node.ssh_channel_strategy = saved_ssh_channel_strategy;
             }
-            if let Some(session_id) = self
-                .workspace_runtime
-                .read(cx)
-                .ssh_terminal_session_ids_for_node(&node_id)
-                .first()
-                .copied()
-                && self.focus_terminal_session(session_id, window, cx)
-            {
-                let _ = self.connection_store.mark_used(&saved_connection_id);
-                return Ok(());
-            }
+            // A repeated open asks for another shell on the reused node; the
+            // existing terminals stay untouched and a new tab is added below.
             if self.ssh_nodes.contains_key(&node_id) {
                 let node_config = self
                     .config_for_reused_saved_node(&node_id, &config)
@@ -934,17 +969,8 @@ impl WorkspaceApp {
                         saved_dedicated_new_terminal_connection;
                     node.ssh_channel_strategy = saved_ssh_channel_strategy;
                 }
-                if let Some(session_id) = self
-                    .workspace_runtime
-                    .read(cx)
-                    .ssh_terminal_session_ids_for_node(&existing_node_id)
-                    .first()
-                    .copied()
-                    && self.focus_terminal_session(session_id, window, cx)
-                {
-                    let _ = self.connection_store.mark_used(&saved_connection_id);
-                    return Ok(());
-                }
+                // A repeated open adds a shell to the reused root node instead
+                // of jumping to the existing tab.
                 if let Some((node_title, node_saved_connection_id)) = self
                     .ssh_nodes
                     .get(&existing_node_id)
@@ -1064,6 +1090,38 @@ impl WorkspaceApp {
         accepted_config: &SshConfig,
     ) -> Option<SshConfig> {
         updated_saved_node_config_for_connect(&self.node_router, node_id, accepted_config)
+    }
+
+    /// Opens one more terminal on the connected node that owns this saved route.
+    ///
+    /// Repeating the same open request asks for an additional shell, never a
+    /// second chain or a second copy of the node. A node that is still
+    /// connecting is left to the connect flow, whose duplicate-request rule
+    /// joins the pending chain instead of starting another one.
+    pub(in crate::workspace) fn open_extra_terminal_for_connected_saved_connection(
+        &mut self,
+        saved_connection_id: &str,
+        config: &SshConfig,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let Some(node_id) = reusable_indexed_saved_node_for_config(
+            &self.saved_ssh_nodes,
+            &self.ssh_nodes,
+            &self.node_router,
+            saved_connection_id,
+            config,
+        ) else {
+            return false;
+        };
+        if !self.node_is_ready_for_terminal(&node_id) {
+            return false;
+        }
+        self.associate_existing_node_with_saved_connection(&node_id, saved_connection_id);
+        // The sidebar action already applies the saved profile's terminal
+        // options and dedicated-new-terminal policy for an additional shell.
+        self.queue_ssh_terminal_tab_for_sidebar_node(node_id, window, cx)
+            .is_ok()
     }
 
     pub(in crate::workspace) fn try_reuse_active_saved_connection_terminal(
@@ -2192,6 +2250,54 @@ mod create_tests {
             );
             assert!(Arc::ptr_eq(&handle.physical::<()>().unwrap(), &physical));
         }
+    }
+
+    #[test]
+    fn routed_saved_node_matches_the_same_route_after_the_chain_is_split() {
+        // Expanding a routed saved connection removes the proxy chain from the
+        // target node and turns each hop into its own node. Reopening the same
+        // saved connection must still recognize that tree as reusable.
+        let router = NodeRouter::new(SshConnectionRegistry::new(ConnectionPoolConfig::default()));
+        let expansion = router
+            .expand_manual_preset(
+                "saved-a",
+                vec![SshConfig::password("jump.example.com", 22, "ops", "pw")],
+                SshConfig::password("192.168.1.10", 22, "root", "pw"),
+            )
+            .unwrap();
+        let requested = SshConfig {
+            proxy_chain: Some(vec![ProxyHopConfig {
+                totp: None,
+                host: "jump.example.com".to_string(),
+                port: 22,
+                username: "ops".to_string(),
+                auth: AuthMethod::password("pw"),
+                agent_forwarding: false,
+                identity_agent: None,
+                agent_forwarding_socket: None,
+                legacy_ssh_compatibility: false,
+                ssh_algorithms: oxideterm_connections::SshAlgorithmPreferences::default(),
+                strict_host_key_checking: true,
+                trust_host_key: None,
+                expected_host_key_fingerprint: None,
+            }]),
+            ..SshConfig::password("192.168.1.10", 22, "root", "pw")
+        };
+
+        assert!(
+            saved_node_route_matches_config(&router, &expansion.target_node_id, &requested),
+            "the same jump route must reuse its materialized target node"
+        );
+
+        // A changed hop policy needs that hop reconnected, not a second tree.
+        let mut changed_hop = requested.clone();
+        changed_hop.proxy_chain.as_mut().unwrap()[0]
+            .ssh_algorithms
+            .mac = vec!["hmac-sha1".to_string()];
+        assert!(
+            !saved_node_route_matches_config(&router, &expansion.target_node_id, &changed_hop),
+            "a changed hop negotiation policy must not reuse the existing tree"
+        );
     }
 
     #[test]

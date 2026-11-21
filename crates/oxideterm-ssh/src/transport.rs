@@ -50,8 +50,9 @@ use crate::{
         SshAgentEndpoint, resolve_ssh_agent_endpoint, resolve_ssh_agent_forwarding_endpoint,
     },
     host_key::{
-        HostKeyStatus, HostKeyVerification, accept_host_key_for_session, check_host_key_via_stream,
-        learn_host_key, public_key_fingerprint, verify_host_key,
+        HostKeyStatus, HostKeyTrust, HostKeyVerification, accept_host_key_for_session_for,
+        check_host_key_via_stream_for, learn_host_key_for, public_key_fingerprint,
+        verify_host_key_for,
     },
     upstream_proxy::{UpstreamProxyConfig, UpstreamProxyProtocol, dial_initial_tcp},
 };

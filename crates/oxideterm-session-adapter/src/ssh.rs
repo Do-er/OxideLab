@@ -10,7 +10,7 @@ use oxideterm_connections::{
 };
 use oxideterm_settings::PersistedSettings;
 use oxideterm_ssh::{
-    AuthMethod, ProxyCommandConfig, ProxyHopConfig, SshConfig, UpstreamProxyAuth,
+    AuthMethod, HostKeyTrust, ProxyCommandConfig, ProxyHopConfig, SshConfig, UpstreamProxyAuth,
     UpstreamProxyConfig, UpstreamProxyProtocol, X11ForwardPolicy,
 };
 
@@ -47,6 +47,7 @@ pub fn ssh_config_from_saved_connection_with_auth(
         // instead of silently turning into a direct connection.
         upstream_proxy_config_from_saved_policy(store, settings, &conn.upstream_proxy).ok()?
     };
+    let host_key_alias = routed_host_key_alias(conn.host.as_str(), conn.port, &proxy_chain);
     Some(SshConfig {
         totp: store.totp_binding(conn.options.totp_credential_id.as_deref()),
         host: conn.host.clone(),
@@ -54,6 +55,7 @@ pub fn ssh_config_from_saved_connection_with_auth(
         username: conn.username.clone(),
         auth,
         timeout_secs: conn.options.effective_connect_timeout_seconds(),
+        host_key_alias,
         proxy_chain: (!proxy_chain.is_empty()).then_some(proxy_chain),
         upstream_proxy,
         proxy_command,
@@ -146,6 +148,7 @@ pub fn ssh_config_from_saved_connection_with_runtime_secrets(
             runtime_secrets.upstream_proxy.take(),
         )?
     };
+    let host_key_alias = routed_host_key_alias(conn.host.as_str(), conn.port, &proxy_chain);
     Some(SshConfig {
         totp: store.totp_binding(conn.options.totp_credential_id.as_deref()),
         host: conn.host.clone(),
@@ -153,6 +156,7 @@ pub fn ssh_config_from_saved_connection_with_runtime_secrets(
         username: conn.username.clone(),
         auth,
         timeout_secs: conn.options.effective_connect_timeout_seconds(),
+        host_key_alias,
         proxy_chain: (!proxy_chain.is_empty()).then_some(proxy_chain),
         upstream_proxy,
         proxy_command,
@@ -296,6 +300,7 @@ pub fn ssh_config_from_standalone_sftp_endpoint_with_runtime_secrets(
             runtime_secrets.upstream_proxy.take(),
         )?
     };
+    let host_key_alias = routed_host_key_alias(endpoint.host.as_str(), endpoint.port, &proxy_chain);
     Some(SshConfig {
         host: endpoint.host.clone(),
         port: endpoint.port,
@@ -305,6 +310,7 @@ pub fn ssh_config_from_standalone_sftp_endpoint_with_runtime_secrets(
         proxy_chain: (!proxy_chain.is_empty()).then_some(proxy_chain),
         upstream_proxy,
         proxy_command,
+        host_key_alias,
         identity_agent: endpoint.identity_agent.clone(),
         legacy_ssh_compatibility: endpoint.legacy_ssh_compatibility,
         ssh_algorithms: endpoint.ssh_algorithms.clone(),
@@ -484,6 +490,26 @@ pub fn proxy_command_from_value(
         Some(resolve_proxy_command(command, alias, hostname, user, port)),
     )
     .unwrap_or(ProxyCommandConfig::Unavailable)
+}
+
+/// Trust name for a target reached through `proxy_chain`.
+///
+/// Units that share one inner address (each BMC answers on 192.168.1.10) are
+/// only distinguishable by the route that reaches them, so the jump endpoints
+/// name the target. A direct connection keeps the plain address entry.
+pub fn routed_host_key_alias(
+    host: &str,
+    port: u16,
+    proxy_chain: &[ProxyHopConfig],
+) -> Option<String> {
+    if proxy_chain.is_empty() {
+        return None;
+    }
+    let jump_hosts = proxy_chain
+        .iter()
+        .map(|hop| hop.host.as_str())
+        .collect::<Vec<_>>();
+    HostKeyTrust::for_route(host, port, &jump_hosts).alias
 }
 
 pub fn proxy_chain_config_from_saved_connection(

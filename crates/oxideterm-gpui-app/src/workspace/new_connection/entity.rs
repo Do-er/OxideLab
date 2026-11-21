@@ -311,6 +311,7 @@ impl ConnectionFlowEntity {
             session_tree_challenge: true,
             host: step.host.clone(),
             port: step.port,
+            host_key_alias: step.host_key_alias.clone(),
         })
     }
 
@@ -1129,6 +1130,7 @@ mod tests {
             session_tree_challenge: false,
             host: "example.test".to_string(),
             port: 22,
+            host_key_alias: None,
         }
     }
 
@@ -1171,6 +1173,7 @@ mod tests {
                     node_id: NodeId::new("target"),
                     host: "target.example.test".to_string(),
                     port: 22,
+                    host_key_alias: None,
                     trust_host_key: None,
                     expected_host_key_fingerprint: None,
                     host_key_replacement: None,
@@ -1301,6 +1304,7 @@ mod tests {
             let replacement = oxideterm_ssh::HostKeyReplacement {
                 host: "target.example.test".to_string(),
                 port: 22,
+                alias: None,
                 key_type: "ssh-ed25519".to_string(),
                 previous_fingerprint: "SHA256:old".to_string(),
                 fingerprint: "SHA256:test".to_string(),

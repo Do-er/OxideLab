@@ -102,10 +102,12 @@ pub(super) fn proxy_session_tree_endpoints(
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
-    endpoints.push(NativeSessionTreeConnectEndpoint::new(
-        config.host.clone(),
-        config.port,
-    ));
+    // Only the target is reached through every hop; each bastion is dialed at
+    // its own unique address and keeps its plain trust entry.
+    endpoints.push(
+        NativeSessionTreeConnectEndpoint::new(config.host.clone(), config.port)
+            .with_host_key_alias(config.host_key_alias.clone()),
+    );
     endpoints
 }
 

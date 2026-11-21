@@ -26,7 +26,7 @@ use oxideterm_ssh::{
     NativeSessionTreeConnectPlan, NativeSessionTreeConnectStep, NodeId, NodeReadiness,
     NodeTreeExpansion, ProxyHopConfig, SshConfig, SshPromptError, SshPromptHandler,
     SshTransportClient, UpstreamProxyAuth, UpstreamProxyConfig, UpstreamProxyProtocol,
-    X11ForwardPolicy, X11ForwardTrust, check_host_key_with_route,
+    HostKeyTrust, X11ForwardPolicy, X11ForwardTrust, check_host_key_with_route_for,
     check_host_key_with_upstream_proxy,
 };
 use tokio::sync::oneshot;
