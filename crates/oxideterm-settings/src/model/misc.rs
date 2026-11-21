@@ -316,6 +316,11 @@ pub struct SshConfigSettings {
     pub auto_sync_hosts: bool,
     #[serde(default)]
     pub allow_proxy_command: bool,
+    /// Lab devices that are reflashed keep their address but not their host key.
+    /// Accepting the replacement without a prompt is opt-in because it also
+    /// removes the only interactive defence against a swapped server identity.
+    #[serde(default)]
+    pub auto_replace_host_keys: bool,
 }
 
 impl Default for SshConfigSettings {
@@ -324,6 +329,7 @@ impl Default for SshConfigSettings {
             auto_load_hosts: true,
             auto_sync_hosts: false,
             allow_proxy_command: false,
+            auto_replace_host_keys: false,
         }
     }
 }
@@ -621,6 +627,7 @@ mod misc_tests {
         assert!(restored.ssh_config.auto_load_hosts);
         assert!(!restored.ssh_config.auto_sync_hosts);
         assert!(!restored.ssh_config.allow_proxy_command);
+        assert!(!restored.ssh_config.auto_replace_host_keys);
     }
 
     #[test]

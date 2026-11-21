@@ -16,7 +16,9 @@
       "cancel": "Hủy",
       "confirm": "Xóa khóa",
       "delete": "Xóa",
-      "read_only": "Mục chỉ đọc. Hãy quản lý trong tệp nguồn."
+      "read_only": "Mục chỉ đọc. Hãy quản lý trong tệp nguồn.",
+      "auto_replace": "Tự động thay khóa máy chủ đã thay đổi",
+      "auto_replace_hint": "Bỏ qua hộp thoại xác nhận khi máy chủ báo khóa khác và lưu khóa mới. Máy chủ lạ cũng được tin cậy mà không hỏi. Dành cho thiết bị phòng thí nghiệm thường xuyên được nạp lại firmware."
     },
     "credentials": {
       "title": "Thông tin xác thực",

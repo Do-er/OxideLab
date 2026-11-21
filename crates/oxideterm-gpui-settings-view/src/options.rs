@@ -374,6 +374,10 @@ pub fn set_ssh_config_allow_proxy_command(settings: &mut PersistedSettings, valu
     settings.ssh_config.allow_proxy_command = value;
 }
 
+pub fn set_ssh_config_auto_replace_host_keys(settings: &mut PersistedSettings, value: bool) {
+    settings.ssh_config.auto_replace_host_keys = value;
+}
+
 pub fn sftp_concurrent_options() -> &'static [i64] {
     &[1, 2, 3, 4, 5, 6, 8, 10]
 }

@@ -1,7 +1,8 @@
 use gpui::{
-    AnyElement, Context, MouseButton, ParentElement, SharedString, Styled, Window, div, prelude::*,
-    px, rgb, rgba,
+    AnyElement, App, Context, MouseButton, ParentElement, SharedString, Styled, Window, div,
+    prelude::*, px, rgb, rgba,
 };
+use oxideterm_gpui_terminal::{TerminalNotice, TerminalNoticeVariant};
 use oxideterm_gpui_ui::{
     MaterialRole,
     button::{ButtonOptions, ButtonRadius, ButtonSize, ButtonVariant, ToolbarButtonOptions},
@@ -33,17 +34,92 @@ pub(in crate::workspace) struct HostKeyChallenge {
 }
 
 impl WorkspaceApp {
+    /// Reflashed lab hardware rotates its host key while keeping the address,
+    /// so the confirmation dialog becomes noise once the user opts in globally.
+    pub(in crate::workspace) fn auto_replace_host_keys_enabled(&self) -> bool {
+        self.settings_store
+            .settings()
+            .ssh_config
+            .auto_replace_host_keys
+    }
+
+    pub(in crate::workspace) fn report_auto_replaced_host_key(
+        &self,
+        host: &str,
+        status: &HostKeyStatus,
+        cx: &App,
+    ) {
+        let description = match status {
+            HostKeyStatus::Changed {
+                expected_fingerprint,
+                actual_fingerprint,
+                ..
+            } => self
+                .i18n
+                .t("ssh.host_key.auto_replaced_changed")
+                .replace("{{expected}}", expected_fingerprint)
+                .replace("{{fingerprint}}", actual_fingerprint),
+            HostKeyStatus::Unknown { fingerprint, .. } => self
+                .i18n
+                .t("ssh.host_key.auto_replaced_unknown")
+                .replace("{{fingerprint}}", fingerprint),
+            HostKeyStatus::Verified | HostKeyStatus::Error { .. } => return,
+        };
+        self.push_workspace_notice(
+            TerminalNotice {
+                title: self
+                    .i18n
+                    .t("ssh.host_key.auto_replaced_title")
+                    .replace("{{host}}", host),
+                description: Some(description),
+                status_text: None,
+                progress: None,
+                variant: TerminalNoticeVariant::Warning,
+            },
+            cx,
+        );
+    }
+
     fn accept_host_key_challenge(
         &mut self,
         persist: bool,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        let Some(mut challenge) = self.connection_flow.update(cx, |connection_flow, cx| {
+        let Some(challenge) = self.connection_flow.update(cx, |connection_flow, cx| {
             connection_flow.take_host_key_challenge(cx)
         }) else {
             return;
         };
+        self.accept_host_key_challenge_owned(challenge, persist, window, cx);
+    }
+
+    /// Resolves an untrusted host key without opening the dialog, reporting the
+    /// saved fingerprint only after the connection flow actually resumed.
+    pub(in crate::workspace) fn auto_accept_host_key_challenge(
+        &mut self,
+        challenge: HostKeyChallenge,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let host = challenge.host.clone();
+        let status = challenge.status.clone();
+        if self.accept_host_key_challenge_owned(challenge, true, window, cx) {
+            self.report_auto_replaced_host_key(&host, &status, cx);
+        }
+    }
+
+    /// Accepts a challenge that never reached the dialog. The silent path owns
+    /// the same accept branches so a background accept cannot diverge from the
+    /// buttons the user would otherwise press. Returns whether the flow
+    /// continued, so the caller only reports success for a real acceptance.
+    pub(in crate::workspace) fn accept_host_key_challenge_owned(
+        &mut self,
+        mut challenge: HostKeyChallenge,
+        persist: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> bool {
         let (fingerprint, replacement) = match &challenge.status {
             HostKeyStatus::Unknown { fingerprint, .. } => (fingerprint.clone(), None),
             HostKeyStatus::Changed {
@@ -60,7 +136,7 @@ impl WorkspaceApp {
                     fingerprint: actual_fingerprint.clone(),
                 }),
             ),
-            HostKeyStatus::Verified | HostKeyStatus::Error { .. } => return,
+            HostKeyStatus::Verified | HostKeyStatus::Error { .. } => return false,
         };
         challenge.config.host_key_replacement = replacement.clone();
 
@@ -86,7 +162,7 @@ impl WorkspaceApp {
                 cx,
             );
             cx.notify();
-            return;
+            return true;
         }
 
         let routed_standalone_sftp = challenge
@@ -125,7 +201,7 @@ impl WorkspaceApp {
                     self.report_workspace_error_notice(message, None, cx);
                 }
                 cx.notify();
-                return;
+                return false;
             }
             let message = self.i18n.t("ssh.form.checking_host_key");
             self.update_connection_form_state(cx, |state| {
@@ -136,7 +212,7 @@ impl WorkspaceApp {
             });
             self.start_ssh_preflight(challenge.config, challenge.title, challenge.intent, cx);
             cx.notify();
-            return;
+            return true;
         }
 
         challenge.config.strict_host_key_checking = true;
@@ -149,6 +225,7 @@ impl WorkspaceApp {
             window,
             cx,
         );
+        true
     }
 
     pub(in crate::workspace) fn cancel_host_key_challenge(&mut self, cx: &mut Context<Self>) {

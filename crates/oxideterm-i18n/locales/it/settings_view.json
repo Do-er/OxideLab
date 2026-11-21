@@ -16,7 +16,9 @@
       "cancel": "Annulla",
       "confirm": "Elimina chiave",
       "delete": "Elimina",
-      "read_only": "Voce di sola lettura. Gestiscila nel file di origine."
+      "read_only": "Voce di sola lettura. Gestiscila nel file di origine.",
+      "auto_replace": "Sostituisci automaticamente le chiavi host modificate",
+      "auto_replace_hint": "Salta la finestra di conferma quando il server segnala una chiave diversa e salva quella nuova. Gli host sconosciuti vengono considerati affidabili senza chiedere. Pensato per dispositivi da laboratorio che vengono riprogrammati spesso."
     },
     "credentials": {
       "title": "Credenziali",

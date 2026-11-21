@@ -263,13 +263,22 @@ impl ConnectionFlowEntity {
         status: HostKeyStatus,
         cx: &mut Context<Self>,
     ) -> bool {
-        let Some(run) = self.active_proxy_connect_run.as_ref() else {
+        let Some(challenge) = self.active_proxy_host_key_challenge(status) else {
             return false;
         };
-        let Some(step) = run.plan.steps.get(run.plan.current_index) else {
-            return false;
-        };
-        let challenge = HostKeyChallenge {
+        self.open_host_key_challenge(challenge, cx);
+        true
+    }
+
+    /// Builds the active hop's challenge without claiming dialog ownership, so
+    /// automatic acceptance can resolve the same step the dialog would show.
+    pub(in crate::workspace) fn active_proxy_host_key_challenge(
+        &self,
+        status: HostKeyStatus,
+    ) -> Option<HostKeyChallenge> {
+        let run = self.active_proxy_connect_run.as_ref()?;
+        let step = run.plan.steps.get(run.plan.current_index)?;
+        Some(HostKeyChallenge {
             presence: oxideterm_gpui_ui::motion::ExitPresence::visible(),
             config: oxideterm_ssh::SshConfig::default(),
             title: run.title.clone(),
@@ -278,9 +287,7 @@ impl ConnectionFlowEntity {
             session_tree_challenge: true,
             host: step.host.clone(),
             port: step.port,
-        };
-        self.open_host_key_challenge(challenge, cx);
-        true
+        })
     }
 
     pub(in crate::workspace) fn mark_current_proxy_connect_step_verified(
@@ -1265,6 +1272,25 @@ mod tests {
                 previous_fingerprint: "SHA256:old".to_string(),
                 fingerprint: "SHA256:test".to_string(),
             };
+            // Automatic acceptance resolves the current hop without claiming the
+            // dialog, so the modal owner must stay untouched.
+            let silent = entity
+                .active_proxy_host_key_challenge(HostKeyStatus::Changed {
+                    expected_fingerprint: "SHA256:old".to_string(),
+                    actual_fingerprint: "SHA256:test".to_string(),
+                    key_type: "ssh-ed25519".to_string(),
+                })
+                .expect("silent challenge for the active hop");
+            assert_eq!(
+                (
+                    silent.host.as_str(),
+                    silent.port,
+                    silent.session_tree_challenge
+                ),
+                ("target.example.test", 22, true)
+            );
+            assert!(!entity.has_host_key_challenge());
+
             assert!(entity.open_active_proxy_host_key_challenge(
                 HostKeyStatus::Changed {
                     expected_fingerprint: "SHA256:old".to_string(),

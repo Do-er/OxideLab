@@ -16,7 +16,9 @@
       "cancel": "Abbrechen",
       "confirm": "Schlüssel löschen",
       "delete": "Löschen",
-      "read_only": "Schreibgeschützter Eintrag. In der Quelldatei verwalten."
+      "read_only": "Schreibgeschützter Eintrag. In der Quelldatei verwalten.",
+      "auto_replace": "Geänderte Hostschlüssel automatisch ersetzen",
+      "auto_replace_hint": "Bestätigungsdialog überspringen, wenn der Server einen anderen Schlüssel meldet, und den neuen speichern. Neue Hosts werden ohne Nachfrage vertraut. Gedacht für Laborgeräte, die häufig neu geflasht werden."
     },
     "credentials": {
       "title": "Zugangsdaten",

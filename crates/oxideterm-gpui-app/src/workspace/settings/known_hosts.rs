@@ -190,12 +190,42 @@ impl WorkspaceApp {
                 },
             ));
         }
+        let auto_replace_host_keys = self
+            .settings_store
+            .settings()
+            .ssh_config
+            .auto_replace_host_keys;
         let mut body = div()
             .w_full()
             .min_w_0()
             .flex()
             .flex_col()
             .gap(px(12.0))
+            .child(
+                self.setting_row(
+                    "settings_view.known_hosts.auto_replace",
+                    "settings_view.known_hosts.auto_replace_hint",
+                    checkbox(&self.tokens, String::new(), auto_replace_host_keys)
+                        .on_mouse_down(
+                            MouseButton::Left,
+                            cx.listener(move |this, _event, _window, cx| {
+                                this.edit_settings(
+                                    |settings| {
+                                        set_ssh_config_auto_replace_host_keys(
+                                            settings,
+                                            !auto_replace_host_keys,
+                                        )
+                                    },
+                                    cx,
+                                );
+                                cx.stop_propagation();
+                            }),
+                        )
+                        .into_any_element(),
+                    cx,
+                ),
+            )
+            .child(self.card_separator())
             .child(toolbar);
         if let Some((path, _)) = file {
             body = body.child(

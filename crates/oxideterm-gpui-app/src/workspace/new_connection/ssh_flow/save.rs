@@ -707,6 +707,51 @@ fn preserve_edited_proxy_hop_auth(
     Ok(())
 }
 
+fn preserve_duplicated_proxy_hop_auth(
+    proxy_chain: &mut [SavedProxyHop],
+    source_proxy_chain: &[SavedProxyHop],
+    edit_sources: &[EditedProxyHopSource],
+    saved_auth_copies: Vec<Option<SavedAuth>>,
+    missing_credentials_message: &str,
+) -> anyhow::Result<()> {
+    if proxy_chain.len() != edit_sources.len() || proxy_chain.len() != saved_auth_copies.len() {
+        anyhow::bail!(missing_credentials_message.to_string());
+    }
+    for ((request_hop, edit_source), saved_auth_copy) in proxy_chain
+        .iter_mut()
+        .zip(edit_sources)
+        .zip(saved_auth_copies)
+    {
+        let source_hop = edit_source
+            .persisted_proxy_hop_index
+            .and_then(|index| source_proxy_chain.get(index));
+        if let Some(saved_auth_copy) = saved_auth_copy {
+            if source_hop.is_some_and(|source_hop| {
+                request_hop.account_credential_id == source_hop.account_credential_id
+            }) || source_hop.is_none()
+            {
+                request_hop.auth = saved_auth_copy;
+                continue;
+            }
+            anyhow::bail!(missing_credentials_message.to_string());
+        }
+        if edit_source.has_explicit_secret_draft {
+            continue;
+        }
+        let Some(source_hop) = source_hop else {
+            continue;
+        };
+        if !proxy_hop_auth_method_matches(request_hop, source_hop) {
+            anyhow::bail!(missing_credentials_message.to_string());
+        }
+        // A duplicate owns a separate credential slot, so its route can change without
+        // inheriting the in-place editor's endpoint restriction. The source secret is
+        // resolved only by auth_for_duplicate_owner and is never loaded into the form.
+        request_hop.auth = source_hop.auth.clone();
+    }
+    Ok(())
+}
+
 fn auth_for_duplicate_owner(
     connection_store: &ConnectionStore,
     auth: SavedAuth,
@@ -816,6 +861,11 @@ fn proxy_hop_auth_target_matches(left: &SavedProxyHop, right: &SavedProxyHop) ->
     left.host == right.host
         && left.port == right.port
         && left.username == right.username
+        && proxy_hop_auth_method_matches(left, right)
+}
+
+fn proxy_hop_auth_method_matches(left: &SavedProxyHop, right: &SavedProxyHop) -> bool {
+    left.account_credential_id == right.account_credential_id
         && left.auth.gssapi_options() == right.auth.gssapi_options()
         && left.auth.uses_empty_password() == right.auth.uses_empty_password()
         && match (
@@ -859,6 +909,55 @@ fn proxy_hop_auth_target_matches(left: &SavedProxyHop, right: &SavedProxyHop) ->
             ) => left_key_id == right_key_id,
             _ => false,
         }
+}
+
+fn duplicate_connection_save_request(
+    connection_store: &ConnectionStore,
+    form: &mut NewConnectionForm,
+    source_connection: &SavedConnection,
+    missing_credentials_message: &str,
+) -> anyhow::Result<SaveConnectionRequest> {
+    let saved_auth_copies = saved_proxy_hop_auth_copies(
+        connection_store,
+        &form.proxy_hops,
+        missing_credentials_message,
+    )?;
+    let edit_sources = form
+        .proxy_hops
+        .iter()
+        .map(|hop| EditedProxyHopSource {
+            persisted_proxy_hop_index: hop.persisted_proxy_hop_index,
+            has_explicit_secret_draft: hop.has_explicit_secret_draft(),
+        })
+        .collect::<Vec<_>>();
+    let mut request =
+        save_request_from_form_with_existing_auth(form, None, Some(&source_connection.auth))?;
+    preserve_duplicated_proxy_hop_auth(
+        &mut request.proxy_chain,
+        &source_connection.proxy_chain,
+        &edit_sources,
+        saved_auth_copies,
+        missing_credentials_message,
+    )?;
+    request.auth = auth_for_duplicate_owner(connection_store, request.auth)?;
+    for hop in &mut request.proxy_chain {
+        hop.auth = auth_for_duplicate_owner(
+            connection_store,
+            std::mem::replace(&mut hop.auth, SavedAuth::Agent),
+        )?;
+    }
+    request.upstream_proxy =
+        upstream_proxy_for_duplicate_owner(connection_store, request.upstream_proxy)?;
+    if request.proxy_command.is_some()
+        && let Some(source_command) = source_connection.proxy_command.as_ref()
+    {
+        // A duplicate receives a new protected-store owner instead of sharing an id.
+        request.proxy_command = Some(SavedProxyCommand {
+            keychain_id: None,
+            plaintext_command: Some(connection_store.get_saved_proxy_command(source_command)?),
+        });
+    }
+    Ok(request)
 }
 
 impl WorkspaceApp {
@@ -3037,64 +3136,23 @@ impl WorkspaceApp {
             return;
         };
         let source_connection = self.connection_store.get(&source_id).cloned();
-        let source_auth = source_connection
-            .as_ref()
-            .map(|connection| connection.auth.clone());
+        let Some(source_connection) = source_connection else {
+            self.update_connection_form_state(cx, |state| {
+                if let Some(form) = state.form.as_mut() {
+                    form.error = Some(self.i18n.t("sessions.saved_next_hop.not_found"));
+                }
+            });
+            cx.notify();
+            return;
+        };
         let Some(save_request) = self.with_connection_form_mut(cx, |this, form, _cx| {
             let form = form?;
-            Some((|| {
-                let source_connection = source_connection
-                    .as_ref()
-                    .ok_or_else(|| anyhow::anyhow!("Source connection is no longer available"))?;
-                let missing_credentials_message =
-                    this.i18n.t("sessions.saved_next_hop.missing_credentials");
-                let saved_auth_copies = saved_proxy_hop_auth_copies(
-                    &this.connection_store,
-                    &form.proxy_hops,
-                    &missing_credentials_message,
-                )?;
-                let edit_sources = form
-                    .proxy_hops
-                    .iter()
-                    .map(|hop| EditedProxyHopSource {
-                        persisted_proxy_hop_index: hop.persisted_proxy_hop_index,
-                        has_explicit_secret_draft: hop.has_explicit_secret_draft(),
-                    })
-                    .collect();
-                let mut request =
-                    save_request_from_form_with_existing_auth(form, None, source_auth.as_ref())?;
-                preserve_edited_proxy_hop_auth(
-                    &mut request.proxy_chain,
-                    &source_connection.proxy_chain,
-                    edit_sources,
-                    saved_auth_copies,
-                    &missing_credentials_message,
-                )?;
-                request.auth = auth_for_duplicate_owner(&this.connection_store, request.auth)?;
-                for hop in &mut request.proxy_chain {
-                    hop.auth = auth_for_duplicate_owner(
-                        &this.connection_store,
-                        std::mem::replace(&mut hop.auth, SavedAuth::Agent),
-                    )?;
-                }
-                request.upstream_proxy = upstream_proxy_for_duplicate_owner(
-                    &this.connection_store,
-                    request.upstream_proxy,
-                )?;
-                if request.proxy_command.is_some()
-                    && let Some(source_command) = source_connection.proxy_command.as_ref()
-                {
-                    // A duplicate receives a new protected-store owner instead of sharing an id.
-                    request.proxy_command = Some(SavedProxyCommand {
-                        keychain_id: None,
-                        plaintext_command: Some(
-                            this.connection_store
-                                .get_saved_proxy_command(source_command)?,
-                        ),
-                    });
-                }
-                Ok::<SaveConnectionRequest, anyhow::Error>(request)
-            })())
+            Some(duplicate_connection_save_request(
+                &this.connection_store,
+                form,
+                &source_connection,
+                &this.i18n.t("sessions.saved_next_hop.missing_credentials"),
+            ))
         }) else {
             return;
         };
@@ -3767,6 +3825,137 @@ mod saved_connection_open_tests {
                     ..
         } if password == "copied-proxy-secret"
                 ));
+    }
+
+    #[test]
+    fn duplicated_proxy_hop_copies_its_saved_password_to_the_new_host() {
+        let directory = tempfile::tempdir().unwrap();
+        let mut store = ConnectionStore::load(directory.path().join("connections.json")).unwrap();
+        let credential_id = store
+            .save_account_credential(
+                None,
+                "Jump account",
+                "jump-user",
+                Some(&SecretString::from("original-jump-secret")),
+            )
+            .unwrap();
+        store
+            .save_account_credential(
+                Some(&credential_id),
+                "Jump account",
+                "jump-user",
+                Some(&SecretString::from("later-global-secret")),
+            )
+            .unwrap();
+        let mut source: SavedConnection = serde_json::from_value(serde_json::json!({
+            "id": "source",
+            "name": "Source",
+            "host": "target.example.com",
+            "username": "target-user",
+            "auth": {"type": "password"},
+            "created_at": "2026-11-21T00:00:00Z",
+            "proxy_chain": [{
+                "host": "old-jump.example.com",
+                "username": "jump-user",
+                "auth": {"type": "password"},
+                "account_credential_id": credential_id,
+            }]
+        }))
+        .unwrap();
+        store
+            .store_connection_credential(
+                "source",
+                oxideterm_connections::ConnectionCredentialSlot::Primary,
+                &SecretString::from("target-secret"),
+            )
+            .unwrap();
+        store
+            .store_connection_credential(
+                "source",
+                oxideterm_connections::ConnectionCredentialSlot::ProxyHop { index: 0 },
+                &SecretString::from("original-jump-secret"),
+            )
+            .unwrap();
+        let source_connection = store.get("source").unwrap().clone();
+        let mut form = form_from_saved_connection(&source_connection, None);
+        form.proxy_hops[0].host = "new-jump.example.com".to_string();
+        assert_eq!(
+            form.proxy_hops[0].account_credential_id.as_deref(),
+            Some(credential_id.as_str())
+        );
+        assert!(!form.proxy_hops[0].has_explicit_secret_draft());
+
+        let request = duplicate_connection_save_request(
+            &store,
+            &mut form,
+            &source_connection,
+            "missing proxy credentials",
+        )
+        .expect("a duplicate retains its original hop password for a changed host");
+
+        assert_eq!(request.proxy_chain[0].host, "new-jump.example.com");
+        assert_eq!(
+            request.proxy_chain[0].account_credential_id.as_deref(),
+            Some(credential_id.as_str())
+        );
+        let mut unlinked_form = form_from_saved_connection(&source_connection, None);
+        unlinked_form.proxy_hops[0].host = "new-jump.example.com".to_string();
+        unlinked_form.proxy_hops[0].account_credential_id = None;
+        assert_eq!(
+            duplicate_connection_save_request(
+                &store,
+                &mut unlinked_form,
+                &source_connection,
+                "missing proxy credentials",
+            )
+            .unwrap_err()
+            .to_string(),
+            "missing proxy credentials"
+        );
+        assert!(matches!(
+            &request.proxy_chain[0].auth,
+            SavedAuth::Password {
+                keychain_id: None,
+                plaintext_password: Some(password),
+                ..
+            } if password == "original-jump-secret"
+        ));
+        let duplicate = store.upsert(request).expect("save duplicate");
+        let saved_hop = &store.get(&duplicate.id).unwrap().proxy_chain[0];
+        assert_eq!(saved_hop.host, "new-jump.example.com");
+        let duplicate_keychain_id = match &saved_hop.auth {
+            SavedAuth::Password {
+                keychain_id: Some(keychain_id),
+                plaintext_password: None,
+                ..
+            } => keychain_id,
+            other => panic!("unexpected duplicate proxy auth: {other:?}"),
+        };
+        assert!(matches!(
+            &store.get(&duplicate.id).unwrap().auth,
+            SavedAuth::Password {
+                keychain_id: Some(_),
+                plaintext_password: None,
+                ..
+            }
+        ));
+        let source_keychain_id = match &store.get("source").unwrap().proxy_chain[0].auth {
+            SavedAuth::Password {
+                keychain_id: Some(keychain_id),
+                ..
+            } => keychain_id,
+            other => panic!("unexpected source proxy auth: {other:?}"),
+        };
+        assert_ne!(duplicate_keychain_id, source_keychain_id);
+        assert_eq!(
+            store.get_saved_auth_password(&saved_hop.auth).unwrap(),
+            "original-jump-secret"
+        );
+        assert!(
+            !std::fs::read_to_string(store.path())
+                .unwrap()
+                .contains("original-jump-secret")
+        );
     }
 
     #[test]

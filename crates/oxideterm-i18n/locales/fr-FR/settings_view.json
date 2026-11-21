@@ -16,7 +16,9 @@
       "cancel": "Annuler",
       "confirm": "Supprimer la clé",
       "delete": "Supprimer",
-      "read_only": "Entrée en lecture seule. Gérez-la dans le fichier source."
+      "read_only": "Entrée en lecture seule. Gérez-la dans le fichier source.",
+      "auto_replace": "Remplacer automatiquement les clés d’hôte modifiées",
+      "auto_replace_hint": "Ignorer la boîte de confirmation lorsqu’un serveur annonce une autre clé et enregistrer la nouvelle. Les hôtes inconnus sont approuvés sans demander. Destiné aux appareils de laboratoire souvent reflashés."
     },
     "credentials": {
       "title": "Identifiants",

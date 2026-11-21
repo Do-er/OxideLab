@@ -16,7 +16,9 @@
       "cancel": "Cancelar",
       "confirm": "Excluir chave",
       "delete": "Excluir",
-      "read_only": "Entrada somente leitura. Gerencie-a no arquivo de origem."
+      "read_only": "Entrada somente leitura. Gerencie-a no arquivo de origem.",
+      "auto_replace": "Substituir automaticamente chaves de host alteradas",
+      "auto_replace_hint": "Ignorar o diálogo de confirmação quando o servidor informar outra chave e salvar a nova. Hosts desconhecidos passam a ser confiados sem perguntar. Indicado para equipamentos de laboratório que são regravados com frequência."
     },
     "credentials": {
       "title": "Credenciais",

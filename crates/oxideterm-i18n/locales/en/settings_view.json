@@ -16,7 +16,9 @@
       "cancel": "Cancel",
       "confirm": "Delete key",
       "delete": "Delete",
-      "read_only": "Read-only entry. Manage it in the source file."
+      "read_only": "Read-only entry. Manage it in the source file.",
+      "auto_replace": "Replace changed host keys automatically",
+      "auto_replace_hint": "Skip the confirmation dialog when the server reports a different key and save the new one. New hosts are trusted without asking. Intended for lab devices that are frequently reflashed."
     },
     "credentials": {
       "title": "Credentials",

@@ -547,6 +547,22 @@ impl WorkspaceApp {
                 self.continue_verified_ssh_flow(config, title, intent, window, cx)
             }
             HostKeyStatus::Unknown { .. } | HostKeyStatus::Changed { .. } => {
+                if self.auto_replace_host_keys_enabled() {
+                    // Reflashed lab devices keep their address but not their key. The
+                    // toast keeps the fingerprint visible without blocking the login.
+                    let challenge = HostKeyChallenge {
+                        presence: oxideterm_gpui_ui::motion::ExitPresence::visible(),
+                        config,
+                        title,
+                        status,
+                        intent,
+                        session_tree_challenge: false,
+                        host,
+                        port,
+                    };
+                    self.auto_accept_host_key_challenge(challenge, window, cx);
+                    return;
+                }
                 self.prepare_modal_interaction_boundary(cx);
                 let challenge = HostKeyChallenge {
                     presence: oxideterm_gpui_ui::motion::ExitPresence::visible(),
@@ -800,6 +816,17 @@ impl WorkspaceApp {
                 self.continue_active_proxy_session_tree_connect(window, cx);
             }
             HostKeyStatus::Unknown { .. } | HostKeyStatus::Changed { .. } => {
+                if self.auto_replace_host_keys_enabled() {
+                    let Some(challenge) =
+                        self.connection_flow.update(cx, |connection_flow, _cx| {
+                            connection_flow.active_proxy_host_key_challenge(status)
+                        })
+                    else {
+                        return;
+                    };
+                    self.auto_accept_host_key_challenge(challenge, window, cx);
+                    return;
+                }
                 self.prepare_modal_interaction_boundary(cx);
                 let challenge_opened = self.connection_flow.update(cx, |connection_flow, cx| {
                     connection_flow.open_active_proxy_host_key_challenge(status, cx)

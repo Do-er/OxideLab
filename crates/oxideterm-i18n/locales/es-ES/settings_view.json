@@ -16,7 +16,9 @@
       "cancel": "Cancelar",
       "confirm": "Eliminar clave",
       "delete": "Eliminar",
-      "read_only": "Entrada de solo lectura. Adminístrala en el archivo de origen."
+      "read_only": "Entrada de solo lectura. Adminístrala en el archivo de origen.",
+      "auto_replace": "Sustituir automáticamente las claves de host modificadas",
+      "auto_replace_hint": "Omitir el diálogo de confirmación cuando el servidor informe de otra clave y guardar la nueva. Los hosts nuevos se confían sin preguntar. Pensado para equipos de laboratorio que se reflashean con frecuencia."
     },
     "credentials": {
       "title": "Credenciales",
