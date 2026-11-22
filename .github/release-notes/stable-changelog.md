@@ -4,6 +4,78 @@ Stable releases are listed newest first. The release workflow uses each versione
 section as the changelog attached to the corresponding GitHub Release.
 Sections up to `3.0.2` are the upstream OxideTerm release history, kept verbatim.
 
+## 3.0.4
+
+### 中文
+
+OxideLab 3.0.4 是 Do-er 维护的社区分支更新，新增当前终端窗格的不换行视图，完善 SSH 主机密钥信任与 ProxyJump 连接队列，并将连接进度、错误与操作集中到工作区顶部状态栏。
+
+#### 🔄 上游更新
+
+- 基于 `v3.0.3`；本版本未合入新的官方上游主线提交。
+
+#### 🧩 自有更新
+
+##### ⌨️ 终端
+
+- **不换行视图**：底部命令栏新增自动换行开关，关闭后可把当前窗格中的软折行拼接为逻辑行并横向滚动；选择、复制、搜索、链接、命令标记与折叠、时间戳及光标定位随显示坐标联动，窗口宽度变化不会在此模式下触发终端重排。
+- **横向滚动修正**：滚动条仅在内容实际超出视口时显示，滚动范围与拖拽及光标定位保持一致；网格空白填充不再误判为溢出，带样式的空格、零宽字符和超链接也会计入实际行宽。
+- **Free Type 输入保护**：剪切、删除和粘贴等操作仅在实时跟踪到 Shell 活动输入时改写命令；仅有屏幕恢复内容、输入跟踪已失效或命令已开始输出时，不再向 Shell 合成编辑字节，避免误改命令。
+- **首版适用边界**：不换行设置仅对当前窗格临时生效且不持久化，只拼接仍保留在回滚缓冲中的软折行；alt screen 与 tmux 控制模式继续使用物理视图，含终端图像的折行链保持原样，块选区限于当前视口。
+
+##### 🔐 SSH 与连接
+
+- **按路由隔离主机密钥**：不同跳板链后的相同内网地址分别保存信任记录，避免多台设备共用同一地址时相互覆盖或反复提示密钥变化；预检、实际连接、缓存和密钥替换统一使用相同的路由身份。
+- **跳板链路复用**：重复打开已连接的保存连接会在同一节点新增终端，不再跳回旧标签或重建整棵会话树；修改任一跳的协商策略仍会重新连接，避免复用不符合新配置的旧链路。
+- **ProxyJump 连接队列**：不同连接请求按顺序执行，重复点击同一目标会并入正在进行的连接，不再产生重复认证或链路冲突。
+- **自动替换主机密钥**：设置 → 连接 → 已信任主机新增可选开关，自动保存新主机及已变更的主机密钥，并在继续连接后显示包含指纹的警告通知。该选项默认关闭；开启后会跳过身份确认，降低对中间人攻击的防护，仅建议用于可信网络中需要频繁刷机的实验设备。
+- **复制连接的凭据修复**：复制带跳板的连接并修改跳板地址时，保留源跳板已保存的密码并创建独立凭据记录，避免误用同名账户凭据中后来更新的密码。
+
+##### 🎨 工作区与外观
+
+- **顶部连接状态栏**：连接浮动卡片改为工作区内嵌状态栏，集中显示进度、状态与错误；多个连接可展开查看，支持取消等待中或进行中的连接、全部取消、失败后重试及关闭已完成条目。
+- **图标变体调整**：以 White Orange 取代与默认图标重复的 White Graphite，默认项直接使用应用打包图标，并重排选择器使对应配色更直观。
+- **项目文档完善**：新增终端工作区与外观设置截图，下载、问题反馈和项目徽章链接统一指向 `Do-er/OxideLab`。
+
+#### ⚠️ 升级注意
+
+- `whiteGraphite` 配置值已由 `whiteOrange` 取代，Filled 系列不再接受 `orange`、`blue`、`graphite`、`green`、`purple`、`red` 短别名。此前选择 White Graphite 的用户需要在升级后重新选择图标；手动编辑过这些配置值时，请改用 `whiteOrange` 或 `filledOrange` 等完整名称。
+
+### English
+
+OxideLab 3.0.4 is an update to the Do-er-maintained community fork, adding a no-wrap view for individual terminal panes, improving SSH host-key trust and ProxyJump connection queues, and consolidating connection progress, errors, and actions into a workspace status bar.
+
+#### 🔄 Upstream changes
+
+- Built on `v3.0.3`; no new official upstream mainline commits were merged for this release.
+
+#### 🧩 Fork-specific changes
+
+##### ⌨️ Terminal
+
+- **No-wrap view**: Added a line-wrapping toggle to the bottom Command Bar. With wrapping off, soft-wrapped rows in the current pane are joined into logical lines with horizontal scrolling; selection, copying, search, links, command marks and folding, timestamps, and cursor positioning follow the displayed coordinates, while window-width changes no longer reflow the terminal in this mode.
+- **Horizontal scrolling fixes**: The scrollbar now appears only when content actually exceeds the viewport, with one consistent range for dragging and cursor reveal. Blank grid padding no longer creates false overflow, while styled blanks, zero-width sequences, and hyperlinks count toward the real row width.
+- **Free Type input protection**: Cut, delete, paste, and related edits now modify a command only when live Shell input tracking confirms an active prompt. Screen-recovered text, stale tracking, or commands that have started producing output no longer trigger synthesized editing bytes.
+- **First-version boundaries**: The no-wrap setting is temporary, pane-local, and not persisted, and only soft wraps retained in scrollback can be joined. The alt screen and tmux control mode keep physical views, wrapped chains containing terminal images remain unchanged, and block selection is limited to the current viewport.
+
+##### 🔐 SSH and connections
+
+- **Route-scoped host keys**: Targets behind different jump chains now keep separate trust records even when they share a private address, preventing devices from overwriting each other's keys or repeatedly triggering changed-key prompts. Preflight, live connections, caches, and key replacement all use the same routed identity.
+- **Jump-chain reuse**: Reopening an already connected saved connection adds a terminal to the same node instead of focusing an old tab or rebuilding the session tree. Changing any hop's negotiation policy still forces a fresh connection rather than reusing an incompatible chain.
+- **ProxyJump connection queue**: Distinct connection requests now run sequentially, while repeated clicks on the same target join the pending connection instead of duplicating authentication or causing chain conflicts.
+- **Automatic host-key replacement**: Added an opt-in switch under Settings → Connections → Trusted Hosts that saves keys for new hosts and replaces changed keys automatically, then shows a warning notification with the fingerprint after the connection resumes. It is off by default; enabling it bypasses identity confirmation and weakens protection against man-in-the-middle attacks, so it is intended only for frequently reflashed lab devices on trusted networks.
+- **Duplicated-connection credential fix**: When duplicating a connection with jump hosts and changing a hop address, the original hop's saved password is retained in an independent credential record instead of resolving a newer password from the associated account credential.
+
+##### 🎨 Workspace and appearance
+
+- **Top connection status bar**: Replaced floating connection cards with an inline workspace bar for progress, status, and errors. Multiple connections can be expanded, with actions to cancel queued or active connections, cancel all, retry failures, and dismiss finished entries.
+- **Icon variant update**: Replaced the duplicate White Graphite option with White Orange, pointed Default directly at the packaged application icon, and reordered the picker to make related color variants clearer.
+- **Project documentation**: Added terminal-workspace and appearance-settings screenshots, and pointed download, issue-reporting, and project badge links at `Do-er/OxideLab`.
+
+#### ⚠️ Upgrade notes
+
+- The `whiteGraphite` configuration value has been replaced by `whiteOrange`, and the Filled variants no longer accept the short aliases `orange`, `blue`, `graphite`, `green`, `purple`, or `red`. Users who previously selected White Graphite need to select an icon again after upgrading; manually edited settings should use complete values such as `whiteOrange` or `filledOrange`.
+
 ## 3.0.3
 
 ### 中文
