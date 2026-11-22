@@ -1673,6 +1673,9 @@ impl WorkspaceApp {
                 self.fail_queued_tunnels(node, cx);
             }
         }
+        if self.connection_flow.read(cx).has_queued_proxy_connects() {
+            self.enqueue_connection_flow_window_effect(cx);
+        }
     }
 
     fn advance_connection_chain_after_node_connected(
@@ -1699,6 +1702,9 @@ impl WorkspaceApp {
             }
             runtime_entity::ConnectionChainAdvance::Complete => {
                 self.schedule_next_reconnect_cascade_node(cx);
+                if self.connection_flow.read(cx).has_queued_proxy_connects() {
+                    self.enqueue_connection_flow_window_effect(cx);
+                }
             }
         }
     }

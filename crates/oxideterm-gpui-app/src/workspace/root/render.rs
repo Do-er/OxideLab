@@ -1863,6 +1863,14 @@ impl WorkspaceApp {
         attempt_id: &str,
         cx: &mut Context<Self>,
     ) {
+        if self.active_proxy_connect_waits_for_node(node_id, cx)
+            || self
+                .connection_flow
+                .read(cx)
+                .active_proxy_connect_opens_node_terminal(node_id)
+        {
+            self.cancel_active_proxy_connect_run(cx);
+        }
         let disconnected_nodes = self.workspace_runtime.update(cx, |runtime, cx| {
             runtime.disconnect_node_runtime_subtree(node_id, cx)
         });
@@ -1878,6 +1886,20 @@ impl WorkspaceApp {
                 cx.notify();
             }
         });
+        if self.connection_flow.read(cx).has_queued_proxy_connects() {
+            self.enqueue_connection_flow_window_effect(cx);
+        }
+        cx.notify();
+    }
+
+    fn cancel_queued_proxy_connect_from_status_bar(
+        &mut self,
+        queue_id: u64,
+        cx: &mut Context<Self>,
+    ) {
+        self.connection_flow.update(cx, |flow, cx| {
+            flow.cancel_queued_proxy_connect(queue_id, cx);
+        });
         cx.notify();
     }
 
@@ -1886,6 +1908,10 @@ impl WorkspaceApp {
         targets: Vec<(NodeId, String)>,
         cx: &mut Context<Self>,
     ) {
+        self.connection_flow.update(cx, |flow, cx| {
+            flow.clear_queued_proxy_connects(cx);
+        });
+        self.cancel_active_proxy_connect_run(cx);
         let now = cx.background_executor().now();
         for (node_id, attempt_id) in targets {
             let disconnected_nodes = self.workspace_runtime.update(cx, |runtime, cx| {
@@ -2029,34 +2055,89 @@ impl WorkspaceApp {
             return None;
         }
         let entries = self.overlay.read(cx).connection_trace_bar_entries(&self.i18n);
-        let primary = entries.first()?;
+        let queued_entries = self.connection_flow.read(cx).queued_proxy_connect_entries();
+        let total_count = entries.len() + queued_entries.len();
+        if total_count == 0 {
+            return None;
+        }
         let tokens = &self.tokens;
 
-        let dot_color = match primary.status {
-            ConnectionTraceStatus::Running => tokens.ui.accent,
-            ConnectionTraceStatus::Ready => tokens.ui.success,
-            ConnectionTraceStatus::Failed => tokens.ui.error,
-            ConnectionTraceStatus::Cancelled => tokens.ui.text_muted,
-        };
-        let border_color = match primary.status {
-            ConnectionTraceStatus::Failed => tokens.ui.error,
-            _ => tokens.ui.border,
-        };
-        let summary_text = match primary.status {
-            ConnectionTraceStatus::Failed => match primary.detail.as_deref() {
-                Some(detail) if !detail.is_empty() => format!("{} · {}", primary.title, detail),
-                _ => primary.title.clone(),
-            },
-            _ => format!("{} · {}", primary.title, primary.status_text),
-        };
+        let (dot_color, border_color, summary_text, primary_progress, primary_failed, primary_actions) =
+            if let Some(primary) = entries.first() {
+                let dot_color = match primary.status {
+                    ConnectionTraceStatus::Running => tokens.ui.accent,
+                    ConnectionTraceStatus::Ready => tokens.ui.success,
+                    ConnectionTraceStatus::Failed => tokens.ui.error,
+                    ConnectionTraceStatus::Cancelled => tokens.ui.text_muted,
+                };
+                let border_color = match primary.status {
+                    ConnectionTraceStatus::Failed => tokens.ui.error,
+                    _ => tokens.ui.border,
+                };
+                let summary_text = match primary.status {
+                    ConnectionTraceStatus::Failed => match primary.detail.as_deref() {
+                        Some(detail) if !detail.is_empty() => {
+                            format!("{} · {}", primary.title, detail)
+                        }
+                        _ => primary.title.clone(),
+                    },
+                    _ => format!("{} · {}", primary.title, primary.status_text),
+                };
+                (
+                    dot_color,
+                    border_color,
+                    summary_text,
+                    primary.progress,
+                    primary.status == ConnectionTraceStatus::Failed,
+                    self.render_connection_status_bar_actions(primary, cx),
+                )
+            } else {
+                let queued = &queued_entries[0];
+                let queue_id = queued.queue_id;
+                let title = self
+                    .i18n
+                    .t("connections.trace.connecting")
+                    .replace("{{label}}", &queued.title);
+                let stage = self.i18n.t("connections.trace.stage.queued");
+                let cancel_label = self.i18n.t("common.actions.cancel");
+                let cancel_btn = oxideterm_gpui_ui::button::button_with(
+                    tokens,
+                    cancel_label,
+                    oxideterm_gpui_ui::button::ButtonOptions {
+                        variant: oxideterm_gpui_ui::button::ButtonVariant::Ghost,
+                        size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                        ..Default::default()
+                    },
+                )
+                .h(px(22.0))
+                .px(px(8.0))
+                .text_xs()
+                .on_mouse_down(
+                    MouseButton::Left,
+                    cx.listener(move |this, _event, _window, cx| {
+                        this.cancel_queued_proxy_connect_from_status_bar(queue_id, cx);
+                        cx.stop_propagation();
+                    }),
+                )
+                .into_any_element();
+                (
+                    tokens.ui.accent,
+                    tokens.ui.border,
+                    format!("{title} · {stage}"),
+                    None,
+                    false,
+                    cancel_btn,
+                )
+            };
 
-        let extra_count = entries.len().saturating_sub(1);
+        let extra_count = total_count.saturating_sub(1);
         let queue_expanded = self.connection_queue_expanded && extra_count > 0;
         let running_targets = entries
             .iter()
             .filter(|entry| entry.status == ConnectionTraceStatus::Running)
             .map(|entry| (entry.node_id.clone(), entry.attempt_id.clone()))
             .collect::<Vec<_>>();
+        let cancellable_total = running_targets.len() + queued_entries.len();
 
         let bar = div()
             .w_full()
@@ -2091,7 +2172,7 @@ impl WorkspaceApp {
                             .flex_1()
                             .min_w_0()
                             .text_xs()
-                            .text_color(rgb(if primary.status == ConnectionTraceStatus::Failed {
+                            .text_color(rgb(if primary_failed {
                                 tokens.ui.error
                             } else {
                                 tokens.ui.text
@@ -2107,7 +2188,7 @@ impl WorkspaceApp {
                     .flex_row()
                     .items_center()
                     .gap(px(8.0))
-                    .when_some(primary.progress, |row, value| {
+                    .when_some(primary_progress, |row, value| {
                         row.child(
                             div()
                                 .w(px(88.0))
@@ -2143,12 +2224,12 @@ impl WorkspaceApp {
                             ),
                         )
                     })
-                    .child(self.render_connection_status_bar_actions(primary, cx)),
+                    .child(primary_actions),
             );
 
         let mut container = div().w_full().flex().flex_col().child(bar);
         if queue_expanded {
-            let queue_rows = entries
+            let mut queue_rows = entries
                 .iter()
                 .map(|entry| {
                     let entry_dot_color = match entry.status {
@@ -2223,13 +2304,82 @@ impl WorkspaceApp {
                         )
                 })
                 .collect::<Vec<_>>();
+            let queued_stage = self.i18n.t("connections.trace.stage.queued");
+            let cancel_label = self.i18n.t("common.actions.cancel");
+            for queued in &queued_entries {
+                let queue_id = queued.queue_id;
+                let title = self
+                    .i18n
+                    .t("connections.trace.connecting")
+                    .replace("{{label}}", &queued.title);
+                queue_rows.push(
+                    div()
+                        .w_full()
+                        .h(px(28.0))
+                        .px(px(12.0))
+                        .flex()
+                        .flex_row()
+                        .items_center()
+                        .justify_between()
+                        .gap(px(10.0))
+                        .border_b_1()
+                        .border_color(self.workspace_divider_color(tokens.ui.border, 0x80))
+                        .child(
+                            div()
+                                .flex_1()
+                                .min_w_0()
+                                .flex()
+                                .flex_row()
+                                .items_center()
+                                .gap(px(8.0))
+                                .child(
+                                    div()
+                                        .flex_none()
+                                        .w(px(5.0))
+                                        .h(px(5.0))
+                                        .rounded_full()
+                                        .bg(rgb(tokens.ui.text_muted)),
+                                )
+                                .child(
+                                    div()
+                                        .flex_1()
+                                        .min_w_0()
+                                        .text_xs()
+                                        .text_color(rgb(tokens.ui.text_muted))
+                                        .truncate()
+                                        .child(format!("{title} · {queued_stage}")),
+                                ),
+                        )
+                        .child(
+                            oxideterm_gpui_ui::button::button_with(
+                                tokens,
+                                cancel_label.clone(),
+                                oxideterm_gpui_ui::button::ButtonOptions {
+                                    variant: oxideterm_gpui_ui::button::ButtonVariant::Ghost,
+                                    size: oxideterm_gpui_ui::button::ButtonSize::Sm,
+                                    ..Default::default()
+                                },
+                            )
+                            .h(px(22.0))
+                            .px(px(8.0))
+                            .text_xs()
+                            .on_mouse_down(
+                                MouseButton::Left,
+                                cx.listener(move |this, _event, _window, cx| {
+                                    this.cancel_queued_proxy_connect_from_status_bar(queue_id, cx);
+                                    cx.stop_propagation();
+                                }),
+                            ),
+                        ),
+                );
+            }
             let mut list = div()
                 .w_full()
                 .flex()
                 .flex_col()
                 .bg(self.workspace_chrome_background(tokens.ui.bg_panel))
                 .children(queue_rows);
-            if running_targets.len() > 1 {
+            if cancellable_total > 1 {
                 let cancel_all_label = self.i18n.t("connections.trace.cancel_all");
                 list = list.child(
                     div()

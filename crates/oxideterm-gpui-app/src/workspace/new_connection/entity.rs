@@ -81,8 +81,10 @@ pub(in crate::workspace) struct ConnectionFlowEntity {
     ssh_worker_rx: std::sync::mpsc::Receiver<SshConnectionWorkerResult>,
     ssh_worker_results: VecDeque<SshConnectionWorkerResult>,
     active_proxy_connect_run: Option<NativeProxyConnectRun>,
+    queued_proxy_connect_requests: VecDeque<QueuedProxyConnectRequest>,
     cancelled_proxy_connect_runs: VecDeque<NativeProxyConnectRun>,
     next_proxy_connect_generation: u64,
+    next_proxy_queue_id: u64,
     path_picker_task: Option<Task<()>>,
     password_load_task: Option<Task<()>>,
     next_password_load_id: u64,
@@ -94,6 +96,29 @@ pub(in crate::workspace) struct ConnectionFlowEntity {
     keyboard_interactive_timer_generation: u64,
     keyboard_interactive_timer_task: Option<Task<()>>,
     keyboard_interactive_exit_task: Option<Task<()>>,
+}
+
+#[derive(Clone, Debug)]
+pub(in crate::workspace) struct QueuedProxyConnectBarEntry {
+    pub(in crate::workspace) queue_id: u64,
+    pub(in crate::workspace) title: String,
+}
+
+pub(in crate::workspace) enum QueuedProxyConnectRequest {
+    New {
+        queue_id: u64,
+        config: Box<oxideterm_ssh::SshConfig>,
+        title: String,
+        intent: SshConnectionIntent,
+        save_after_open: Option<SaveConnectionRequest>,
+    },
+    Existing {
+        queue_id: u64,
+        target_node_id: oxideterm_ssh::NodeId,
+        title: String,
+        intent: SshConnectionIntent,
+        save_after_open: Option<SaveConnectionRequest>,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -158,8 +183,10 @@ impl ConnectionFlowEntity {
             ssh_worker_rx,
             ssh_worker_results: VecDeque::new(),
             active_proxy_connect_run: None,
+            queued_proxy_connect_requests: VecDeque::new(),
             cancelled_proxy_connect_runs: VecDeque::new(),
             next_proxy_connect_generation: 0,
+            next_proxy_queue_id: 0,
             path_picker_task: None,
             password_load_task: None,
             next_password_load_id: 0,
@@ -203,6 +230,142 @@ impl ConnectionFlowEntity {
 
     pub(in crate::workspace) fn has_active_proxy_connect_run(&self) -> bool {
         self.active_proxy_connect_run.is_some()
+    }
+
+    pub(in crate::workspace) fn has_queued_proxy_connects(&self) -> bool {
+        !self.queued_proxy_connect_requests.is_empty()
+    }
+
+    pub(in crate::workspace) fn queued_proxy_connect_entries(
+        &self,
+    ) -> Vec<QueuedProxyConnectBarEntry> {
+        self.queued_proxy_connect_requests
+            .iter()
+            .map(|request| match request {
+                QueuedProxyConnectRequest::New {
+                    queue_id, title, ..
+                }
+                | QueuedProxyConnectRequest::Existing {
+                    queue_id, title, ..
+                } => QueuedProxyConnectBarEntry {
+                    queue_id: *queue_id,
+                    title: title.clone(),
+                },
+            })
+            .collect()
+    }
+
+    pub(in crate::workspace) fn enqueue_proxy_connect_new(
+        &mut self,
+        config: oxideterm_ssh::SshConfig,
+        title: String,
+        intent: SshConnectionIntent,
+        save_after_open: Option<SaveConnectionRequest>,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        if let SshConnectionIntent::ConnectSaved { id, .. } = &intent {
+            let duplicate = self
+                .queued_proxy_connect_requests
+                .iter()
+                .any(|queued| match queued {
+                    QueuedProxyConnectRequest::New {
+                        intent: SshConnectionIntent::ConnectSaved { id: queued_id, .. },
+                        ..
+                    }
+                    | QueuedProxyConnectRequest::Existing {
+                        intent: SshConnectionIntent::ConnectSaved { id: queued_id, .. },
+                        ..
+                    } => queued_id == id,
+                    _ => false,
+                });
+            if duplicate {
+                return false;
+            }
+        }
+        self.next_proxy_queue_id = self.next_proxy_queue_id.wrapping_add(1);
+        self.queued_proxy_connect_requests
+            .push_back(QueuedProxyConnectRequest::New {
+                queue_id: self.next_proxy_queue_id,
+                config: Box::new(config),
+                title,
+                intent,
+                save_after_open,
+            });
+        cx.notify();
+        true
+    }
+
+    pub(in crate::workspace) fn enqueue_proxy_connect_existing(
+        &mut self,
+        target_node_id: oxideterm_ssh::NodeId,
+        title: String,
+        intent: SshConnectionIntent,
+        save_after_open: Option<SaveConnectionRequest>,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let duplicate = self
+            .queued_proxy_connect_requests
+            .iter()
+            .any(|queued| match queued {
+                QueuedProxyConnectRequest::Existing {
+                    target_node_id: queued_node_id,
+                    ..
+                } => *queued_node_id == target_node_id,
+                _ => false,
+            });
+        if duplicate {
+            return false;
+        }
+        self.next_proxy_queue_id = self.next_proxy_queue_id.wrapping_add(1);
+        self.queued_proxy_connect_requests
+            .push_back(QueuedProxyConnectRequest::Existing {
+                queue_id: self.next_proxy_queue_id,
+                target_node_id,
+                title,
+                intent,
+                save_after_open,
+            });
+        cx.notify();
+        true
+    }
+
+    pub(in crate::workspace) fn pop_queued_proxy_connect_request(
+        &mut self,
+        cx: &mut Context<Self>,
+    ) -> Option<QueuedProxyConnectRequest> {
+        let request = self.queued_proxy_connect_requests.pop_front()?;
+        cx.notify();
+        Some(request)
+    }
+
+    pub(in crate::workspace) fn cancel_queued_proxy_connect(
+        &mut self,
+        queue_id: u64,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let before = self.queued_proxy_connect_requests.len();
+        self.queued_proxy_connect_requests
+            .retain(|request| match request {
+                QueuedProxyConnectRequest::New { queue_id: id, .. }
+                | QueuedProxyConnectRequest::Existing { queue_id: id, .. } => *id != queue_id,
+            });
+        let removed = self.queued_proxy_connect_requests.len() != before;
+        if removed {
+            cx.notify();
+        }
+        removed
+    }
+
+    pub(in crate::workspace) fn clear_queued_proxy_connects(
+        &mut self,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        if self.queued_proxy_connect_requests.is_empty() {
+            return false;
+        }
+        self.queued_proxy_connect_requests.clear();
+        cx.notify();
+        true
     }
 
     /// A second click on the connection that already owns the chain is a

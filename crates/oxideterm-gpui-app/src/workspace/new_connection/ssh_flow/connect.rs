@@ -3,6 +3,7 @@
 
 use super::*;
 use crate::workspace::WorkspaceNotificationScope;
+use crate::workspace::new_connection::entity::QueuedProxyConnectRequest;
 
 impl WorkspaceApp {
     pub(in crate::workspace) fn ssh_worker_sender(
@@ -23,6 +24,7 @@ impl WorkspaceApp {
             connection_flow.take_worker_results()
         });
         self.apply_ssh_worker_results(results, window, cx);
+        self.drain_next_queued_proxy_connect(window, cx);
     }
 
     pub(super) fn build_new_connection_config(
@@ -644,7 +646,12 @@ impl WorkspaceApp {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.connection_flow.read(cx).has_active_proxy_connect_run() {
+        if self.connection_flow.read(cx).has_active_proxy_connect_run()
+            || self
+                .workspace_runtime
+                .read(cx)
+                .has_active_connection_chain()
+        {
             // Clicking the same saved host twice must join the chain that is
             // already authenticating it instead of surfacing a busy error.
             let duplicate_request = matches!(
@@ -662,10 +669,15 @@ impl WorkspaceApp {
             if duplicate_request {
                 return;
             }
-            self.report_proxy_session_tree_error(
-                self.i18n.t("connections.errors.chain_busy_desc"),
-                cx,
-            );
+            self.connection_flow.update(cx, |connection_flow, cx| {
+                connection_flow.enqueue_proxy_connect_new(
+                    config,
+                    title,
+                    intent,
+                    save_after_open,
+                    cx,
+                );
+            });
             return;
         }
         let upstream_proxy = config.upstream_proxy.take();
@@ -732,19 +744,6 @@ impl WorkspaceApp {
         {
             return true;
         }
-        if self.connection_flow.read(cx).has_active_proxy_connect_run()
-            || self
-                .workspace_runtime
-                .read(cx)
-                .has_active_connection_chain()
-        {
-            self.report_proxy_session_tree_error(
-                self.i18n.t("connections.errors.chain_busy_desc"),
-                cx,
-            );
-            return true;
-        }
-
         let Ok(path_node_ids) = self.node_router.path_to_node(&target_node_id) else {
             self.report_proxy_session_tree_error(
                 format!("Node path not found for {}", target_node_id.0),
@@ -754,6 +753,24 @@ impl WorkspaceApp {
         };
         if path_node_ids.len() <= 1 {
             return false;
+        }
+
+        if self.connection_flow.read(cx).has_active_proxy_connect_run()
+            || self
+                .workspace_runtime
+                .read(cx)
+                .has_active_connection_chain()
+        {
+            self.connection_flow.update(cx, |connection_flow, cx| {
+                connection_flow.enqueue_proxy_connect_existing(
+                    target_node_id,
+                    title,
+                    intent,
+                    save_after_open.take(),
+                    cx,
+                );
+            });
+            return true;
         }
 
         let start_index = path_node_ids
@@ -1149,6 +1166,68 @@ impl WorkspaceApp {
             | SshConnectionIntent::StandaloneSftp { .. }
             | SshConnectionIntent::StandaloneSftpSecondary { .. } => {}
         }
+        self.drain_next_queued_proxy_connect(window, cx);
+    }
+
+    pub(in crate::workspace) fn drain_next_queued_proxy_connect(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        loop {
+            if self.connection_flow.read(cx).has_active_proxy_connect_run()
+                || self
+                    .workspace_runtime
+                    .read(cx)
+                    .has_active_connection_chain()
+            {
+                break;
+            }
+            let Some(request) = self
+                .connection_flow
+                .update(cx, |connection_flow, cx| {
+                    connection_flow.pop_queued_proxy_connect_request(cx)
+                })
+            else {
+                break;
+            };
+            match request {
+                QueuedProxyConnectRequest::New {
+                    config,
+                    title,
+                    intent,
+                    save_after_open,
+                    ..
+                } => {
+                    self.start_proxy_session_tree_connect(
+                        *config,
+                        title,
+                        intent,
+                        save_after_open,
+                        window,
+                        cx,
+                    );
+                }
+                QueuedProxyConnectRequest::Existing {
+                    target_node_id,
+                    title,
+                    intent,
+                    mut save_after_open,
+                    ..
+                } => {
+                    if !self.start_existing_session_tree_connect(
+                        target_node_id.clone(),
+                        title,
+                        intent,
+                        &mut save_after_open,
+                        window,
+                        cx,
+                    ) {
+                        let _ = self.ensure_node_connection_started(&target_node_id, cx);
+                    }
+                }
+            }
+        }
     }
 
     pub(in crate::workspace) fn active_proxy_connect_waits_for_node(
@@ -1265,6 +1344,9 @@ impl WorkspaceApp {
             return;
         };
         self.cleanup_proxy_session_tree_run(&run, cx);
+        if self.connection_flow.read(cx).has_queued_proxy_connects() {
+            self.enqueue_connection_flow_window_effect(cx);
+        }
     }
 
     pub(in crate::workspace) fn cleanup_cancelled_proxy_connect_runs(
@@ -1276,6 +1358,9 @@ impl WorkspaceApp {
         });
         for run in runs {
             self.cleanup_proxy_session_tree_run(&run, cx);
+        }
+        if self.connection_flow.read(cx).has_queued_proxy_connects() {
+            self.enqueue_connection_flow_window_effect(cx);
         }
     }
 
